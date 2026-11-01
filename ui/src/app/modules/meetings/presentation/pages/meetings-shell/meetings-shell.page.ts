@@ -16,6 +16,7 @@ import { MeetingDetailPaneComponent } from '../../components/meeting-detail-pane
 import type { MeetingDragMoveRequest } from '../../components/meeting-sidebar/meeting-sidebar.component';
 import { MeetingSidebarComponent } from '../../components/meeting-sidebar/meeting-sidebar.component';
 import { RecordControlComponent } from '../../components/record-control/record-control.component';
+import { ExportLinkStripComponent } from '../../components/export-link-strip/export-link-strip.component';
 import { SettingsComponent } from '../../components/settings/settings.component';
 import { SidebarSplitterComponent } from '../../components/sidebar-splitter/sidebar-splitter.component';
 import { UpdateBannerComponent } from '../../components/update-banner/update-banner.component';
@@ -23,6 +24,7 @@ import { UpdateConsentDialogComponent } from '../../components/update-consent-di
 import type { SpeakerRename, TranscriptSectionDelete, TranscriptSelectionSpeakerAssignment, TranscriptSegmentEdit, TranscriptSegmentGroupSpeakerReassign, TranscriptSegmentSpeakerReassign } from '../../components/transcript-view/transcript-view.component';
 import type { LiveTranscriptSegmentEdit } from '../../components/live-transcript/live-transcript.component';
 import { formatMmSs } from '../../utils/format-display.util';
+import { createExportLinkControls } from './meetings-shell.page.export-link.support';
 import { buildExportFilename, CHECKING_SYSTEM_AUDIO, createLayoutControls, createSettingsControls, createSidebarNarrowControls, createSummaryInstructionControls, createUpdateHandlers, describeLatestSpeakerUndo, describeLatestTranscriptUndo, loadUpdatesOnLaunch, MeetingOpQueue, runErrorRetry, runLiveSegmentEdited, runMeetingDeleted, runMeetingMoveRequested, runSegmentEdited, runSummarize } from './meetings-shell.page.support';
 
 /**
@@ -32,7 +34,7 @@ import { buildExportFilename, CHECKING_SYSTEM_AUDIO, createLayoutControls, creat
  */
 @Component({
   selector: 'app-meetings-shell-page',
-  imports: [MeetingSidebarComponent, SidebarSplitterComponent, MeetingDetailPaneComponent, RecordControlComponent, AttributionComponent, SettingsComponent, UpdateConsentDialogComponent, UpdateBannerComponent, TranslocoPipe],
+  imports: [ExportLinkStripComponent, MeetingSidebarComponent, SidebarSplitterComponent, MeetingDetailPaneComponent, RecordControlComponent, AttributionComponent, SettingsComponent, UpdateConsentDialogComponent, UpdateBannerComponent, TranslocoPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './meetings-shell.page.html',
   styleUrl: './meetings-shell.page.scss',
@@ -59,6 +61,8 @@ export class MeetingsShellPage implements OnInit {
   protected readonly updateHandlers = createUpdateHandlers(this.facade);
   /** Settings-modal surface: `showSettings()` + toggle/backdrop handlers; opens on native menu requests (see `createSettingsControls`). */
   protected readonly settings = createSettingsControls(this.facade, this.showAbout, this.destroyRef);
+  /** Export-file state of the open meeting and its relink actions (see `createExportLinkControls`). */
+  protected readonly exportLink = createExportLinkControls(this.facade);
   /** Per-request summary-instructions wiring: active-meeting drafts keyed by template + the change handler (see `createSummaryInstructionControls`). */
   protected readonly summaryInstructions = createSummaryInstructionControls(this.facade);
   protected readonly elapsedSec = signal(0);

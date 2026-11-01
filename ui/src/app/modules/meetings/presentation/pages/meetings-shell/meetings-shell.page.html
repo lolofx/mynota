@@ -85,6 +85,16 @@
       </div>
 
       <div content class="content-slot">
+        @if (facade.selectedMeeting()) {
+          <app-export-link-strip
+            [link]="exportLink.link()"
+            [busy]="exportLink.busy()"
+            [error]="exportLink.error()"
+            (relinkRequested)="exportLink.onRelink()"
+            (recreateRequested)="exportLink.onRecreate()"
+            (unlinkRequested)="exportLink.onUnlink()"
+          />
+        }
         <app-meeting-detail-pane
           [meeting]="facade.selectedMeeting()"
           [modelsReady]="modelsReady()"

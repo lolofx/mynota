@@ -1,0 +1,34 @@
+@if (visible()) {
+  <div class="export-link-strip" [class.is-missing]="link()?.state === 'missing'" role="status">
+    @switch (link()?.state) {
+      @case ('linked') {
+        <p class="message">
+          {{ 'exportLink.linked' | transloco }}
+          <span class="path" [title]="link()?.path ?? ''">{{ link()?.path }}</span>
+        </p>
+        <div class="actions">
+          <button type="button" class="relink" [disabled]="busy()" (click)="relinkRequested.emit()">{{ 'exportLink.relink' | transloco }}</button>
+          <button type="button" class="unlink" [disabled]="busy()" (click)="unlinkRequested.emit()">{{ 'exportLink.unlink' | transloco }}</button>
+        </div>
+      }
+      @case ('missing') {
+        <p class="message">{{ 'exportLink.missing' | transloco }}</p>
+        <div class="actions">
+          <button type="button" class="relink" [disabled]="busy()" (click)="relinkRequested.emit()">{{ 'exportLink.relink' | transloco }}</button>
+          <button type="button" class="recreate" [disabled]="busy()" (click)="recreateRequested.emit()">{{ 'exportLink.recreate' | transloco }}</button>
+          <button type="button" class="unlink" [disabled]="busy()" (click)="unlinkRequested.emit()">{{ 'exportLink.unlink' | transloco }}</button>
+        </div>
+      }
+      @case ('notExported') {
+        <p class="message">{{ 'exportLink.notExported' | transloco }}</p>
+        <div class="actions">
+          <button type="button" class="relink" [disabled]="busy()" (click)="relinkRequested.emit()">{{ 'exportLink.relink' | transloco }}</button>
+          <button type="button" class="recreate" [disabled]="busy()" (click)="recreateRequested.emit()">{{ 'exportLink.exportNow' | transloco }}</button>
+        </div>
+      }
+    }
+    @if (error(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+  </div>
+}

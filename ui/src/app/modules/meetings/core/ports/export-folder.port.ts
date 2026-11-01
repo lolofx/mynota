@@ -1,3 +1,12 @@
+/** Where a meeting's exported file stands (ADR 0022). `noFolder`: exporting is off. */
+export type ExportLinkState = 'linked' | 'missing' | 'notExported' | 'noFolder';
+
+export interface ExportLink {
+  readonly state: ExportLinkState;
+  /** Absolute path of the file, only while `state` is `linked`. */
+  readonly path: string | null;
+}
+
 /**
  * The folder every meeting is exported to as one Markdown file (PRD R5).
  * Maps onto the Rust commands get_export_prefs, set_export_folder and
@@ -15,4 +24,14 @@ export abstract class ExportFolderPort {
   abstract set(folder: string | null): Promise<void>;
   /** Exports one meeting into the folder now and resolves with the file path. */
   abstract exportMeeting(meetingId: string): Promise<string>;
+  /** Whether the meeting's exported file is linked, missing or never exported. */
+  abstract getLink(meetingId: string): Promise<ExportLink>;
+  /** Makes the meeting adopt `file`, a Markdown file inside the export folder. Rejects when it cannot. */
+  abstract relink(meetingId: string, file: string): Promise<void>;
+  /** Writes a fresh file for the meeting, links it and resolves with its path. */
+  abstract recreate(meetingId: string): Promise<string>;
+  /** Forgets the stored link without touching the file. */
+  abstract unlink(meetingId: string): Promise<void>;
+  /** Scans the folder for moved files and resolves with the number of meetings relinked. */
+  abstract rescan(): Promise<number>;
 }

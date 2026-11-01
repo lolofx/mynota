@@ -8,6 +8,7 @@ import type { SummaryDto, SummaryLanguageDto } from '../dto/summary.dto';
 import type { SummaryServerDto } from '../dto/summary-server.dto';
 import type { TemplateDto } from '../dto/template.dto';
 import type { TranscriptDto, TranscriptSegmentWireDto } from '../dto/transcript.dto';
+import type { UpdateCheckDto, UpdateConsentDto, UpdateInstallResultDto } from './commands.update-dto';
 
 /**
  * The frozen Rust command surface, registered verbatim in
@@ -88,6 +89,11 @@ export const COMMAND_NAMES = [
   'get_export_prefs',
   'set_export_folder',
   'export_meeting_to_folder',
+  'get_export_link',
+  'relink_export',
+  'recreate_export',
+  'unlink_export',
+  'rescan_export_folder',
 ] as const;
 
 export type CommandName = (typeof COMMAND_NAMES)[number];
@@ -98,38 +104,7 @@ export type NoArgs = Record<string, never>;
 /** Mirrors the Rust `ExportFormat` (`#[serde(rename_all = "lowercase")]`). */
 export type ExportFormatDto = 'markdown' | 'text' | 'json';
 
-/** Mirrors the Rust `UpdateConsent` (`#[serde(rename_all = "lowercase")]`). */
-export type UpdateConsentDto = 'unset' | 'granted' | 'declined';
-
-/** Mirrors the Rust `UpdateCheckStatus` (`#[serde(rename_all = "kebab-case")]`). */
-export type UpdateCheckStatusDto = 'available' | 'up-to-date' | 'skipped' | 'failed';
-
-/** Mirrors the Rust `UpdateSkipReason` (`#[serde(rename_all = "kebab-case")]`). */
-export type UpdateSkipReasonDto = 'no-consent' | 'throttled' | 'recording';
-
-/**
- * Mirrors the Rust `UpdateDonePayload` (`#[serde(rename_all = "camelCase")]`,
- * `app/src-tauri/src/events.rs`) — the exact value `install_update`
- * resolves with AND the payload it emits on `update://done` (one shape,
- * built once Rust-side; pinned by the serde wire-shape tests in
- * `commands/update_install.rs`). Gate refusals never produce this: they
- * reject the invoke with the typed `{code, message}` error envelope.
- */
-export interface UpdateInstallResultDto {
-  readonly success: boolean;
-  readonly version: string | null;
-  readonly message: string | null;
-}
-
-/** Mirrors the Rust `UpdateCheckDto` (`#[serde(rename_all = "camelCase")]`). */
-export interface UpdateCheckDto {
-  readonly status: UpdateCheckStatusDto;
-  readonly version?: string;
-  readonly notes?: string;
-  readonly downloadUrl?: string;
-  readonly reason?: UpdateSkipReasonDto;
-  readonly message?: string;
-}
+export type { UpdateCheckDto, UpdateCheckStatusDto, UpdateConsentDto, UpdateInstallResultDto, UpdateSkipReasonDto } from './commands.update-dto';
 
 /**
  * Mirrors the Rust `SummarizeInstructionsDto` (`#[serde(rename_all =
@@ -378,6 +353,19 @@ export interface CommandSignatures {
   readonly set_export_folder: { args: { readonly folder: string | null }; result: void };
   /** Exports one meeting into the configured folder now; resolves with the file path. */
   readonly export_meeting_to_folder: { args: { readonly meetingId: string }; result: string };
+  /** Whether the meeting's exported file is linked, missing or never exported (ADR 0022). */
+  readonly get_export_link: {
+    args: { readonly meetingId: string };
+    result: { readonly state: 'linked' | 'missing' | 'notExported' | 'noFolder'; readonly path: string | null };
+  };
+  /** Makes the meeting adopt a Markdown file chosen inside the export folder. */
+  readonly relink_export: { args: { readonly meetingId: string; readonly file: string }; result: void };
+  /** Writes a fresh file for the meeting and links it; resolves with its path. */
+  readonly recreate_export: { args: { readonly meetingId: string }; result: string };
+  /** Forgets the stored link; the file stays where it is. */
+  readonly unlink_export: { args: { readonly meetingId: string }; result: void };
+  /** Scans the export folder for moved files; resolves with how many meetings were relinked. */
+  readonly rescan_export_folder: { args: NoArgs; result: number };
 }
 
 /**
