@@ -16,6 +16,8 @@ use crate::store::MeetingStore;
 const MEETINGS_DIR: &str = "meetings";
 const MEETING_FILE: &str = "meeting.json";
 const MEETING_TMP_FILE: &str = "meeting.json.tmp";
+const NOTES_FILE: &str = "notes.md";
+const NOTES_TMP_FILE: &str = "notes.md.tmp";
 const AUDIO_FILE: &str = "audio.wav";
 const MIC_TRACK_FILE: &str = "track-mic.wav";
 const SYSTEM_TRACK_FILE: &str = "track-system.wav";
@@ -179,6 +181,30 @@ impl MeetingStore for FsMeetingStore {
 
     fn transcript_journal_path(&self, id: MeetingId) -> PathBuf {
         self.meeting_dir(id).join(JOURNAL_FILE)
+    }
+
+    fn read_notes(&self, id: MeetingId) -> Result<String, AppError> {
+        if !self.meeting_dir(id).is_dir() {
+            return Err(AppError::NotFound(id.to_string()));
+        }
+        match fs::read_to_string(self.meeting_dir(id).join(NOTES_FILE)) {
+            Ok(text) => Ok(text),
+            Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(String::new()),
+            Err(err) => Err(err.into()),
+        }
+    }
+
+    fn write_notes(&self, id: MeetingId, text: &str) -> Result<(), AppError> {
+        let dir = self.meeting_dir(id);
+        if !dir.is_dir() {
+            return Err(AppError::NotFound(id.to_string()));
+        }
+        let tmp = dir.join(NOTES_TMP_FILE);
+        paths::write_0600(&tmp, text.as_bytes())?;
+        fs::rename(&tmp, dir.join(NOTES_FILE)).inspect_err(|_| {
+            let _ = fs::remove_file(&tmp);
+        })?;
+        Ok(())
     }
 
     fn save_summary(

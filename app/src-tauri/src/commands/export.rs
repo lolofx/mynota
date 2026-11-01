@@ -253,9 +253,10 @@ pub fn export_meeting_confined(
 
     let meeting = store.get(id)?;
     let summaries = load_summaries(store, id, &meeting)?;
+    let notes = store.read_notes(id)?;
 
     let contents = match format {
-        ExportFormat::Markdown => Ok(render_markdown(&meeting, &summaries)),
+        ExportFormat::Markdown => Ok(render_markdown(&meeting, &summaries, &notes)),
         ExportFormat::Text => Ok(render_text(&meeting, &summaries)),
         ExportFormat::Json => render_json(&meeting, &summaries),
     }?;
@@ -341,21 +342,22 @@ pub fn render_contract(
 ) -> Result<(Meeting, String), AppError> {
     let meeting = store.get(id)?;
     let summaries = load_summaries(store, id, &meeting)?;
-    let markdown = render_markdown(&meeting, &summaries);
+    let notes = store.read_notes(id)?;
+    let markdown = render_markdown(&meeting, &summaries, &notes);
     Ok((meeting, markdown))
 }
 
 /// Renders `meeting` and `summaries` as the fork's export contract
 /// (PRD R5): a YAML front matter, then one `[hh:mm:ss] Speaker: text` line
 /// per segment in chronological order, then any summaries. Transcript and
-/// summaries sit between `mynota` markers so a re-export can rewrite them
+/// summaries and notes sit between `mynota` markers so a re-export can rewrite them
 /// without touching text the user added around them (ADR 0022).
 ///
 /// The front matter only carries what the app really knows. `language` and
 /// `source` are left out on purpose: the meeting record stores neither, and
 /// guessing them would hand wrong metadata to the tooling that reads this
 /// file.
-fn render_markdown(meeting: &Meeting, summaries: &[Summary]) -> String {
+fn render_markdown(meeting: &Meeting, summaries: &[Summary], notes: &str) -> String {
     let mut segments: Vec<&TranscriptSegment> = meeting
         .transcript
         .as_ref()
@@ -425,11 +427,22 @@ fn render_markdown(meeting: &Meeting, summaries: &[Summary]) -> String {
     out.push('\n');
     out.push_str(&export_link::block("summary", &sections.join("\n")));
 
+    // The user's own notes come last and are never touched by a summary run.
+    out.push('\n');
+    out.push_str(&export_link::block(
+        "notes",
+        &if notes.trim().is_empty() {
+            String::new()
+        } else {
+            format!("## My notes\n\n{}\n", notes.trim_end())
+        },
+    ));
+
     out
 }
 
 /// `hh:mm:ss` for a number of seconds (fractions dropped, negatives as 0).
-fn clock(seconds: f32) -> String {
+pub(crate) fn clock(seconds: f32) -> String {
     let total = seconds.max(0.0) as u64;
     format!(
         "{:02}:{:02}:{:02}",

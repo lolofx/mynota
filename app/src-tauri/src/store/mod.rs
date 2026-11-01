@@ -86,6 +86,14 @@ pub trait MeetingStore {
         language: &str,
     ) -> Result<Summary, AppError>;
 
+    /// Loads the user's own notes for a meeting, empty when none were taken.
+    /// Returns [`AppError::NotFound`] when the meeting does not exist.
+    fn read_notes(&self, id: MeetingId) -> Result<String, AppError>;
+
+    /// Replaces the user's own notes for a meeting. Notes live in their own
+    /// file, so re-transcribing or summarizing never touches them.
+    fn write_notes(&self, id: MeetingId, text: &str) -> Result<(), AppError>;
+
     /// Deletes a previously saved summary's markdown for a
     /// meeting/template/language triple (`{template}__{language}.md`) and
     /// removes its entry from the meeting's summary list. Returns

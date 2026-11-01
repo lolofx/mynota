@@ -17,6 +17,10 @@ use std::path::{Component, Path, PathBuf};
 /// Blocks every exported file carries, in order.
 pub const BLOCKS: [&str; 2] = ["transcript", "summary"];
 
+/// Blocks added after the first betas: a file without them gets them appended
+/// on the next export instead of being refused.
+pub const OPTIONAL_BLOCKS: [&str; 1] = ["notes"];
+
 /// Front matter key holding the meeting id.
 pub const ID_KEY: &str = "mynota_id";
 
@@ -163,6 +167,24 @@ pub fn merge(existing: &str, fresh: &str) -> Result<String, LinkError> {
         let (new_start, new_stop) = block_range(&new, name).ok_or(LinkError::MarkersMissing)?;
         let (start, stop) = block_range(&body, name).ok_or(LinkError::MarkersMissing)?;
         body.replace_range(start..stop, &new[new_start..new_stop]);
+    }
+
+    for name in OPTIONAL_BLOCKS {
+        let Some((new_start, new_stop)) = block_range(&new, name) else {
+            continue;
+        };
+        match block_range(&body, name) {
+            Some((start, stop)) => body.replace_range(start..stop, &new[new_start..new_stop]),
+            None => {
+                let whole = format!("{}{}{}", begin(name), &new[new_start..new_stop], end(name));
+                if !body.ends_with('\n') {
+                    body.push('\n');
+                }
+                body.push('\n');
+                body.push_str(&whole);
+                body.push('\n');
+            }
+        }
     }
 
     let mut out = String::from("---\n");
@@ -456,6 +478,27 @@ mod tests {
         assert!(merged.contains("tags: [work]\n"), "{merged}");
         assert!(!merged.contains("speakers:"), "{merged}");
         assert!(merged.contains("status: to-summarize\n"), "{merged}");
+    }
+
+    #[test]
+    fn merge_adds_the_notes_block_to_a_file_that_predates_it_and_then_rewrites_it() {
+        let old = doc("1", "T", "a", "");
+        let with_notes = format!("{}\n{}", doc("1", "T", "b", ""), block("notes", "mine"));
+
+        let first = merge(&old, &with_notes).expect("merge");
+        assert!(
+            first.contains("<!-- mynota:begin notes -->\nmine\n<!-- mynota:end notes -->"),
+            "{first}"
+        );
+
+        let again = merge(
+            &first,
+            &format!("{}\n{}", doc("1", "T", "b", ""), block("notes", "changed")),
+        )
+        .expect("merge again");
+        assert!(again.contains("changed"), "{again}");
+        assert!(!again.contains("mine"), "{again}");
+        assert_eq!(again.matches("mynota:begin notes").count(), 1);
     }
 
     #[test]

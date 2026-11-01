@@ -8,6 +8,7 @@ pub mod import;
 pub mod languages;
 pub mod meetings;
 pub mod models;
+pub mod notes;
 pub mod placement;
 pub mod recording;
 pub mod storage;

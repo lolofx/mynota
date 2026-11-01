@@ -391,3 +391,40 @@ fn the_export_carries_the_meeting_id_and_both_marker_pairs() {
         "{markdown}"
     );
 }
+
+#[test]
+fn the_notes_are_exported_last_in_their_own_block() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let store = store_at(dir.path());
+    let meeting = store.create("With notes").expect("create");
+    store
+        .save(&meeting.with_transcript(Transcript {
+            segments: vec![segment(0.0, 1.0, "Hi.", Speaker::me())],
+        }))
+        .expect("save");
+    store
+        .write_notes(meeting.id, "[00:00:01] check this\n")
+        .expect("notes");
+
+    let dest = dir.path().join("notes.md");
+    export_meeting_confined(
+        &store,
+        meeting.id,
+        ExportFormat::Markdown,
+        &dest,
+        dir.path(),
+    )
+    .expect("export markdown");
+
+    let markdown = fs::read_to_string(&dest).expect("read markdown");
+    assert!(
+        markdown.contains(
+            "<!-- mynota:begin notes -->\n## My notes\n\n[00:00:01] check this\n<!-- mynota:end notes -->"
+        ),
+        "{markdown}"
+    );
+    assert!(
+        markdown.find("begin summary") < markdown.find("begin notes"),
+        "{markdown}"
+    );
+}
