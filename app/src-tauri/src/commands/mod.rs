@@ -12,6 +12,7 @@ pub mod placement;
 pub mod recording;
 pub mod storage;
 pub mod summary;
+pub mod summary_server;
 pub mod templates;
 pub mod update_install;
 pub mod updates;

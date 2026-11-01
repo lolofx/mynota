@@ -37,6 +37,30 @@ pub struct SummaryPrefs {
     /// [`crate::summary_models`]); `None` means "use the best one installed".
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub model: Option<String>,
+    /// Optional Ollama server on the user's own network (ADR 0021). Stored
+    /// only here, in the user's data folder, never in the repository.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub server: Option<SummaryServerPrefs>,
+}
+
+/// A summary server the user configured. `enabled` lets the address and
+/// model be kept while summaries go back to the local model.
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+pub struct SummaryServerPrefs {
+    pub url: String,
+    pub model: String,
+    #[serde(default)]
+    pub enabled: bool,
+}
+
+impl SummaryPrefs {
+    /// The server to summarize on, when one is configured, complete and
+    /// switched on.
+    pub fn active_server(&self) -> Option<&SummaryServerPrefs> {
+        self.server.as_ref().filter(|server| {
+            server.enabled && !server.url.trim().is_empty() && !server.model.trim().is_empty()
+        })
+    }
 }
 
 /// Trims `raw` and caps it at [`MAX_GUIDELINE_CHARS`] Unicode scalars.
@@ -189,6 +213,7 @@ mod tests {
         let prefs = SummaryPrefs {
             guidelines: "Use bullet points.".into(),
             model: None,
+            ..Default::default()
         };
 
         // Act
@@ -221,6 +246,7 @@ mod tests {
         let prefs = SummaryPrefs {
             guidelines: "Always list action items.".into(),
             model: None,
+            ..Default::default()
         };
 
         // Act
@@ -250,6 +276,7 @@ mod tests {
         let prefs = SummaryPrefs {
             guidelines: "Summaries in French, bullet points only.".into(),
             model: None,
+            ..Default::default()
         };
 
         // Act
@@ -324,6 +351,7 @@ mod tests {
         let prefs = SummaryPrefs {
             guidelines: "Be brief.".into(),
             model: Some("qwen2.5-3b".into()),
+            ..Default::default()
         };
 
         // Act
@@ -332,5 +360,95 @@ mod tests {
 
         // Assert
         assert_eq!(reloaded, prefs);
+    }
+
+    fn server(enabled: bool) -> SummaryServerPrefs {
+        SummaryServerPrefs {
+            url: "http://summary-host.invalid:11434".into(),
+            model: "some-model:1b".into(),
+            enabled,
+        }
+    }
+
+    #[test]
+    fn server_round_trips_and_keeps_the_other_summary_keys() {
+        // Arrange
+        let temp = tempfile::tempdir().expect("tempdir");
+        let prefs = SummaryPrefs {
+            guidelines: "Be brief.".into(),
+            model: Some("qwen2.5-3b".into()),
+            server: Some(server(true)),
+        };
+
+        // Act
+        save(temp.path(), &prefs).expect("save should succeed");
+
+        // Assert
+        assert_eq!(load(temp.path()), prefs);
+    }
+
+    #[test]
+    fn a_file_written_before_the_server_existed_loads_without_one() {
+        // Arrange
+        let temp = tempfile::tempdir().expect("tempdir");
+        fs::write(
+            temp.path().join(PREFERENCES_FILE),
+            br#"{"summary":{"guidelines":"Be brief.","model":"qwen2.5-3b"}}"#,
+        )
+        .expect("write");
+
+        // Act
+        let prefs = load(temp.path());
+
+        // Assert
+        assert_eq!(prefs.server, None);
+        assert_eq!(prefs.active_server(), None);
+    }
+
+    #[test]
+    fn only_an_enabled_and_complete_server_is_active() {
+        let mut prefs = SummaryPrefs::default();
+        assert_eq!(prefs.active_server(), None);
+
+        prefs.server = Some(server(false));
+        assert_eq!(prefs.active_server(), None, "switched off");
+
+        prefs.server = Some(SummaryServerPrefs {
+            model: "  ".into(),
+            ..server(true)
+        });
+        assert_eq!(prefs.active_server(), None, "no model chosen");
+
+        prefs.server = Some(SummaryServerPrefs {
+            url: String::new(),
+            ..server(true)
+        });
+        assert_eq!(prefs.active_server(), None, "no address");
+
+        prefs.server = Some(server(true));
+        assert!(prefs.active_server().is_some());
+    }
+
+    #[test]
+    fn saving_guidelines_does_not_drop_a_configured_server() {
+        // Arrange: the settings screens each save the whole struct after a
+        // load, so the server must survive a load-modify-save cycle.
+        let temp = tempfile::tempdir().expect("tempdir");
+        save(
+            temp.path(),
+            &SummaryPrefs {
+                server: Some(server(true)),
+                ..Default::default()
+            },
+        )
+        .expect("save");
+
+        // Act
+        let mut prefs = load(temp.path());
+        prefs.guidelines = "New guidelines".into();
+        save(temp.path(), &prefs).expect("save");
+
+        // Assert
+        assert_eq!(load(temp.path()).server, Some(server(true)));
     }
 }
