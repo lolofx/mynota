@@ -1,23 +1,32 @@
 # Mynota
 
-Record a meeting, a web conference or a video call on your PC, get a transcript on your machine, and export it as a Markdown file.
+A meeting notebook for your PC: record a meeting, a web conference or a talk you listen to, get the transcript on your machine, add summaries and your own notes, and keep everything together in a Markdown file for your note vault.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-FFC300?style=flat-square)](LICENSE)
 
-> **This is a fork.** Mynota is a small fork of [Myna](https://github.com/fmflurry/myna) by fmflurry (MIT). Myna is the real project, and it does much more. Mynota only keeps the part I need, and it has its own name and visuals so the two are not confused. It is not endorsed by Myna's author. Bugs in Mynota go in this repository's issues, not upstream's.
+> **This is a fork.** Mynota started as a fork of [Myna](https://github.com/fmflurry/myna) by fmflurry (MIT), and it has its own name and visuals so the two are not confused. It follows its own direction: a meeting notebook, not a general meeting assistant. It is not endorsed by Myna's author. Bugs in Mynota go in this repository's issues, not upstream's.
 
 ## What it is for
 
-Mynota records what you hear and say, transcribes it locally, and writes a Markdown file. The summary is then up to you: give the file to another model, use a small local one, or (planned) use an LLM server on your own network.
+One place that holds everything about a meeting, a web conference or a technical talk:
 
-It is deliberately limited. Beyond the Windows work and a few near-term changes, it will not grow into a full product.
+- the **transcript**, made locally from what you hear and say;
+- the **summaries**, from three sources you choose between: a small local model, a server on your own network, or text you paste from another assistant;
+- **your own notes**, typed or dictated while you listen, stamped with the time of the talk (planned);
+- a **Markdown file** per meeting in the folder of your note vault (for example Obsidian), that stays linked to the meeting (planned).
+
+A talk played on the computer is captured like a meeting: it is system audio. Audio files can be purged to free space while everything else is kept, and old meetings can be archived (planned).
+
+Mynota stays small and local-first. Calendars, cloud sync, team features and chat over your meetings are not part of it.
 
 ## How it works
 
 1. **Record** the microphone and the system audio as two tracks, `Me` and `Others`. Nothing is transcribed during the recording, so the meeting software keeps its CPU and memory.
 2. **Transcribe** after you stop, at low priority, with a local speech model (Parakeet-TDT, French and English among 25 European languages). Optional speaker detection splits `Others` into numbered speakers you can rename.
-3. **Export** one Markdown file per meeting into a folder you choose.
-4. **Summarize** if you want to, with an optional local model chosen in Settings.
+3. **Summarize** when you want to: with a local model chosen in Settings, with an Ollama server on your own network (opt-in, private addresses only), or by pasting a summary written elsewhere (planned).
+4. **Export** one Markdown file per meeting into a folder you choose. Today it holds the transcript and the summaries.
+
+Where this is going: [ADR 0022](docs/adr/0022-meeting-hub-notes-and-linked-export.md) and its [plan](aidd_docs/tasks/2026_10/plan-meeting-hub.md). Features marked *planned* above are not in the beta yet.
 
 ```markdown
 ---
@@ -52,7 +61,7 @@ What has been checked on a Windows PC so far, with a development build: recordin
 
 ## Privacy
 
-- Recording, transcription and the optional summary run on your machine. Nothing is sent anywhere by default.
+- Recording, transcription and the local summary run on your machine. Nothing is sent anywhere by default. The one exception is the optional summary server: once you enter its address, the transcript text (never audio) goes to it, and only if it is on a private network.
 - Meetings are stored in `%USERPROFILE%\mynota\`. No telemetry, no analytics.
 - The network is used only for the one-time model download (Hugging Face and GitHub) and an opt-in update check that never installs anything without your click.
 

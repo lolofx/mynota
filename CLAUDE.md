@@ -2,7 +2,7 @@
 
 ## Project context
 
-Mynota (a fork of Myna, renamed so the two stay distinct) is a **local-first meeting recorder and transcriber** that exports Markdown: capture the microphone and system audio, transcribe locally, write one Markdown file per meeting. Summaries are optional (local model, or another tool fed with the export). The scope is deliberately small; do not grow it toward upstream's roadmap.
+Mynota (a fork of Myna, renamed so the two stay distinct) is a **local-first meeting notebook**: capture the microphone and system audio, transcribe locally, and keep in one place the transcript, the summaries (local model, a server on the user's network, or pasted text) and the user's own notes, exported as one linked Markdown file per meeting for a note vault. See [ADR 0022](docs/adr/0022-meeting-hub-notes-and-linked-export.md). The scope stays small and local-first; do not grow it toward upstream's roadmap (calendar, RAG chat, sync, team features).
 
 - **STT**: Parakeet-TDT (ONNX) via sherpa-onnx, with VAD-segmented simulated streaming.
 - **Summarization**: Qwen2.5-Instruct (GGUF) via llama.cpp, templated.
