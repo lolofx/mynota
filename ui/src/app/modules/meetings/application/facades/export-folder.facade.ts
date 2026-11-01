@@ -1,5 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 
+import type { ExportLink } from '../../core/ports/export-folder.port';
 import { ExportFolderPort } from '../../core/ports/export-folder.port';
 
 /**
@@ -19,6 +20,10 @@ export class ExportFolderFacade {
   private readonly folderState = signal<string | null | undefined>(undefined);
   private readonly errorState = signal<string | null>(null);
   private readonly workingState = signal(false);
+  private readonly linkState = signal<ExportLink | null>(null);
+  private readonly linkErrorState = signal<string | null>(null);
+  /** Latest link request; an older answer for a meeting no longer shown is dropped. */
+  private linkRequest = 0;
 
   /** `undefined` until loaded, `null` while exporting is off, else the absolute folder. */
   readonly folder = this.folderState.asReadonly();
@@ -26,6 +31,68 @@ export class ExportFolderFacade {
   readonly error = this.errorState.asReadonly();
   /** True while a load or write is in flight. */
   readonly working = this.workingState.asReadonly();
+
+  /** Export state of the meeting on screen; `null` while unknown or when no meeting is shown. */
+  readonly link = this.linkState.asReadonly();
+  /** Message of the last failed relink, recreate or unlink; `null` once the next one starts. */
+  readonly linkError = this.linkErrorState.asReadonly();
+
+  /** Reads the export state of `meetingId`; `null` clears it (no meeting shown). */
+  async refreshLink(meetingId: string | null): Promise<void> {
+    const request = ++this.linkRequest;
+    if (meetingId === null) {
+      this.linkState.set(null);
+      return;
+    }
+    try {
+      const link = await this.port.getLink(meetingId);
+      if (request === this.linkRequest) {
+        this.linkState.set(link);
+      }
+    } catch {
+      if (request === this.linkRequest) {
+        this.linkState.set(null);
+      }
+    }
+  }
+
+  /** The meeting adopts `file`; the state is read back, a refusal shows as the error. */
+  relink(meetingId: string, file: string): Promise<void> {
+    return this.runLinkAction(meetingId, () => this.port.relink(meetingId, file));
+  }
+
+  /** Writes a fresh file for the meeting and links it. */
+  recreate(meetingId: string): Promise<void> {
+    return this.runLinkAction(meetingId, async () => {
+      await this.port.recreate(meetingId);
+    });
+  }
+
+  /** Forgets the link; the file stays where it is. */
+  unlink(meetingId: string): Promise<void> {
+    return this.runLinkAction(meetingId, () => this.port.unlink(meetingId));
+  }
+
+  /** Scans the folder for moved files, then re-reads the state of `meetingId`. */
+  rescan(meetingId: string | null): Promise<void> {
+    return this.run(async () => {
+      await this.port.rescan();
+      await this.refreshLink(meetingId);
+    });
+  }
+
+  private async runLinkAction(meetingId: string, action: () => Promise<void>): Promise<void> {
+    this.workingState.set(true);
+    this.linkErrorState.set(null);
+    try {
+      await action();
+    } catch (error) {
+      this.linkErrorState.set(error instanceof Error ? error.message : String(error));
+    } finally {
+      this.workingState.set(false);
+    }
+    await this.refreshLink(meetingId);
+  }
 
   load(): Promise<void> {
     return this.run(async () => {

@@ -474,5 +474,14 @@
     "generate": "Générer",
     "generateTitle": "Générer le résumé",
     "generateDescription": "Ajustez les instructions ci-dessous, puis confirmez pour générer ce résumé."
+  },
+  "exportLink": {
+    "linked": "Exportée vers",
+    "missing": "Le fichier exporté est introuvable. Il a peut-être été déplacé ou supprimé.",
+    "notExported": "Pas encore exportée.",
+    "relink": "Relier à un fichier…",
+    "recreate": "Recréer l'export",
+    "exportNow": "Exporter maintenant",
+    "unlink": "Délier"
   }
 }

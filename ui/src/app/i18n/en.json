@@ -474,5 +474,14 @@
     "generate": "Generate",
     "generateTitle": "Generate summary",
     "generateDescription": "Adjust the instructions below, then confirm to generate this summary."
+  },
+  "exportLink": {
+    "linked": "Exported to",
+    "missing": "The exported file was not found. It may have been moved or deleted.",
+    "notExported": "Not exported yet.",
+    "relink": "Relink to a file…",
+    "recreate": "Recreate the export",
+    "exportNow": "Export now",
+    "unlink": "Unlink"
   }
 }
