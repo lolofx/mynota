@@ -73,6 +73,12 @@ You can also export one meeting by hand from the library, as Markdown or JSON.
 
 Under each meeting, **My notes** opens a panel with a quick-note line and a free Markdown text. A quick note is stamped with the time of the talk: the recording clock while you record, or the playback position once you listen to the audio (for a talk played on the computer, record it as system audio like a meeting). The text is saved a moment after you stop typing, kept in its own file (so re-transcribing or summarizing never touches it) and exported as the last block of the Markdown file, under `## My notes`. Dictate with any tool that types into a field.
 
+## Freeing disk space
+
+The audio is the heavy part of a meeting (about 1 GB per hour). Once a meeting has a transcript, a strip above it shows the audio size and **Free the audio…**. This removes the audio files and keeps the transcript, summaries, notes and exported file. It asks first, and it cannot be undone: a meeting without audio can no longer be re-transcribed or have its speakers detected (it says so). Playing the audio of that meeting is gone too.
+
+In **Settings > Free disk space**, choose an age (30 days to a year): the app shows how many meetings and how much disk are concerned, and removes the audio of all of them after you confirm. A meeting without a transcript, or being recorded, is never touched.
+
 ## Pasted summaries
 
 Under **My notes**, **Pasted summaries** keeps a summary you wrote or obtained elsewhere, for example from an assistant. Give it a label (the assistant's name, say), paste the text, keep it. It is stored with the meeting, shown rendered, never regenerated, and not removed by anything the app does to generated summaries. It is exported in the summary block under `## Summary: <label>`, after the generated ones.

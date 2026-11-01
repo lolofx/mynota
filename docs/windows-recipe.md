@@ -152,6 +152,13 @@ With an export folder set (a note vault, ideally Obsidian):
 3. Generate a summary with a template, re-transcribe: the pasted one is untouched.
 4. Remove it (after confirming): gone from the panel and from the next export.
 
+## 3e. Audio purge
+
+1. On a transcribed meeting, note the size shown in the strip, then **Free the audio…** and confirm. Expect the strip to say the audio was removed, the player to disappear, the meeting folder to shrink (`<data>/meetings/<id>`) and the transcript, notes and exported file to be unchanged.
+2. On that meeting, **Re-transcribe** and **Detect speakers** must refuse cleanly, not crash.
+3. Settings, **Free disk space**: pick an age, read the count and size, confirm. Expect the same effect on every concerned meeting, and a meeting recorded today to be left alone.
+4. During a recording, the open meeting shows no purge button.
+
 ## 4. Automated checks that need real hardware
 
 ```powershell
