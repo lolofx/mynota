@@ -15,6 +15,7 @@ use tauri::{AppHandle, Manager};
 use crate::auto_export;
 use crate::domain::{Meeting, MeetingId, Summary};
 use crate::error::AppError;
+use crate::export_link::{self, LinkState};
 use crate::paths;
 use crate::state::AppState;
 use crate::store::MeetingStore;
@@ -107,6 +108,121 @@ pub async fn export_meeting_to_folder(
             "export_meeting_to_folder worker thread panicked".to_string(),
         ))
     })
+}
+
+/// Where a meeting's exported file stands, as the UI shows it (ADR 0022).
+#[derive(Serialize, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ExportLinkDto {
+    /// `"linked"`, `"missing"`, `"notExported"` or `"noFolder"` (exporting is
+    /// off, so there is nothing to link).
+    pub state: &'static str,
+    /// Absolute path of the linked file, only when `state` is `"linked"`.
+    pub path: Option<String>,
+}
+
+/// The configured export folder, or a readable error when exporting is off.
+fn export_folder() -> Result<PathBuf, AppError> {
+    let root = paths::data_root().map_err(|err| AppError::Path(err.to_string()))?;
+    auto_export::load(&root)
+        .folder
+        .map(PathBuf::from)
+        .ok_or_else(|| {
+            AppError::Path("no export folder is configured: choose one in Settings".to_string())
+        })
+}
+
+/// Runs `work` on a blocking thread with the store and the export folder.
+async fn on_export_worker<T: Send + 'static>(
+    app: &AppHandle,
+    name: &'static str,
+    work: impl FnOnce(&dyn MeetingStore, &Path) -> Result<T, AppError> + Send + 'static,
+) -> Result<T, AppError> {
+    let store = app.state::<AppState>().store.clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        let folder = export_folder()?;
+        work(store.as_ref(), &folder)
+    })
+    .await
+    .unwrap_or_else(|_| Err(AppError::Store(format!("{name} worker thread panicked"))))
+}
+
+/// Reads whether `meeting_id`'s file is linked, missing or never exported.
+#[tauri::command]
+pub async fn get_export_link(
+    app: AppHandle,
+    meeting_id: String,
+) -> Result<ExportLinkDto, AppError> {
+    let id = parse_meeting_id(&meeting_id)?;
+    let root = paths::data_root().map_err(|err| AppError::Path(err.to_string()))?;
+    if auto_export::load(&root).folder.is_none() {
+        return Ok(ExportLinkDto {
+            state: "noFolder",
+            path: None,
+        });
+    }
+    on_export_worker(&app, "get_export_link", move |store, folder| {
+        let (state, path) = auto_export::export_state(store, id, folder)?;
+        Ok(ExportLinkDto {
+            state: match state {
+                LinkState::Linked => "linked",
+                LinkState::Missing => "missing",
+                LinkState::NotExported => "notExported",
+            },
+            path: path.map(|p| p.display().to_string()),
+        })
+    })
+    .await
+}
+
+/// Makes the meeting adopt `file`, a Markdown file inside the export folder.
+#[tauri::command]
+pub async fn relink_export(
+    app: AppHandle,
+    meeting_id: String,
+    file: PathBuf,
+) -> Result<(), AppError> {
+    let id = parse_meeting_id(&meeting_id)?;
+    on_export_worker(&app, "relink_export", move |store, folder| {
+        auto_export::relink(store, id, folder, &file)
+    })
+    .await
+}
+
+/// Writes a fresh file for the meeting and links it; returns its path.
+#[tauri::command]
+pub async fn recreate_export(app: AppHandle, meeting_id: String) -> Result<String, AppError> {
+    let id = parse_meeting_id(&meeting_id)?;
+    on_export_worker(&app, "recreate_export", move |store, folder| {
+        Ok(auto_export::recreate(store, id, folder)?
+            .display()
+            .to_string())
+    })
+    .await
+}
+
+/// Forgets the stored link; the file is left where it is.
+#[tauri::command]
+pub async fn unlink_export(app: AppHandle, meeting_id: String) -> Result<(), AppError> {
+    let id = parse_meeting_id(&meeting_id)?;
+    let store = app.state::<AppState>().store.clone();
+    tauri::async_runtime::spawn_blocking(move || auto_export::unlink(store.as_ref(), id))
+        .await
+        .unwrap_or_else(|_| {
+            Err(AppError::Store(
+                "unlink_export worker thread panicked".to_string(),
+            ))
+        })
+}
+
+/// Scans the export folder for moved files and relinks their meetings;
+/// returns how many meetings were relinked. Also runs once at start.
+#[tauri::command]
+pub async fn rescan_export_folder(app: AppHandle) -> Result<usize, AppError> {
+    on_export_worker(&app, "rescan_export_folder", |store, folder| {
+        auto_export::relink_by_scan(store, folder)
+    })
+    .await
 }
 
 pub fn export_meeting_blocking(
@@ -231,7 +347,9 @@ pub fn render_contract(
 
 /// Renders `meeting` and `summaries` as the fork's export contract
 /// (PRD R5): a YAML front matter, then one `[hh:mm:ss] Speaker: text` line
-/// per segment in chronological order, then any summaries.
+/// per segment in chronological order, then any summaries. Transcript and
+/// summaries sit between `mynota` markers so a re-export can rewrite them
+/// without touching text the user added around them (ADR 0022).
 ///
 /// The front matter only carries what the app really knows. `language` and
 /// `source` are left out on purpose: the meeting record stores neither, and
@@ -281,8 +399,10 @@ fn render_markdown(meeting: &Meeting, summaries: &[Summary]) -> String {
     } else {
         "status: summarized\n"
     });
+    out.push_str(&format!("{}: {}\n", export_link::ID_KEY, meeting.id));
     out.push_str("---\n\n");
 
+    let mut transcript = String::new();
     for segment in &segments {
         let text = segment
             .text
@@ -290,17 +410,20 @@ fn render_markdown(meeting: &Meeting, summaries: &[Summary]) -> String {
             .collect::<Vec<_>>()
             .join(" ");
         match speaker_display_name(&segment.speaker, &meeting.speaker_names) {
-            Some(name) => out.push_str(&format!("[{}] {name}: {text}\n", clock(segment.start_sec))),
-            None => out.push_str(&format!("[{}] {text}\n", clock(segment.start_sec))),
+            Some(name) => {
+                transcript.push_str(&format!("[{}] {name}: {text}\n", clock(segment.start_sec)))
+            }
+            None => transcript.push_str(&format!("[{}] {text}\n", clock(segment.start_sec))),
         }
     }
+    out.push_str(&export_link::block("transcript", &transcript));
 
-    for summary in summaries {
-        out.push_str(&format!(
-            "\n## Summary: {}\n\n{}\n",
-            summary.template, summary.markdown
-        ));
-    }
+    let sections: Vec<String> = summaries
+        .iter()
+        .map(|summary| format!("## Summary: {}\n\n{}\n", summary.template, summary.markdown))
+        .collect();
+    out.push('\n');
+    out.push_str(&export_link::block("summary", &sections.join("\n")));
 
     out
 }

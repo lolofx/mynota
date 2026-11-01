@@ -11,6 +11,7 @@
 //! succeeded, so [`after_save`] never returns an error: a full disk or a
 //! missing network drive must not fail a transcription.
 
+use std::collections::HashMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -20,6 +21,7 @@ use serde_json::Value;
 use crate::commands::export::{render_contract, to_local};
 use crate::domain::{Meeting, MeetingId};
 use crate::error::AppError;
+use crate::export_link::{self, LinkState};
 use crate::paths;
 use crate::store::MeetingStore;
 
@@ -94,8 +96,8 @@ pub fn prepare_folder(raw: &str) -> Result<String, AppError> {
 
 /// `YYYY-MM-DD_hh-mm_title-slug.md`, in local time.
 ///
-/// Deterministic for a given meeting, so re-exporting overwrites the same
-/// file instead of piling up copies. The date prefix also means the name can
+/// The name a first export gets. Once a meeting is exported, its stored link
+/// takes over, so a renamed meeting does not leave a second file behind. The date prefix also means the name can
 /// never be a reserved Windows device name.
 pub fn file_name(meeting: &Meeting) -> String {
     let local = to_local(meeting.created_at);
@@ -137,23 +139,96 @@ fn slug(title: &str) -> String {
 
 /// Writes `id` into `folder` as one Markdown file and returns its path.
 ///
-/// Written to a hidden temporary file then renamed, so a tool watching the
-/// folder never reads a half-written file.
+/// The meeting's stored link wins over the default name, so a renamed meeting
+/// keeps one file; the link is stored on first export and whenever the file
+/// ends up elsewhere. Text the user added outside the `mynota` markers is
+/// kept (see [`crate::export_link`]).
 pub fn export_to_folder(
     store: &dyn MeetingStore,
     id: MeetingId,
     folder: &Path,
 ) -> Result<PathBuf, AppError> {
     let (meeting, markdown) = render_contract(store, id)?;
-    fs::create_dir_all(folder)?;
-    let name = file_name(&meeting);
-    let target = folder.join(&name);
-    let temporary = folder.join(format!(".{name}.tmp"));
-    fs::write(&temporary, markdown)?;
-    fs::rename(&temporary, &target).inspect_err(|_| {
-        let _ = fs::remove_file(&temporary);
-    })?;
-    Ok(target)
+    let relative = export_link::write_export(
+        folder,
+        meeting.export_path.as_deref(),
+        &meeting.id.to_string(),
+        &file_name(&meeting),
+        &markdown,
+    )?;
+    if meeting.export_path.as_deref() != Some(relative.as_str()) {
+        store.save(&store.get(id)?.with_export_path(Some(relative.clone())))?;
+    }
+    Ok(folder.join(relative))
+}
+
+/// Where a meeting's export stands, and the file's path when it is linked.
+pub fn export_state(
+    store: &dyn MeetingStore,
+    id: MeetingId,
+    folder: &Path,
+) -> Result<(LinkState, Option<PathBuf>), AppError> {
+    let meeting = store.get(id)?;
+    let state = export_link::state(folder, meeting.export_path.as_deref());
+    let path = match (&state, &meeting.export_path) {
+        (LinkState::Linked, Some(rel)) => Some(export_link::resolve(folder, rel)?),
+        _ => None,
+    };
+    Ok((state, path))
+}
+
+/// Makes `id` adopt `file`, a Markdown file chosen inside the export folder.
+pub fn relink(
+    store: &dyn MeetingStore,
+    id: MeetingId,
+    folder: &Path,
+    file: &Path,
+) -> Result<(), AppError> {
+    let meeting = store.get(id)?;
+    let relative = export_link::adopt(folder, file, &meeting.id.to_string())?;
+    store.save(&meeting.with_export_path(Some(relative)))
+}
+
+/// Forgets the stored link; the file is left alone.
+pub fn unlink(store: &dyn MeetingStore, id: MeetingId) -> Result<(), AppError> {
+    store.save(&store.get(id)?.with_export_path(None))
+}
+
+/// Writes a fresh file for `id` and links it, dropping the old link first so
+/// a refused (marker-less) file is not merged into.
+pub fn recreate(
+    store: &dyn MeetingStore,
+    id: MeetingId,
+    folder: &Path,
+) -> Result<PathBuf, AppError> {
+    unlink(store, id)?;
+    export_to_folder(store, id, folder)
+}
+
+/// Relinks meetings to files that moved inside `folder`: a meeting whose
+/// linked file is missing, or that was never linked, adopts the file whose
+/// front matter carries its id. Returns how many meetings were relinked.
+pub fn relink_by_scan(store: &dyn MeetingStore, folder: &Path) -> Result<usize, AppError> {
+    let mut found: HashMap<String, String> = HashMap::new();
+    for (id, relative) in export_link::scan(folder) {
+        found.entry(id).or_insert(relative);
+    }
+    if found.is_empty() {
+        return Ok(0);
+    }
+    let mut relinked = 0;
+    for meeting in store.list()? {
+        let Some(relative) = found.get(&meeting.id.to_string()) else {
+            continue;
+        };
+        let current = export_link::state(folder, meeting.export_path.as_deref());
+        if current == LinkState::Linked || meeting.export_path.as_deref() == Some(relative) {
+            continue;
+        }
+        store.save(&meeting.with_export_path(Some(relative.clone())))?;
+        relinked += 1;
+    }
+    Ok(relinked)
 }
 
 /// Exports `id` when an export folder is configured. Call it right after a
@@ -294,5 +369,86 @@ mod tests {
 
         assert_eq!(stored, wanted.display().to_string());
         assert!(wanted.is_dir());
+    }
+
+    #[test]
+    fn a_renamed_meeting_keeps_its_one_file_and_the_link_is_stored() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let store = FsMeetingStore::new(dir.path());
+        let meeting = saved_meeting(&store, "Point projet");
+        let out = dir.path().join("vault");
+
+        let first = export_to_folder(&store, meeting.id, &out).expect("first");
+        store
+            .save(&store.get(meeting.id).expect("get").with_title("Revue Q3"))
+            .expect("rename");
+        let second = export_to_folder(&store, meeting.id, &out).expect("second");
+
+        assert_eq!(first, second);
+        assert_eq!(fs::read_dir(&out).expect("dir").count(), 1);
+        assert!(fs::read_to_string(&second)
+            .expect("read")
+            .contains("title: Revue Q3\n"));
+        let stored = store.get(meeting.id).expect("get").export_path;
+        assert_eq!(
+            stored.as_deref(),
+            first.file_name().and_then(|n| n.to_str())
+        );
+    }
+
+    #[test]
+    fn a_moved_file_is_relinked_by_the_scan_and_a_deleted_one_is_recreated() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let store = FsMeetingStore::new(dir.path());
+        let meeting = saved_meeting(&store, "Point projet");
+        let out = dir.path().join("vault");
+        let first = export_to_folder(&store, meeting.id, &out).expect("export");
+
+        fs::create_dir_all(out.join("sub")).expect("mkdir");
+        let moved = out.join("sub").join(first.file_name().expect("name"));
+        fs::rename(&first, &moved).expect("move");
+        assert_eq!(
+            export_state(&store, meeting.id, &out).expect("state").0,
+            LinkState::Missing
+        );
+
+        assert_eq!(relink_by_scan(&store, &out).expect("scan"), 1);
+        let (state, path) = export_state(&store, meeting.id, &out).expect("state");
+        assert_eq!(state, LinkState::Linked);
+        assert_eq!(path.as_deref(), Some(moved.as_path()));
+        assert_eq!(relink_by_scan(&store, &out).expect("again"), 0);
+
+        fs::remove_file(&moved).expect("delete");
+        let again = recreate(&store, meeting.id, &out).expect("recreate");
+        assert_eq!(again, first);
+        assert_eq!(
+            export_state(&store, meeting.id, &out).expect("state").0,
+            LinkState::Linked
+        );
+    }
+
+    #[test]
+    fn unlink_forgets_the_file_and_leaves_it_in_place() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let store = FsMeetingStore::new(dir.path());
+        let meeting = saved_meeting(&store, "Point projet");
+        let out = dir.path().join("vault");
+        let file = export_to_folder(&store, meeting.id, &out).expect("export");
+
+        unlink(&store, meeting.id).expect("unlink");
+
+        assert!(file.is_file());
+        assert_eq!(
+            export_state(&store, meeting.id, &out).expect("state").0,
+            LinkState::NotExported
+        );
+    }
+
+    #[test]
+    fn a_meeting_json_without_export_path_still_loads() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let store = FsMeetingStore::new(dir.path());
+        let meeting = saved_meeting(&store, "Ancienne réunion");
+        assert_eq!(store.get(meeting.id).expect("get").export_path, None);
     }
 }

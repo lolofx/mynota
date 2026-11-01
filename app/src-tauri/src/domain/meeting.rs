@@ -95,6 +95,13 @@ pub struct Meeting {
     /// sidebar.
     #[serde(default)]
     pub speaker_names: BTreeMap<String, String>,
+    /// Path of this meeting's exported Markdown file, relative to the export
+    /// folder (`/`-separated). `None` until the first export. Lets a re-export
+    /// write to the same file after a rename, and lets the app tell a moved
+    /// file from a missing one (ADR 0022). `#[serde(default)]` keeps older
+    /// `meeting.json` files loading.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub export_path: Option<String>,
 }
 
 impl Meeting {
@@ -113,6 +120,16 @@ impl Meeting {
             folder_id: None,
             position: None,
             speaker_names: BTreeMap::new(),
+            export_path: None,
+        }
+    }
+
+    /// Returns a copy of this meeting with `export_path` replaced. `None`
+    /// forgets the link without touching the file.
+    pub fn with_export_path(&self, export_path: Option<String>) -> Self {
+        Self {
+            export_path,
+            ..self.clone()
         }
     }
 
