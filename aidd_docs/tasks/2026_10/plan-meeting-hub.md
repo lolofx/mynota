@@ -52,7 +52,7 @@ Acceptance: purge a meeting, the audio folder shrinks, transcript, notes and exp
 
 Goal: tidy the list without losing anything.
 
-1. Check what the interface already offers around `set_meeting_archived`; add the action, the filter and the count where missing.
+1. The interface already had the archive action, the Archive section and its count (checked); nothing to add there.
 2. Export: `status: archived` on archive, back on unarchive; the file stays in the vault.
 3. Tests and translations.
 

@@ -73,6 +73,10 @@ You can also export one meeting by hand from the library, as Markdown or JSON.
 
 Under each meeting, **My notes** opens a panel with a quick-note line and a free Markdown text. A quick note is stamped with the time of the talk: the recording clock while you record, or the playback position once you listen to the audio (for a talk played on the computer, record it as system audio like a meeting). The text is saved a moment after you stop typing, kept in its own file (so re-transcribing or summarizing never touches it) and exported as the last block of the Markdown file, under `## My notes`. Dictate with any tool that types into a field.
 
+## Archiving
+
+Archive a meeting from the library (or drop it on the **Archive** section) to tidy the list; nothing is deleted. Its exported file stays in the vault and its front matter says `status: archived`, going back to `to-summarize` or `summarized` when you unarchive it.
+
 ## Freeing disk space
 
 The audio is the heavy part of a meeting (about 1 GB per hour). Once a meeting has a transcript, a strip above it shows the audio size and **Free the audio…**. This removes the audio files and keeps the transcript, summaries, notes and exported file. It asks first, and it cannot be undone: a meeting without audio can no longer be re-transcribed or have its speakers detected (it says so). Playing the audio of that meeting is gone too.

@@ -159,6 +159,11 @@ With an export folder set (a note vault, ideally Obsidian):
 3. Settings, **Free disk space**: pick an age, read the count and size, confirm. Expect the same effect on every concerned meeting, and a meeting recorded today to be left alone.
 4. During a recording, the open meeting shows no purge button.
 
+## 3f. Archive
+
+1. Archive an exported meeting. Expect it to leave the list, to show in the **Archive** section with its count, and its file to say `status: archived`.
+2. Unarchive it: the status goes back, the file is the same one.
+
 ## 4. Automated checks that need real hardware
 
 ```powershell
