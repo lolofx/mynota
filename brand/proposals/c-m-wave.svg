@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Mynota proposal C: an M drawn as a sound wave</title>
+  <rect width="512" height="512" rx="112" fill="#12332E"/>
+  <path d="M104 384V176l76 120 76-168 76 168 76-120v208" fill="none" stroke="#F4F1EA" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="256" cy="400" r="0" fill="none"/>
+  <path d="M120 440h272" stroke="#E8A33D" stroke-width="16" stroke-linecap="round"/>
+</svg>
