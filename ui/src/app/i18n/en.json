@@ -92,6 +92,11 @@
       "note": "Each meeting is written there as one Markdown file (title, date, speakers, then timestamped lines) as soon as its transcript is ready, and refreshed when speakers or summaries change.",
       "choose": "Choose…",
       "turnOff": "Turn off"
+    },
+    "tabs": {
+      "general": "General",
+      "summary": "Summaries",
+      "storage": "Storage"
     }
   },
   "updateBanner": {

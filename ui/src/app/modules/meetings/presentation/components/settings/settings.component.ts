@@ -31,6 +31,9 @@ export class SettingsComponent {
   private readonly i18n = inject(I18n);
   private readonly language = inject(UiLanguageService);
 
+  /** Settings are grouped by theme so each group fits without scrolling. */
+  protected readonly tabs = ['general', 'summary', 'storage'] as const;
+  protected readonly tab = signal<(typeof this.tabs)[number]>('general');
   protected readonly interfaceLanguages = SUPPORTED_LANGUAGES;
   protected readonly uiLanguage = this.language.language;
 

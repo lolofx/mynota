@@ -150,6 +150,12 @@ app-meeting-detail-pane {
   z-index: var(--z-modal);
 }
 
+.settings-backdrop .modal {
+  max-width: 46rem;
+  max-height: none;
+  overflow: visible;
+}
+
 .modal {
   max-width: 32rem;
   width: 100%;

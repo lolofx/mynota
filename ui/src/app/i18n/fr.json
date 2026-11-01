@@ -92,6 +92,11 @@
       "note": "Chaque réunion y est écrite dans un fichier Markdown (titre, date, intervenants, puis lignes horodatées) dès que sa transcription est prête, et mise à jour quand les intervenants ou les résumés changent.",
       "choose": "Choisir…",
       "turnOff": "Désactiver"
+    },
+    "tabs": {
+      "general": "Général",
+      "summary": "Résumés",
+      "storage": "Stockage"
     }
   },
   "updateBanner": {
