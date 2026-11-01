@@ -69,6 +69,12 @@ Above each meeting, a strip shows the file it is linked to:
 
 You can also export one meeting by hand from the library, as Markdown or JSON.
 
+## My notes
+
+Under each meeting, **My notes** opens a panel with a quick-note line and a free Markdown text. A quick note is stamped with the time of the talk: the recording clock while you record, or the playback position once you listen to the audio (for a talk played on the computer, record it as system audio like a meeting). The text is saved a moment after you stop typing, kept in its own file (so re-transcribing or summarizing never touches it) and exported as the last block of the Markdown file, under `## My notes`. Dictate with any tool that types into a field.
+
+The summary template that used to be called **Notes** is now **Minutes** (**Compte rendu** in French).
+
 ## Speakers
 
 Speaker detection splits `Others` into numbered speakers (`Others 1`, `Others 2`…). Rename them in the transcript and the export follows. It is not perfect, especially with similar voices or overlapping speech; see [diarization-accuracy.md](diarization-accuracy.md).

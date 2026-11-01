@@ -137,6 +137,14 @@ With an export folder set (a note vault, ideally Obsidian):
 4. Delete the file, open the meeting. Expect "not found" with **Relink**, **Recreate**, **Unlink**. Try each.
 5. Remove one marker line from a file and export again. Expect no overwrite, and the strip to offer relink or recreate.
 
+## 3c. My notes
+
+1. Start a recording, open **My notes**, type a quick note. Expect `[mm:ss]`-style time next to the box counting up and the line stamped with it.
+2. Stop, wait for the transcript. Open the exported file: the notes are the last block, after the summaries.
+3. Play the audio, jump to a point, add a quick note: stamped with the playback position.
+4. Re-transcribe and generate a summary: the notes are unchanged.
+5. Restart the app: the notes are still there.
+
 ## 4. Automated checks that need real hardware
 
 ```powershell

@@ -12,7 +12,7 @@ One place that holds everything about a meeting, a web conference or a technical
 
 - the **transcript**, made locally from what you hear and say;
 - the **summaries**, from three sources you choose between: a small local model, a server on your own network, or text you paste from another assistant;
-- **your own notes**, typed or dictated while you listen, stamped with the time of the talk (planned);
+- **your own notes**, typed or dictated while you listen, stamped with the time of the talk;
 - a **Markdown file** per meeting in the folder of your note vault (for example Obsidian), that stays linked to the meeting, even when the file is moved in the vault.
 
 A talk played on the computer is captured like a meeting: it is system audio. Audio files can be purged to free space while everything else is kept, and old meetings can be archived (planned).
