@@ -366,7 +366,7 @@ fn every_builtin_template_carries_its_expected_label_and_emoji() {
         ("action-items", "Action Items", "✅"),
         ("decisions", "Decisions", "⚖️"),
         ("key-points", "Key Points", "🔑"),
-        ("meeting-notes", "Notes", "📝"),
+        ("meeting-notes", "Minutes", "📝"),
     ];
 
     // Act
