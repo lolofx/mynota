@@ -1,0 +1,54 @@
+@if (available) {
+  <section class="summary-server" [attr.aria-label]="'settings.summaryServer.title' | transloco">
+    <h3>{{ 'settings.summaryServer.title' | transloco }}</h3>
+    <p class="helper">{{ 'settings.summaryServer.helper' | transloco }}</p>
+
+    <label class="field">
+      <span>{{ 'settings.summaryServer.addressLabel' | transloco }}</span>
+      <input
+        type="text"
+        class="server-url"
+        autocomplete="off"
+        spellcheck="false"
+        [placeholder]="'settings.summaryServer.addressPlaceholder' | transloco"
+        [value]="url()"
+        [disabled]="busy()"
+        (input)="onUrlInput($event)"
+      />
+    </label>
+
+    <div class="actions">
+      <button type="button" class="test-connection" [disabled]="!canTest()" (click)="testConnection()">
+        {{ status() === 'testing' ? ('settings.summaryServer.testing' | transloco) : ('settings.summaryServer.test' | transloco) }}
+      </button>
+    </div>
+
+    <label class="field">
+      <span>{{ 'settings.summaryServer.modelLabel' | transloco }}</span>
+      <select class="server-model" [disabled]="modelChoices().length === 0 || busy()" (change)="onModelChange($event)">
+        @if (modelChoices().length === 0) {
+          <option value="" selected>{{ 'settings.summaryServer.noModelYet' | transloco }}</option>
+        }
+        @for (name of modelChoices(); track name) {
+          <option [value]="name" [selected]="name === model()">{{ name }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="switch">
+      <input type="checkbox" class="server-enabled" [checked]="enabled()" [disabled]="busy()" (change)="onEnabledChange($event)" />
+      <span>{{ 'settings.summaryServer.useServer' | transloco }}</span>
+    </label>
+    <p class="privacy">{{ 'settings.summaryServer.privacy' | transloco }}</p>
+
+    <div class="actions">
+      <button type="button" class="save-server" [disabled]="busy()" (click)="save()">
+        {{ 'settings.summaryServer.save' | transloco }}
+      </button>
+    </div>
+
+    @if (message(); as note) {
+      <p class="note" [class.note-error]="note.kind === 'error'" [attr.role]="note.kind === 'error' ? 'alert' : 'status'">{{ note.text }}</p>
+    }
+  </section>
+}

@@ -8,6 +8,7 @@ import type { ModelDownloadState } from '../../../application/stores/meetings.st
 import type { SummaryModelSlot } from '../../../core/models/models-status.model';
 import type { SummaryLanguage } from '../../../core/models/summary-language.model';
 import type { UpdateCheck, UpdateConsent } from '../../../core/models/update.model';
+import { SummaryServerSettingsComponent } from '../summary-server-settings/summary-server-settings.component';
 
 /**
  * The minimal honest settings surface: only controls whose state is fully
@@ -20,7 +21,7 @@ import type { UpdateCheck, UpdateConsent } from '../../../core/models/update.mod
  */
 @Component({
   selector: 'app-settings',
-  imports: [TranslocoPipe],
+  imports: [TranslocoPipe, SummaryServerSettingsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

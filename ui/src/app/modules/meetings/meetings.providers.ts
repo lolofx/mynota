@@ -14,6 +14,7 @@ import { RecorderPort } from './core/ports/recorder.port';
 import { ExportFolderPort } from './core/ports/export-folder.port';
 import { StorageLocationPort } from './core/ports/storage-location.port';
 import { SummarizerPort } from './core/ports/summarizer.port';
+import { SummaryServerPort } from './core/ports/summary-server.port';
 import { TemplateRepositoryPort } from './core/ports/template-repository.port';
 import { TranscriberPort } from './core/ports/transcriber.port';
 import { UpdatesPort } from './core/ports/updates.port';
@@ -28,6 +29,7 @@ import { TauriMenuAdapter } from './infrastructure/tauri/tauri-menu.adapter';
 import { TauriModelsStatusAdapter } from './infrastructure/tauri/tauri-models-status.adapter';
 import { TauriRecorderAdapter } from './infrastructure/tauri/tauri-recorder.adapter';
 import { TauriSummarizerAdapter } from './infrastructure/tauri/tauri-summarizer.adapter';
+import { TauriSummaryServerAdapter } from './infrastructure/tauri/tauri-summary-server.adapter';
 import { TauriTemplateRepositoryAdapter } from './infrastructure/tauri/tauri-template-repository.adapter';
 import { TauriTranscriberAdapter } from './infrastructure/tauri/tauri-transcriber.adapter';
 import { TauriUpdatesAdapter } from './infrastructure/tauri/tauri-updates.adapter';
@@ -106,6 +108,7 @@ export function provideMeetings(): EnvironmentProviders {
     { provide: RecorderPort, useClass: TauriRecorderAdapter },
     { provide: TranscriberPort, useClass: TauriTranscriberAdapter },
     { provide: SummarizerPort, useClass: TauriSummarizerAdapter },
+    { provide: SummaryServerPort, useClass: TauriSummaryServerAdapter },
     { provide: MeetingRepositoryPort, useClass: TauriMeetingRepositoryAdapter },
     { provide: FolderRepositoryPort, useClass: TauriFolderRepositoryAdapter },
     { provide: TemplateRepositoryPort, useClass: TauriTemplateRepositoryAdapter },
