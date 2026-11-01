@@ -222,7 +222,8 @@ pub fn relink_by_scan(store: &dyn MeetingStore, folder: &Path) -> Result<usize, 
             continue;
         };
         let current = export_link::state(folder, meeting.export_path.as_deref());
-        if current == LinkState::Linked || meeting.export_path.as_deref() == Some(relative) {
+        if current == LinkState::Linked || meeting.export_path.as_deref() == Some(relative.as_str())
+        {
             continue;
         }
         store.save(&meeting.with_export_path(Some(relative.clone())))?;

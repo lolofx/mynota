@@ -43,15 +43,17 @@ describe('ExportLinkStripComponent', () => {
   it('emits one request per button', () => {
     const el = render({ state: 'missing', path: null });
     const seen: string[] = [];
+    fixture.componentInstance.rescanRequested.subscribe(() => seen.push('rescan'));
     fixture.componentInstance.relinkRequested.subscribe(() => seen.push('relink'));
     fixture.componentInstance.recreateRequested.subscribe(() => seen.push('recreate'));
     fixture.componentInstance.unlinkRequested.subscribe(() => seen.push('unlink'));
 
+    (el.querySelector('.rescan') as HTMLButtonElement).click();
     (el.querySelector('.relink') as HTMLButtonElement).click();
     (el.querySelector('.recreate') as HTMLButtonElement).click();
     (el.querySelector('.unlink') as HTMLButtonElement).click();
 
-    expect(seen).toEqual(['relink', 'recreate', 'unlink']);
+    expect(seen).toEqual(['rescan', 'relink', 'recreate', 'unlink']);
   });
 
   it('disables the buttons while busy and shows a failed action', () => {

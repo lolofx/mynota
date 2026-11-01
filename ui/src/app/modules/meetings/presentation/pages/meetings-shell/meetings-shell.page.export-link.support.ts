@@ -11,6 +11,8 @@ export interface ExportLinkControls {
   readonly link: Signal<ExportLink | null>;
   readonly busy: Signal<boolean>;
   readonly error: Signal<string | null>;
+  /** Looks for the file again in the export folder (it may have been moved). */
+  readonly onRescan: () => void;
   /** Asks for a Markdown file and links the open meeting to it. */
   readonly onRelink: () => void;
   readonly onRecreate: () => void;
@@ -39,6 +41,12 @@ export function createExportLinkControls(facade: MeetingsFacade): ExportLinkCont
     link: computed(() => exportFolder?.link() ?? null),
     busy: computed(() => exportFolder?.working() ?? false),
     error: computed(() => exportFolder?.linkError() ?? null),
+    onRescan: () => {
+      const id = selectedId();
+      if (id !== null) {
+        void exportFolder?.rescan(id);
+      }
+    },
     onRelink: () => {
       const id = selectedId();
       if (id === null || fileDialog === null || exportFolder === null) {
