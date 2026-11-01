@@ -101,7 +101,9 @@ export function onEvent<E extends EventName>(name: E): Observable<EventPayload<E
 
     return () => {
       torndown = true;
-      unlisten?.();
+      // Tauri's unlisten is async at runtime (typed as sync); a late teardown must not
+      // surface as an unhandled rejection.
+      void Promise.resolve(unlisten?.()).catch(() => undefined);
     };
   });
 }
