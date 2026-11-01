@@ -492,5 +492,13 @@
     "quickPlaceholder": "Note rapide, Entrée pour ajouter",
     "placeholder": "Tes propres notes sur cette réunion, en Markdown",
     "stampHint": "La note est horodatée avec cette heure"
+  },
+  "pasted": {
+    "title": "Résumés collés",
+    "paste": "Coller un résumé…",
+    "remove": "Retirer",
+    "save": "Garder",
+    "labelPlaceholder": "Étiquette (par exemple le nom de l'assistant)",
+    "textPlaceholder": "Colle le résumé ici"
   }
 }

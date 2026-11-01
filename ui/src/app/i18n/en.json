@@ -492,5 +492,13 @@
     "quickPlaceholder": "Quick note, Enter to add",
     "placeholder": "Your own notes on this meeting, in Markdown",
     "stampHint": "The note is stamped with this time"
+  },
+  "pasted": {
+    "title": "Pasted summaries",
+    "paste": "Paste a summary…",
+    "remove": "Remove",
+    "save": "Keep",
+    "labelPlaceholder": "Label (for example the assistant's name)",
+    "textPlaceholder": "Paste the summary here"
   }
 }

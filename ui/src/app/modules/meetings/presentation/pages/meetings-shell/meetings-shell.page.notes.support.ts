@@ -1,8 +1,11 @@
 import type { Signal } from '@angular/core';
 import { computed, effect, inject, signal, untracked } from '@angular/core';
 
+import { ExternalSummariesFacade } from '../../../application/facades/external-summaries.facade';
 import { MeetingNotesFacade } from '../../../application/facades/meeting-notes.facade';
 import { MeetingsFacade } from '../../../application/facades/meetings.facade';
+import type { ExternalSummary } from '../../../core/models/external-summary.model';
+import type { PastedSummaryDraft } from '../../components/pasted-summaries/pasted-summaries.component';
 
 /** "My notes" panel wiring (ADR 0022), grouped so `MeetingsShellPage` stays under the `max-lines` cap. */
 export interface NotesControls {
@@ -51,5 +54,36 @@ export function createNotesControls(facade: MeetingsFacade, recordingElapsedSec:
       const at = isRecordingOpenMeeting() ? recordingElapsedSec() : selected()?.hasAudio === true && playbackSec() > 0 ? playbackSec() : null;
       void notes?.addNote(text, at);
     },
+  };
+}
+
+/** Pasted-summaries panel wiring (ADR 0022). */
+export interface PastedSummariesControls {
+  readonly visible: Signal<boolean>;
+  readonly items: Signal<readonly ExternalSummary[]>;
+  readonly working: Signal<boolean>;
+  readonly error: Signal<string | null>;
+  readonly onAdded: (draft: PastedSummaryDraft) => void;
+  readonly onRemoved: (summaryId: number) => void;
+}
+
+/** Loads the pasted summaries of the open meeting; the facade is optional like the notes one. */
+export function createPastedSummariesControls(facade: MeetingsFacade): PastedSummariesControls {
+  const pasted = inject(ExternalSummariesFacade, { optional: true });
+  const selection = facade as Partial<Pick<MeetingsFacade, 'selectedMeeting'>>;
+  const selectedId = computed(() => selection.selectedMeeting?.()?.id ?? null);
+
+  effect(() => {
+    const id = selectedId();
+    untracked(() => void pasted?.load(id));
+  });
+
+  return {
+    visible: computed(() => pasted !== null && selectedId() !== null),
+    items: computed(() => pasted?.items() ?? []),
+    working: computed(() => pasted?.working() ?? false),
+    error: computed(() => pasted?.error() ?? null),
+    onAdded: (draft) => void pasted?.add(draft.label, draft.markdown),
+    onRemoved: (summaryId) => void pasted?.remove(summaryId),
   };
 }

@@ -163,6 +163,15 @@
           (diarizeRequested)="onDiarizeRequested()"
           (summaryInstructionDraftChanged)="summaryInstructions.onDraftChanged($event)"
         />
+        @if (pasted.visible()) {
+          <app-pasted-summaries
+            [items]="pasted.items()"
+            [working]="pasted.working()"
+            [error]="pasted.error()"
+            (added)="pasted.onAdded($event)"
+            (removed)="pasted.onRemoved($event)"
+          />
+        }
         @if (notes.visible()) {
           <app-notes-panel
             [text]="notes.text()"
