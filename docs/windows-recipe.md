@@ -127,6 +127,16 @@ Note: whether the `date` matches the wall clock, the file name, and anything the
 3. Note for each size: time to first output, peak memory, and a one-line quality judgement (misses, invented items, language).
 4. Restart the app: the choice must persist.
 
+## 3b. Linked export file
+
+With an export folder set (a note vault, ideally Obsidian):
+
+1. Export a meeting, rename it in the library, record or edit something so it exports again. Expect one file in the folder, with the new title in its front matter.
+2. Add a paragraph of your own below the closing `mynota` marker, then trigger another export (rename a speaker). Expect the paragraph kept.
+3. Move the file into a sub-folder of the vault, restart the app, open the meeting. Expect the strip to show the new path.
+4. Delete the file, open the meeting. Expect "not found" with **Relink**, **Recreate**, **Unlink**. Try each.
+5. Remove one marker line from a file and export again. Expect no overwrite, and the strip to offer relink or recreate.
+
 ## 4. Automated checks that need real hardware
 
 ```powershell
