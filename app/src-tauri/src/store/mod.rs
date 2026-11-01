@@ -86,6 +86,14 @@ pub trait MeetingStore {
         language: &str,
     ) -> Result<Summary, AppError>;
 
+    /// Total size in bytes of a meeting's audio files (every `.wav` in its
+    /// folder: the recording, its parts and the STT tracks).
+    fn audio_bytes(&self, id: MeetingId) -> Result<u64, AppError>;
+
+    /// Removes a meeting's audio files and returns the bytes freed. Touches
+    /// nothing else: transcript, summaries and notes stay.
+    fn purge_audio(&self, id: MeetingId) -> Result<u64, AppError>;
+
     /// Loads the user's own notes for a meeting, empty when none were taken.
     /// Returns [`AppError::NotFound`] when the meeting does not exist.
     fn read_notes(&self, id: MeetingId) -> Result<String, AppError>;

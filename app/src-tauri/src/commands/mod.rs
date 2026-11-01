@@ -1,6 +1,7 @@
 //! Tauri command handlers, grouped by concern.
 
 pub mod app_info;
+pub mod audio_purge;
 pub mod devices;
 pub mod export;
 pub mod external_summary;

@@ -60,6 +60,25 @@ impl FsMeetingStore {
         self.meeting_dir(id).join(MEETING_TMP_FILE)
     }
 
+    /// Every `.wav` directly in the meeting folder.
+    fn audio_files(&self, id: MeetingId) -> Result<Vec<PathBuf>, AppError> {
+        let dir = self.meeting_dir(id);
+        if !dir.is_dir() {
+            return Err(AppError::NotFound(id.to_string()));
+        }
+        Ok(fs::read_dir(&dir)?
+            .flatten()
+            .map(|entry| entry.path())
+            .filter(|path| {
+                path.is_file()
+                    && path
+                        .extension()
+                        .and_then(|e| e.to_str())
+                        .is_some_and(|e| e.eq_ignore_ascii_case("wav"))
+            })
+            .collect())
+    }
+
     fn summaries_dir(&self, id: MeetingId) -> PathBuf {
         self.meeting_dir(id).join(SUMMARIES_DIR)
     }
@@ -183,6 +202,25 @@ impl MeetingStore for FsMeetingStore {
 
     fn transcript_journal_path(&self, id: MeetingId) -> PathBuf {
         self.meeting_dir(id).join(JOURNAL_FILE)
+    }
+
+    fn audio_bytes(&self, id: MeetingId) -> Result<u64, AppError> {
+        Ok(self
+            .audio_files(id)?
+            .iter()
+            .filter_map(|path| fs::metadata(path).ok())
+            .map(|meta| meta.len())
+            .sum())
+    }
+
+    fn purge_audio(&self, id: MeetingId) -> Result<u64, AppError> {
+        let mut freed = 0;
+        for path in self.audio_files(id)? {
+            let len = fs::metadata(&path).map(|meta| meta.len()).unwrap_or(0);
+            fs::remove_file(&path)?;
+            freed += len;
+        }
+        Ok(freed)
     }
 
     fn read_notes(&self, id: MeetingId) -> Result<String, AppError> {

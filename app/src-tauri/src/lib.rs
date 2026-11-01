@@ -4,6 +4,7 @@
 //! `paths` resolves the on-disk locations the rest of the app (data root,
 //! models, templates) read from and write to.
 
+pub mod audio_purge;
 pub mod auto_export;
 pub mod commands;
 pub mod diarize_judge;
@@ -190,6 +191,10 @@ pub fn run() {
             commands::external_summary::list_external_summaries,
             commands::external_summary::add_external_summary,
             commands::external_summary::delete_external_summary,
+            commands::audio_purge::get_audio_usage,
+            commands::audio_purge::purge_meeting_audio,
+            commands::audio_purge::preview_audio_purge,
+            commands::audio_purge::purge_old_audio,
             commands::updates::update_consent,
             commands::updates::set_update_consent,
             commands::updates::check_for_update,

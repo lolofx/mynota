@@ -102,6 +102,12 @@ pub struct Meeting {
     /// `meeting.json` files loading.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub export_path: Option<String>,
+    /// Whether the audio files were removed to free disk space (ADR 0022).
+    /// The transcript, summaries, notes and export are kept; re-transcribing
+    /// or detecting speakers is no longer possible. `#[serde(default)]` keeps
+    /// older `meeting.json` files loading.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub audio_purged: bool,
 }
 
 impl Meeting {
@@ -121,6 +127,7 @@ impl Meeting {
             position: None,
             speaker_names: BTreeMap::new(),
             export_path: None,
+            audio_purged: false,
         }
     }
 
@@ -129,6 +136,20 @@ impl Meeting {
     pub fn with_export_path(&self, export_path: Option<String>) -> Self {
         Self {
             export_path,
+            ..self.clone()
+        }
+    }
+
+    /// Returns a copy of this meeting with `audio_purged` replaced. Purging
+    /// also forgets `audio_path`, which points at a file that is gone.
+    pub fn with_audio_purged(&self, audio_purged: bool) -> Self {
+        Self {
+            audio_purged,
+            audio_path: if audio_purged {
+                None
+            } else {
+                self.audio_path.clone()
+            },
             ..self.clone()
         }
     }
