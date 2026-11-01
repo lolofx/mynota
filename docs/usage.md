@@ -73,6 +73,10 @@ You can also export one meeting by hand from the library, as Markdown or JSON.
 
 Under each meeting, **My notes** opens a panel with a quick-note line and a free Markdown text. A quick note is stamped with the time of the talk: the recording clock while you record, or the playback position once you listen to the audio (for a talk played on the computer, record it as system audio like a meeting). The text is saved a moment after you stop typing, kept in its own file (so re-transcribing or summarizing never touches it) and exported as the last block of the Markdown file, under `## My notes`. Dictate with any tool that types into a field.
 
+## Pasted summaries
+
+Under **My notes**, **Pasted summaries** keeps a summary you wrote or obtained elsewhere, for example from an assistant. Give it a label (the assistant's name, say), paste the text, keep it. It is stored with the meeting, shown rendered, never regenerated, and not removed by anything the app does to generated summaries. It is exported in the summary block under `## Summary: <label>`, after the generated ones.
+
 The summary template that used to be called **Notes** is now **Minutes** (**Compte rendu** in French).
 
 ## Speakers

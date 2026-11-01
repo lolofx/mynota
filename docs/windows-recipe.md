@@ -145,6 +145,13 @@ With an export folder set (a note vault, ideally Obsidian):
 4. Re-transcribe and generate a summary: the notes are unchanged.
 5. Restart the app: the notes are still there.
 
+## 3d. Pasted summaries
+
+1. Open a transcribed meeting, **Pasted summaries**, **Paste a summary…**, label it, paste a Markdown text, keep it. Expect it rendered under the label.
+2. Restart the app: still there. Open the exported file: a `## Summary: <label>` section in the summary block.
+3. Generate a summary with a template, re-transcribe: the pasted one is untouched.
+4. Remove it (after confirming): gone from the panel and from the next export.
+
 ## 4. Automated checks that need real hardware
 
 ```powershell
