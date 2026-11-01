@@ -42,13 +42,30 @@ date: 2026-10-27T14:30:00
 duration: 00:42:10
 speakers: [Me, Others 1, Others 2]
 status: to-summarize
+mynota_id: 3f2b8c1e-0000-0000-0000-000000000000
 ---
 
+<!-- mynota:begin transcript -->
 [00:00:04] Me: Bonjour à tous.
 [00:00:07] Others 1: Bonjour, on commence par le planning.
+<!-- mynota:end transcript -->
+
+<!-- mynota:begin summary -->
+<!-- mynota:end summary -->
 ```
 
-The file name is stable (`YYYY-MM-DD_hh-mm_title.md`), so a tool that watches the folder sees updates, not copies. The reasons for each choice are in [ADR 0019](adr/0019-markdown-export-contract-and-export-folder.md).
+The first file name is `YYYY-MM-DD_hh-mm_title.md`. After that the meeting remembers its file, so renaming the meeting does not leave a second copy behind. The reasons for each choice are in [ADR 0019](adr/0019-markdown-export-contract-and-export-folder.md) and [ADR 0022](adr/0022-meeting-hub-notes-and-linked-export.md).
+
+### The file stays linked to the meeting
+
+Only what sits between the `mynota` markers (and the front matter keys the app writes) is rewritten on each export. Text you add elsewhere in the file, and front matter keys of your own such as `tags`, are kept. Do not edit inside the markers: it is overwritten.
+
+Above each meeting, a strip shows the file it is linked to:
+
+- **Moved the file inside the folder?** Nothing to do: at start the app looks for `mynota_id` in the folder and links the meeting to the file again.
+- **File deleted or renamed so it cannot be found?** The strip says so and offers **Relink to a file…** (pick the file; it must still contain the markers), **Recreate the export** (a fresh file) or **Unlink** (forget the file; the next export writes a new one).
+- **A file without markers** (hand-written, or the markers removed) is never overwritten: relink to another file or recreate the export.
+- Files written by earlier betas (no `mynota_id`, no markers) are upgraded on their first re-export, when they still have the default name.
 
 You can also export one meeting by hand from the library, as Markdown or JSON.
 
