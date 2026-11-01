@@ -110,8 +110,8 @@ describe('MeetingDetailPaneComponent summarizingKey', () => {
 
     const button: HTMLButtonElement = fixture.nativeElement.querySelector('.generate-button');
     expect(button.disabled).toBe(true);
-    expect(button.title).toContain('Notes');
-    expect(fixture.nativeElement.querySelector('.generate .busy-hint')?.textContent).toContain('Notes');
+    expect(button.title).toContain('Minutes');
+    expect(fixture.nativeElement.querySelector('.generate .busy-hint')?.textContent).toContain('Minutes');
   });
 
   it('a disabled Generate elsewhere never emits summarizeRequested, even if clicked', () => {

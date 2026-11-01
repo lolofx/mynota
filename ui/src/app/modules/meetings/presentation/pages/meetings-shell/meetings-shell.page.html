@@ -128,6 +128,7 @@
           [speakerUndoLabel]="speakerUndoLabel()"
           [summaryGuidelines]="facade.summaryGuidelines()"
           [summaryInstructionDrafts]="summaryInstructions.drafts()"
+          (playbackTimeChanged)="notes.onPlaybackTime($event)"
           (renameRequested)="onMeetingRenamed($event)"
           (segmentEdited)="onSegmentEdited($event)"
           (liveSegmentEdited)="onLiveSegmentEdited($event)"
@@ -162,6 +163,16 @@
           (diarizeRequested)="onDiarizeRequested()"
           (summaryInstructionDraftChanged)="summaryInstructions.onDraftChanged($event)"
         />
+        @if (notes.visible()) {
+          <app-notes-panel
+            [text]="notes.text()"
+            [clockSec]="notes.clockSec()"
+            [saving]="notes.saving()"
+            [error]="notes.error()"
+            (textChanged)="notes.onTextChanged($event)"
+            (noteAdded)="notes.onNoteAdded($event)"
+          />
+        }
       </div>
     </app-sidebar-splitter>
   </div>

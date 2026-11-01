@@ -94,6 +94,9 @@ export const COMMAND_NAMES = [
   'recreate_export',
   'unlink_export',
   'rescan_export_folder',
+  'get_meeting_notes',
+  'set_meeting_notes',
+  'append_meeting_note',
 ] as const;
 
 export type CommandName = (typeof COMMAND_NAMES)[number];
@@ -366,6 +369,14 @@ export interface CommandSignatures {
   readonly unlink_export: { args: { readonly meetingId: string }; result: void };
   /** Scans the export folder for moved files; resolves with how many meetings were relinked. */
   readonly rescan_export_folder: { args: NoArgs; result: number };
+  /** The user's own notes on a meeting (ADR 0022); empty when none. */
+  readonly get_meeting_notes: { args: { readonly meetingId: string }; result: string };
+  readonly set_meeting_notes: { args: { readonly meetingId: string; readonly text: string }; result: void };
+  /** Adds one line, stamped `[hh:mm:ss]` when `atSec` is given; resolves with the full text. */
+  readonly append_meeting_note: {
+    args: { readonly meetingId: string; readonly text: string; readonly atSec: number | null };
+    result: string;
+  };
 }
 
 /**

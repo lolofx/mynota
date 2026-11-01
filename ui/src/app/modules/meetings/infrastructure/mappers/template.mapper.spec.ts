@@ -72,6 +72,6 @@ describe('mapTemplateDtoToDomain', () => {
       emoji: '📝',
     });
 
-    expect(formatTemplateLabel(template)).toBe('📝 Notes');
+    expect(formatTemplateLabel(template)).toBe('📝 Minutes');
   });
 });

@@ -16,6 +16,7 @@ import { MeetingDetailPaneComponent } from '../../components/meeting-detail-pane
 import type { MeetingDragMoveRequest } from '../../components/meeting-sidebar/meeting-sidebar.component';
 import { MeetingSidebarComponent } from '../../components/meeting-sidebar/meeting-sidebar.component';
 import { RecordControlComponent } from '../../components/record-control/record-control.component';
+import { NotesPanelComponent } from '../../components/notes-panel/notes-panel.component';
 import { ExportLinkStripComponent } from '../../components/export-link-strip/export-link-strip.component';
 import { SettingsComponent } from '../../components/settings/settings.component';
 import { SidebarSplitterComponent } from '../../components/sidebar-splitter/sidebar-splitter.component';
@@ -24,6 +25,7 @@ import { UpdateConsentDialogComponent } from '../../components/update-consent-di
 import type { SpeakerRename, TranscriptSectionDelete, TranscriptSelectionSpeakerAssignment, TranscriptSegmentEdit, TranscriptSegmentGroupSpeakerReassign, TranscriptSegmentSpeakerReassign } from '../../components/transcript-view/transcript-view.component';
 import type { LiveTranscriptSegmentEdit } from '../../components/live-transcript/live-transcript.component';
 import { formatMmSs } from '../../utils/format-display.util';
+import { createNotesControls } from './meetings-shell.page.notes.support';
 import { createExportLinkControls } from './meetings-shell.page.export-link.support';
 import { buildExportFilename, CHECKING_SYSTEM_AUDIO, createLayoutControls, createSettingsControls, createSidebarNarrowControls, createSummaryInstructionControls, createUpdateHandlers, describeLatestSpeakerUndo, describeLatestTranscriptUndo, loadUpdatesOnLaunch, MeetingOpQueue, runErrorRetry, runLiveSegmentEdited, runMeetingDeleted, runMeetingMoveRequested, runSegmentEdited, runSummarize } from './meetings-shell.page.support';
 
@@ -34,7 +36,7 @@ import { buildExportFilename, CHECKING_SYSTEM_AUDIO, createLayoutControls, creat
  */
 @Component({
   selector: 'app-meetings-shell-page',
-  imports: [ExportLinkStripComponent, MeetingSidebarComponent, SidebarSplitterComponent, MeetingDetailPaneComponent, RecordControlComponent, AttributionComponent, SettingsComponent, UpdateConsentDialogComponent, UpdateBannerComponent, TranslocoPipe],
+  imports: [NotesPanelComponent, ExportLinkStripComponent, MeetingSidebarComponent, SidebarSplitterComponent, MeetingDetailPaneComponent, RecordControlComponent, AttributionComponent, SettingsComponent, UpdateConsentDialogComponent, UpdateBannerComponent, TranslocoPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './meetings-shell.page.html',
   styleUrl: './meetings-shell.page.scss',
@@ -75,6 +77,8 @@ export class MeetingsShellPage implements OnInit {
    * while the route points elsewhere. Live-started → null slot, `busy()` fallback.
    */
   protected readonly recordingMeetingId = computed<MeetingId | undefined>(() => this.facade.activeRecording()?.meetingId ?? (this.facade.busy() ? this.facade.selectedMeeting()?.id : undefined));
+  /** "My notes" panel of the open meeting; quick notes are stamped with the recording clock or the playback position (see `createNotesControls`). */
+  protected readonly notes = createNotesControls(this.facade, this.elapsedSec, computed(() => this.recordingMeetingId() !== undefined && this.recordingMeetingId() === this.facade.selectedMeeting()?.id));
 
   /** Transcript-undo toolbar button label; `null` hides the button. */
   protected readonly transcriptUndoLabel = computed(() => describeLatestTranscriptUndo(this.facade.transcriptUndo()));

@@ -1,0 +1,36 @@
+<section class="notes-panel" [class.is-open]="open()">
+  <button type="button" class="toggle" [attr.aria-expanded]="open()" (click)="toggle()">
+    <span aria-hidden="true">{{ open() ? '▾' : '▸' }}</span>
+    {{ 'notes.title' | transloco }}
+    @if (saving()) {
+      <span class="saving">{{ 'notes.saving' | transloco }}</span>
+    }
+  </button>
+  @if (open()) {
+    <form class="quick" (submit)="$event.preventDefault(); add()">
+      @if (stamp(); as at) {
+        <span class="stamp" [title]="'notes.stampHint' | transloco">[{{ at }}]</span>
+      }
+      <input
+        type="text"
+        class="quick-input"
+        [value]="draft()"
+        [attr.placeholder]="'notes.quickPlaceholder' | transloco"
+        [attr.aria-label]="'notes.quickPlaceholder' | transloco"
+        (input)="onDraft($event)"
+      />
+      <button type="submit" class="add" [disabled]="draft().trim() === ''">{{ 'notes.add' | transloco }}</button>
+    </form>
+    <textarea
+      class="text"
+      rows="6"
+      [value]="text()"
+      [attr.placeholder]="'notes.placeholder' | transloco"
+      [attr.aria-label]="'notes.title' | transloco"
+      (input)="onText($event)"
+    ></textarea>
+    @if (error(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+  }
+</section>

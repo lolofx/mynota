@@ -1,0 +1,55 @@
+import type { Signal } from '@angular/core';
+import { computed, effect, inject, signal, untracked } from '@angular/core';
+
+import { MeetingNotesFacade } from '../../../application/facades/meeting-notes.facade';
+import { MeetingsFacade } from '../../../application/facades/meetings.facade';
+
+/** "My notes" panel wiring (ADR 0022), grouped so `MeetingsShellPage` stays under the `max-lines` cap. */
+export interface NotesControls {
+  readonly visible: Signal<boolean>;
+  readonly text: Signal<string>;
+  readonly saving: Signal<boolean>;
+  readonly error: Signal<string | null>;
+  /** Seconds to stamp the next quick note with, or `null` for none. */
+  readonly clockSec: Signal<number | null>;
+  readonly onPlaybackTime: (seconds: number) => void;
+  readonly onTextChanged: (text: string) => void;
+  readonly onNoteAdded: (text: string) => void;
+}
+
+/**
+ * Loads the notes of the open meeting and stamps quick notes with the clock
+ * of the recording in progress, else with the playback position once the
+ * audio has started. The facade is optional: specs that predate the notes
+ * provide none, and the panel then stays hidden.
+ */
+export function createNotesControls(facade: MeetingsFacade, recordingElapsedSec: Signal<number>, isRecordingOpenMeeting: Signal<boolean>): NotesControls {
+  const notes = inject(MeetingNotesFacade, { optional: true });
+  const selection = facade as Partial<Pick<MeetingsFacade, 'selectedMeeting'>>;
+  const selected = computed(() => selection.selectedMeeting?.() ?? null);
+  const playbackSec = signal(0);
+
+  effect(() => {
+    const id = selected()?.id ?? null;
+    untracked(() => void notes?.load(id));
+  });
+
+  return {
+    visible: computed(() => notes !== null && selected() !== null),
+    text: computed(() => notes?.text() ?? ''),
+    saving: computed(() => notes?.saving() ?? false),
+    error: computed(() => notes?.error() ?? null),
+    clockSec: computed(() => {
+      if (isRecordingOpenMeeting()) {
+        return recordingElapsedSec();
+      }
+      return selected()?.hasAudio === true && playbackSec() > 0 ? playbackSec() : null;
+    }),
+    onPlaybackTime: (seconds) => playbackSec.set(seconds),
+    onTextChanged: (text) => notes?.edit(text),
+    onNoteAdded: (text) => {
+      const at = isRecordingOpenMeeting() ? recordingElapsedSec() : selected()?.hasAudio === true && playbackSec() > 0 ? playbackSec() : null;
+      void notes?.addNote(text, at);
+    },
+  };
+}

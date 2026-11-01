@@ -193,7 +193,7 @@
       "description": "Extract concrete action items with an owner and due date where mentioned."
     },
     "meeting-notes": {
-      "label": "Notes",
+      "label": "Minutes",
       "description": "Produce a full set of meeting notes: an overall summary, a discussion narrative, and a list of decisions."
     },
     "decisions": {
@@ -484,5 +484,13 @@
     "exportNow": "Export now",
     "unlink": "Unlink",
     "rescan": "Look for it again"
+  },
+  "notes": {
+    "title": "My notes",
+    "saving": "Saving…",
+    "add": "Add",
+    "quickPlaceholder": "Quick note, Enter to add",
+    "placeholder": "Your own notes on this meeting, in Markdown",
+    "stampHint": "The note is stamped with this time"
   }
 }

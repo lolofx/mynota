@@ -104,13 +104,13 @@ describe('formatTemplateLabel', () => {
     });
 
     expect(label).not.toContain('long, human-written sentence');
-    expect(label).toBe('📝 Notes');
+    expect(label).toBe('📝 Minutes');
   });
 
   it('composes emoji + label when both are present', () => {
     expect(
       formatTemplateLabel({ name: 'meeting-notes', description: 'ignored', prompt: 'p', label: 'Notes', emoji: '📝' }),
-    ).toBe('📝 Notes');
+    ).toBe('📝 Minutes');
   });
 
   it('falls back to emoji + title-cased name when only emoji is present', () => {
@@ -121,7 +121,7 @@ describe('formatTemplateLabel', () => {
 
   it('falls back to the generic emoji + label when only label is present', () => {
     expect(formatTemplateLabel({ name: 'meeting-notes', description: 'ignored', prompt: 'p', label: 'Notes' })).toBe(
-      '🗒️ Notes',
+      '🗒️ Minutes',
     );
   });
 

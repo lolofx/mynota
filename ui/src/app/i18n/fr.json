@@ -193,7 +193,7 @@
       "description": "Extrait les actions concrètes, avec leur responsable et leur échéance lorsqu’elles sont mentionnées."
     },
     "meeting-notes": {
-      "label": "Notes",
+      "label": "Compte rendu",
       "description": "Produit un compte rendu complet : un résumé général, le fil des discussions et la liste des décisions."
     },
     "decisions": {
@@ -484,5 +484,13 @@
     "exportNow": "Exporter maintenant",
     "unlink": "Délier",
     "rescan": "La chercher à nouveau"
+  },
+  "notes": {
+    "title": "Mes notes",
+    "saving": "Enregistrement…",
+    "add": "Ajouter",
+    "quickPlaceholder": "Note rapide, Entrée pour ajouter",
+    "placeholder": "Tes propres notes sur cette réunion, en Markdown",
+    "stampHint": "La note est horodatée avec cette heure"
   }
 }
