@@ -58,6 +58,10 @@ Goal: tidy the list without losing anything.
 
 Acceptance: archive a meeting, it leaves the list, shows under the filter, and its file says archived.
 
+## README
+
+The README already states the direction and marks unfinished features as *planned*. Each phase removes the *planned* mark of its own feature in the same pull request, so the README never promises more than the beta does. Add a screenshot of the notes tab and of the export state once phases A and B ship.
+
 ## After the phases
 
 - Backlog row 10 (export formats) gets an "Obsidian" note: the vault-friendly Markdown is the contract of this ADR.
