@@ -147,7 +147,7 @@
     "STT": "La reconnaissance vocale a échoué pendant le traitement de l’audio.",
     "LLM": "Le générateur de résumés n’a pas pu produire de réponse.",
     "AUDIO": "Impossible d’accéder au microphone.",
-    "MODELS_MISSING": "Des modèles locaux requis sont manquants.",
+    "MODELS_MISSING": "Un modèle requis est manquant. Pour les résumés, choisissez un modèle à télécharger ou configurez un serveur de résumé dans les paramètres.",
     "PATH": "L’emplacement de fichier sélectionné n’est pas valide.",
     "UPDATER": "Le programme de mise à jour n’a pas pu installer ou redémarrer l’application.",
     "CANCELLED": "L’opération a été annulée.",

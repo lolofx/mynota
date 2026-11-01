@@ -122,6 +122,46 @@ describe('SummaryServerSettingsComponent', () => {
     expect(port.saved).toEqual({ url: 'http://host.invalid', model: 'a:1b', enabled: true });
   });
 
+  it('saves the switch as soon as it is changed, without pressing Save', async () => {
+    const port = new FakeSummaryServerPort({ url: 'http://host.invalid', model: 'm:1b', enabled: false });
+    const fixture = await create(port);
+
+    const toggle = el(fixture).querySelector('.server-enabled') as HTMLInputElement;
+    toggle.checked = true;
+    toggle.dispatchEvent(new Event('change'));
+    await fixture.whenStable();
+
+    expect(port.saved).toEqual({ url: 'http://host.invalid', model: 'm:1b', enabled: true });
+  });
+
+  it('switches back off when the server refuses to enable it', async () => {
+    const port = new FakeSummaryServerPort();
+    port.saveError = new Error('choose a model on the summary server');
+    const fixture = await create(port);
+
+    const toggle = el(fixture).querySelector('.server-enabled') as HTMLInputElement;
+    toggle.checked = true;
+    toggle.dispatchEvent(new Event('change'));
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    expect(toggle.checked).toBe(false);
+    expect(el(fixture).querySelector('.note')?.textContent).toContain('choose a model');
+  });
+
+  it('keeps the address and model after a successful test, without pressing Save', async () => {
+    const port = new FakeSummaryServerPort();
+    port.listed = ['a:1b'];
+    const fixture = await create(port);
+    type(el(fixture).querySelector('.server-url') as HTMLInputElement, 'http://host.invalid');
+    fixture.detectChanges();
+
+    (el(fixture).querySelector('.test-connection') as HTMLButtonElement).click();
+    await fixture.whenStable();
+
+    expect(port.saved).toEqual({ url: 'http://host.invalid', model: 'a:1b', enabled: false });
+  });
+
   it('shows the refusal when saving fails', async () => {
     const port = new FakeSummaryServerPort();
     port.saveError = new Error('https is not supported');

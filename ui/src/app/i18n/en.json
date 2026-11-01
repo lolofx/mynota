@@ -147,7 +147,7 @@
     "STT": "Speech-to-text failed while processing the audio.",
     "LLM": "The summarizer failed to generate a response.",
     "AUDIO": "The microphone could not be accessed.",
-    "MODELS_MISSING": "Required local models are missing.",
+    "MODELS_MISSING": "A required model is missing. For summaries, choose a model to download or set up a summary server in Settings.",
     "PATH": "The selected file location is invalid.",
     "UPDATER": "The updater could not install or restart the app.",
     "CANCELLED": "The operation was cancelled.",

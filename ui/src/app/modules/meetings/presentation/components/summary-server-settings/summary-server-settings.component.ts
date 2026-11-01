@@ -60,14 +60,23 @@ export class SummaryServerSettingsComponent implements OnInit {
     this.message.set(null);
   }
 
-  protected onModelChange(event: Event): void {
+  protected async onModelChange(event: Event): Promise<void> {
     this.model.set((event.target as HTMLSelectElement).value);
     this.message.set(null);
+    await this.persist();
   }
 
-  protected onEnabledChange(event: Event): void {
-    this.enabled.set((event.target as HTMLInputElement).checked);
+  /** The switch takes effect at once: forgetting to press Save must not leave summaries on the local model. */
+  protected async onEnabledChange(event: Event): Promise<void> {
+    const box = event.target as HTMLInputElement;
+    const wanted = box.checked;
+    this.enabled.set(wanted);
     this.message.set(null);
+    if (!(await this.persist()) && wanted) {
+      this.enabled.set(false);
+      // The binding sees no change (false before and after), so the box the user ticked must be unticked by hand.
+      box.checked = false;
+    }
   }
 
   /** Contacts the server: proves the address works and fills the model list. */
@@ -86,10 +95,14 @@ export class SummaryServerSettingsComponent implements OnInit {
         if (this.model() === '' || !names.includes(this.model())) {
           this.model.set(names[0] ?? '');
         }
-        this.message.set({
-          kind: 'ok',
-          text: this.i18n.t('settings.summaryServer.connected', { count: names.length }),
-        });
+        this.status.set('idle');
+        if (await this.persist()) {
+          this.message.set({
+            kind: 'ok',
+            text: this.i18n.t('settings.summaryServer.connected', { count: names.length }),
+          });
+        }
+        return;
       }
     } catch (error) {
       this.message.set({ kind: 'error', text: errorText(error) });
@@ -99,16 +112,22 @@ export class SummaryServerSettingsComponent implements OnInit {
   }
 
   protected async save(): Promise<void> {
+    await this.persist();
+  }
+
+  /** Saves the form as it is; returns whether the server accepted it. */
+  private async persist(): Promise<boolean> {
     if (this.port === null || this.busy()) {
-      return;
+      return false;
     }
     this.status.set('saving');
-    this.message.set(null);
     try {
       await this.port.save({ url: this.url().trim(), model: this.model().trim(), enabled: this.enabled() });
       this.message.set({ kind: 'ok', text: this.i18n.t('settings.summaryServer.saved') });
+      return true;
     } catch (error) {
       this.message.set({ kind: 'error', text: errorText(error) });
+      return false;
     } finally {
       this.status.set('idle');
     }
