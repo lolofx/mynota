@@ -15,11 +15,17 @@
 }
 
 /* Big, greyed-out Mynota mark behind the welcome copy — decorative
- * only, never a substitute for the real logo in the title bar. */
+ * only, never a substitute for the real logo in the title bar. It is a
+ * square centred on the content and never smaller than the content plus
+ * its padding, so longer wording (French) never reaches the mark's edges. */
 .mark {
   position: absolute;
-  width: min(22rem, 45vh);
-  height: min(22rem, 45vh);
+  top: 50%;
+  left: 50%;
+  z-index: -1;
+  width: max(calc(100% + var(--space-5)), min(22rem, 45vh));
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
   -webkit-mask: url('/brand/mynota-mark.svg') no-repeat center / contain;
   mask: url('/brand/mynota-mark.svg') no-repeat center / contain;
   background-color: var(--color-text-muted);
@@ -29,10 +35,13 @@
 
 .welcome-content {
   position: relative;
+  isolation: isolate;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-3);
+  box-sizing: border-box;
+  max-width: min(100%, 36rem);
   text-align: center;
   padding: var(--space-5);
 }
@@ -40,16 +49,21 @@
 .welcome-content h1 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 0.9rem + 1.2vw, 1.5rem);
   color: var(--color-text);
+  text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 
 .welcome-content .hint {
   margin: 0;
   color: var(--color-text-muted);
+  text-wrap: balance;
 }
 
 .start-meeting {
+  max-width: 100%;
+  white-space: normal;
   margin-top: var(--space-2);
   padding: var(--space-2) var(--space-5);
   border: none;
@@ -72,6 +86,8 @@
 }
 
 .import-recording {
+  max-width: 100%;
+  white-space: normal;
   margin-top: var(--space-1);
   padding: var(--space-1) var(--space-4);
   border: 1px solid var(--color-border);
