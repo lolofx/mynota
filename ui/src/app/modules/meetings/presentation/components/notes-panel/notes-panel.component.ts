@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 
+import { renderMarkdown } from '../summary-panel/markdown-render.util';
+
 /** `hh:mm:ss` for a whole number of seconds, the stamp the export uses. */
 export function stampOf(totalSec: number): string {
   const total = Math.max(0, Math.floor(totalSec));
@@ -32,7 +34,9 @@ export class NotesPanelComponent {
   readonly noteAdded = output<string>();
 
   protected readonly open = signal(false);
+  protected readonly preview = signal(false);
   protected readonly draft = signal('');
+  protected readonly rendered = computed(() => (this.preview() ? renderMarkdown(this.text()) : ''));
   protected readonly stamp = computed(() => {
     const at = this.clockSec();
     return at === null ? null : stampOf(at);
@@ -40,6 +44,10 @@ export class NotesPanelComponent {
 
   protected toggle(): void {
     this.open.update((value) => !value);
+  }
+
+  protected setPreview(preview: boolean): void {
+    this.preview.set(preview);
   }
 
   protected onDraft(event: Event): void {

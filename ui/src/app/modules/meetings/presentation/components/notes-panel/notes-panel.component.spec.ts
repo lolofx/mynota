@@ -66,4 +66,31 @@ describe('NotesPanelComponent', () => {
 
     expect(seen).toEqual(['my notes']);
   });
+
+  it('shows the notes as rendered Markdown in the preview and back as text', () => {
+    open();
+    fixture.componentRef.setInput('text', '# Title\n\n- one\n- **two**');
+    fixture.detectChanges();
+
+    (el().querySelector('.show') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(el().querySelector('textarea')).toBeNull();
+    expect(el().querySelector('.preview h1')?.textContent).toBe('Title');
+    expect(el().querySelectorAll('.preview li').length).toBe(2);
+    expect(el().querySelector('.preview strong')?.textContent).toBe('two');
+
+    (el().querySelector('.edit') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(el().querySelector('textarea')).not.toBeNull();
+  });
+
+  it('says so when there is nothing to preview', () => {
+    open();
+    (el().querySelector('.show') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(el().querySelector('.preview')).toBeNull();
+    expect(el().querySelector('.empty')).not.toBeNull();
+  });
 });

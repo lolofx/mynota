@@ -21,6 +21,17 @@
       />
       <button type="submit" class="add" [disabled]="draft().trim() === ''">{{ 'notes.add' | transloco }}</button>
     </form>
+    <div class="modes" role="tablist">
+      <button type="button" role="tab" class="mode edit" [class.active]="!preview()" [attr.aria-selected]="!preview()" (click)="setPreview(false)">{{ 'notes.edit' | transloco }}</button>
+      <button type="button" role="tab" class="mode show" [class.active]="preview()" [attr.aria-selected]="preview()" (click)="setPreview(true)">{{ 'notes.preview' | transloco }}</button>
+    </div>
+    @if (preview()) {
+      @if (rendered(); as html) {
+        <div class="preview" [innerHTML]="html"></div>
+      } @else {
+        <p class="empty">{{ 'notes.empty' | transloco }}</p>
+      }
+    } @else {
     <textarea
       class="text"
       rows="6"
@@ -29,6 +40,7 @@
       [attr.aria-label]="'notes.title' | transloco"
       (input)="onText($event)"
     ></textarea>
+    }
     @if (error(); as message) {
       <p class="error" role="alert">{{ message }}</p>
     }

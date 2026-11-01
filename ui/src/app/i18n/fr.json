@@ -491,7 +491,10 @@
     "add": "Ajouter",
     "quickPlaceholder": "Note rapide, Entrée pour ajouter",
     "placeholder": "Tes propres notes sur cette réunion, en Markdown",
-    "stampHint": "La note est horodatée avec cette heure"
+    "stampHint": "La note est horodatée avec cette heure",
+    "edit": "Écrire",
+    "preview": "Aperçu",
+    "empty": "Rien à afficher pour l'instant."
   },
   "pasted": {
     "title": "Résumés collés",

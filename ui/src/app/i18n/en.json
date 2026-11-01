@@ -491,7 +491,10 @@
     "add": "Add",
     "quickPlaceholder": "Quick note, Enter to add",
     "placeholder": "Your own notes on this meeting, in Markdown",
-    "stampHint": "The note is stamped with this time"
+    "stampHint": "The note is stamped with this time",
+    "edit": "Write",
+    "preview": "Preview",
+    "empty": "Nothing to preview yet."
   },
   "pasted": {
     "title": "Pasted summaries",
