@@ -183,6 +183,24 @@
     "start": "Start a meeting",
     "import": "Import a recording"
   },
+  "templates": {
+    "key-points": {
+      "label": "Key Points",
+      "description": "Extract the key points discussed in the meeting as a concise bullet list."
+    },
+    "action-items": {
+      "label": "Action Items",
+      "description": "Extract concrete action items with an owner and due date where mentioned."
+    },
+    "meeting-notes": {
+      "label": "Notes",
+      "description": "Produce a full set of meeting notes: an overall summary, a discussion narrative, and a list of decisions."
+    },
+    "decisions": {
+      "label": "Decisions",
+      "description": "Extract the decisions that were made in the meeting along with the reasoning behind each one."
+    }
+  },
   "onboarding": {
     "title": "Let’s get your AI models",
     "checking": "Checking installed models…",

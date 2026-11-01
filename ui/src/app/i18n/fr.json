@@ -183,6 +183,24 @@
     "start": "Démarrer une réunion",
     "import": "Importer un enregistrement"
   },
+  "templates": {
+    "key-points": {
+      "label": "Points clés",
+      "description": "Extrait les points clés discutés pendant la réunion sous forme de liste à puces concise."
+    },
+    "action-items": {
+      "label": "Actions",
+      "description": "Extrait les actions concrètes, avec leur responsable et leur échéance lorsqu’elles sont mentionnées."
+    },
+    "meeting-notes": {
+      "label": "Notes",
+      "description": "Produit un compte rendu complet : un résumé général, le fil des discussions et la liste des décisions."
+    },
+    "decisions": {
+      "label": "Décisions",
+      "description": "Extrait les décisions prises pendant la réunion, avec la justification de chacune."
+    }
+  },
   "onboarding": {
     "title": "Récupérons vos modèles d’IA",
     "checking": "Vérification des modèles installés…",

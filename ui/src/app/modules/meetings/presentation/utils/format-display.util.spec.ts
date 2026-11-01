@@ -1,4 +1,6 @@
+import { registerTranslator } from '../../../../i18n/tr';
 import {
+  formatTemplateDescription,
   transcriptTabLabel,
   untitledMeetingLabel,
   formatMeetingHeadingDate,
@@ -129,5 +131,37 @@ describe('formatTemplateLabel', () => {
 
   it('exposes a static, prefixed label for the transcript tab', () => {
     expect(transcriptTabLabel()).toBe('📄 Transcript');
+  });
+});
+
+describe('built-in template text in the interface language', () => {
+  beforeEach(() => registerTranslator((key) => `fr:${key}`));
+  afterEach(() => registerTranslator(null));
+
+  const stock = {
+    name: 'key-points',
+    label: 'Key Points',
+    emoji: '🔑',
+    description: 'Extract the key points discussed in the meeting as a concise bullet list.',
+    prompt: 'p',
+  };
+
+  it('translates the label and the tooltip of a built-in template that still has its stock text', () => {
+    expect(formatTemplateLabel(stock)).toBe('🔑 fr:templates.key-points.label');
+    expect(formatTemplateDescription(stock)).toBe('fr:templates.key-points.description');
+  });
+
+  it('keeps the text of a built-in template the user edited', () => {
+    const edited = { ...stock, label: 'Faits marquants', description: 'Mon texte' };
+
+    expect(formatTemplateLabel(edited)).toBe('🔑 Faits marquants');
+    expect(formatTemplateDescription(edited)).toBe('Mon texte');
+  });
+
+  it('keeps the text of a template the user wrote', () => {
+    const own = { name: 'retro', label: 'Retro', emoji: '🔁', description: 'Sprint retro', prompt: 'p' };
+
+    expect(formatTemplateLabel(own)).toBe('🔁 Retro');
+    expect(formatTemplateDescription(own)).toBe('Sprint retro');
   });
 });
