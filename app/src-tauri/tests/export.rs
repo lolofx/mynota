@@ -327,16 +327,67 @@ fn the_front_matter_is_well_formed_and_quotes_what_yaml_would_misread() {
         .iter()
         .map(|line| line.split(':').next().unwrap_or(""))
         .collect();
-    assert_eq!(keys, ["title", "date", "duration", "speakers", "status"]);
+    assert_eq!(
+        keys,
+        [
+            "title",
+            "date",
+            "duration",
+            "speakers",
+            "status",
+            "mynota_id"
+        ]
+    );
     let date = front[1].trim_start_matches("date: ");
     assert_eq!(date.len(), 19, "{date}");
     assert_eq!(&date[10..11], "T");
 }
 
-/// The part of an exported file after its front matter.
+/// The transcript lines of an exported file: what sits between its
+/// `transcript` markers.
 fn body(markdown: &str) -> &str {
-    markdown
-        .split_once("\n---\n\n")
-        .map(|(_, rest)| rest)
-        .expect("front matter is closed by a blank line")
+    let (_, after) = markdown
+        .split_once("<!-- mynota:begin transcript -->\n")
+        .expect("transcript begin marker");
+    after
+        .split_once("<!-- mynota:end transcript -->")
+        .map(|(lines, _)| lines)
+        .expect("transcript end marker")
+}
+
+#[test]
+fn the_export_carries_the_meeting_id_and_both_marker_pairs() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let store = store_at(dir.path());
+    let meeting = store.create("Marked").expect("create");
+    store
+        .save(&meeting.with_transcript(Transcript {
+            segments: vec![segment(0.0, 1.0, "Hi.", Speaker::me())],
+        }))
+        .expect("save");
+
+    let dest = dir.path().join("marked.md");
+    export_meeting_confined(
+        &store,
+        meeting.id,
+        ExportFormat::Markdown,
+        &dest,
+        dir.path(),
+    )
+    .expect("export markdown");
+
+    let markdown = fs::read_to_string(&dest).expect("read markdown");
+    assert!(
+        markdown.contains(&format!("\nmynota_id: {}\n", meeting.id)),
+        "{markdown}"
+    );
+    for name in ["transcript", "summary"] {
+        assert!(markdown.contains(&format!("<!-- mynota:begin {name} -->\n")));
+        assert!(markdown.contains(&format!("<!-- mynota:end {name} -->\n")));
+    }
+    // The transcript comes first, as ADR 0019 promised.
+    assert!(
+        markdown.find("begin transcript") < markdown.find("begin summary"),
+        "{markdown}"
+    );
 }

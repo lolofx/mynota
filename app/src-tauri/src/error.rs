@@ -7,6 +7,15 @@
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
 
+impl From<crate::export_link::LinkError> for AppError {
+    fn from(err: crate::export_link::LinkError) -> Self {
+        match err {
+            crate::export_link::LinkError::Io(io) => Self::Io(io),
+            other => Self::Path(other.to_string()),
+        }
+    }
+}
+
 /// Errors that can surface anywhere in the Myna desktop app.
 #[derive(Debug, thiserror::Error)]
 pub enum AppError {

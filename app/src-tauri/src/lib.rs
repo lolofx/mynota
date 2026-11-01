@@ -11,6 +11,7 @@ pub mod domain;
 pub mod dto;
 pub mod error;
 pub mod events;
+pub mod export_link;
 pub mod ingest;
 pub mod menu;
 pub mod model_init;
@@ -95,6 +96,13 @@ pub fn run() {
             recovery::recover_orphaned_sessions(&store);
             let folders = FsFolderStore::new(root);
             app.manage(AppState::new(store, folders));
+            // ADR 0022: files moved inside the vault since last time are
+            // found again by their `mynota_id`. Off the main thread: a big
+            // vault takes a moment, and it must never block boot.
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move {
+                let _ = commands::export::rescan_export_folder(handle).await;
+            });
             app.manage(Arc::new(ModelDownloadManager::new()));
             // Replace tauri's auto-generated default menu (only installed
             // while `app.menu.is_none()`) with ours: same items, plus
@@ -171,6 +179,11 @@ pub fn run() {
             commands::export::get_export_prefs,
             commands::export::set_export_folder,
             commands::export::export_meeting_to_folder,
+            commands::export::get_export_link,
+            commands::export::relink_export,
+            commands::export::recreate_export,
+            commands::export::unlink_export,
+            commands::export::rescan_export_folder,
             commands::updates::update_consent,
             commands::updates::set_update_consent,
             commands::updates::check_for_update,
