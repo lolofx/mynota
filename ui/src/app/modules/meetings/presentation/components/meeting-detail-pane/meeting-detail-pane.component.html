@@ -60,7 +60,7 @@
           class="tab"
           [class.active]="summarySelectionTab() === template.name"
           [attr.aria-selected]="summarySelectionTab() === template.name"
-          [title]="template.description"
+          [title]="templateDescription(template)"
           (click)="selectTab(template.name)"
         >
           {{ templateLabel(template) }}

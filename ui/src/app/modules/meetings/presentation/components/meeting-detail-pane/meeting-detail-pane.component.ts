@@ -21,6 +21,7 @@ import type { TranscriptSegment } from '../../../core/models/transcript.model';
 import {
   transcriptTabLabel,
   formatMeetingTitle,
+  formatTemplateDescription,
   formatTemplateLabel,
 } from '../../utils/format-display.util';
 import { AudioPlayerComponent } from '../audio-player/audio-player.component';
@@ -404,6 +405,7 @@ export class MeetingDetailPaneComponent {
   protected templateLabel(template: SummaryTemplate): string {
     return formatTemplateLabel(template);
   }
+  protected readonly templateDescription = formatTemplateDescription;
   protected transcriptTabLabel(): string {
     return transcriptTabLabel();
   }
