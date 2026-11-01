@@ -70,6 +70,41 @@ const titleCaseFromSlug = (slug: string): string =>
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ');
 
+/**
+ * The English text shipped in `templates/*.json` for the built-in templates.
+ * A template whose text is still this stock text is shown in the interface
+ * language (`templates.<name>.label|description`); a template the user edited
+ * or wrote keeps its own text, since only they can translate it.
+ */
+const STOCK_TEMPLATE_TEXT: Readonly<Record<string, Readonly<Record<'label' | 'description', string>>>> = {
+  'key-points': {
+    label: 'Key Points',
+    description: 'Extract the key points discussed in the meeting as a concise bullet list.',
+  },
+  'action-items': {
+    label: 'Action Items',
+    description: 'Extract concrete action items with an owner and due date where mentioned.',
+  },
+  'meeting-notes': {
+    label: 'Notes',
+    description: 'Produce a full set of meeting notes: an overall summary, a discussion narrative, and a list of decisions.',
+  },
+  decisions: {
+    label: 'Decisions',
+    description: 'Extract the decisions that were made in the meeting along with the reasoning behind each one.',
+  },
+};
+
+const localisedTemplateText = (template: SummaryTemplate, field: 'label' | 'description'): string | undefined => {
+  const own = template[field]?.trim();
+  const stock = Object.hasOwn(STOCK_TEMPLATE_TEXT, template.name) ? STOCK_TEMPLATE_TEXT[template.name] : undefined;
+  return stock !== undefined && own === stock[field] ? tr(`templates.${template.name}.${field}`) : own;
+};
+
+/** Tooltip text of a template tab, in the interface language for the built-in templates. */
+export const formatTemplateDescription = (template: SummaryTemplate): string =>
+  localisedTemplateText(template, 'description') ?? '';
+
 /** Fallback emoji for a summary template tab when the template specifies none. */
 const GENERIC_TEMPLATE_EMOJI = '🗒️';
 
@@ -89,7 +124,7 @@ const composeTabLabel = (emoji: string, text: string): string => `${emoji} ${tex
  */
 export const formatTemplateLabel = (template: SummaryTemplate): string => {
   const emoji = template.emoji?.trim();
-  const label = template.label?.trim();
+  const label = localisedTemplateText(template, 'label');
   const nameLabel = titleCaseFromSlug(template.name);
 
   if (emoji && label) {
