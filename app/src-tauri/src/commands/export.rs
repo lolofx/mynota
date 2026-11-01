@@ -403,7 +403,10 @@ fn render_markdown(
         let list: Vec<String> = speakers.iter().map(|name| yaml_scalar(name)).collect();
         out.push_str(&format!("speakers: [{}]\n", list.join(", ")));
     }
-    out.push_str(if summaries.is_empty() && external.is_empty() {
+    // An archived meeting says so; its file stays in the vault.
+    out.push_str(if meeting.archived {
+        "status: archived\n"
+    } else if summaries.is_empty() && external.is_empty() {
         "status: to-summarize\n"
     } else {
         "status: summarized\n"

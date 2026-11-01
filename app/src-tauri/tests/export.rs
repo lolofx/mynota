@@ -465,3 +465,23 @@ fn a_pasted_summary_is_exported_under_its_label_after_the_generated_ones() {
     );
     assert!(markdown.contains("\nstatus: summarized\n"), "{markdown}");
 }
+
+#[test]
+fn an_archived_meeting_exports_with_status_archived_and_goes_back_when_unarchived() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let store = store_at(dir.path());
+    let meeting = store.create("To archive").expect("create");
+    let meeting = meeting.with_transcript(Transcript {
+        segments: vec![segment(0.0, 1.0, "Hi.", Speaker::me())],
+    });
+    let dest = dir.path().join("archive.md");
+    let export = |m: &myna_app::domain::Meeting| {
+        store.save(m).expect("save");
+        export_meeting_confined(&store, m.id, ExportFormat::Markdown, &dest, dir.path())
+            .expect("export markdown");
+        fs::read_to_string(&dest).expect("read markdown")
+    };
+
+    assert!(export(&meeting.with_archived(true)).contains("\nstatus: archived\n"));
+    assert!(export(&meeting.with_archived(false)).contains("\nstatus: to-summarize\n"));
+}
