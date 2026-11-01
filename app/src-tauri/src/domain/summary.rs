@@ -54,3 +54,17 @@ pub struct Summary {
 fn default_summary_language() -> String {
     myna_llm::DEFAULT_SUMMARY_LANGUAGE.to_string()
 }
+
+/// A summary the user pasted from outside the app (for example the answer of
+/// an assistant), kept under a label of their choice. It is never generated,
+/// regenerated or marked stale, and "delete generated summaries" does not
+/// reach it: it lives apart from the meeting's generated summaries.
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct ExternalSummary {
+    /// Stable id within the meeting (`1`, `2`, ...), never reused.
+    pub id: u32,
+    pub label: String,
+    pub markdown: String,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
+}

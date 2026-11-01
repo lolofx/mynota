@@ -106,7 +106,7 @@ pub fn append_note(
 
 /// Re-exports once the meeting has a transcript or a linked file, so a note
 /// taken mid-recording does not create a half-empty file.
-fn export_if_ready(store: &dyn MeetingStore, id: MeetingId) {
+pub(crate) fn export_if_ready(store: &dyn MeetingStore, id: MeetingId) {
     if let Ok(meeting) = store.get(id) {
         if meeting.transcript.is_some() || meeting.export_path.is_some() {
             auto_export::after_save(store, id);

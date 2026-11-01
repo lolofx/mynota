@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager};
 
 use crate::auto_export;
-use crate::domain::{Meeting, MeetingId, Summary};
+use crate::domain::{ExternalSummary, Meeting, MeetingId, Summary};
 use crate::error::AppError;
 use crate::export_link::{self, LinkState};
 use crate::paths;
@@ -254,9 +254,10 @@ pub fn export_meeting_confined(
     let meeting = store.get(id)?;
     let summaries = load_summaries(store, id, &meeting)?;
     let notes = store.read_notes(id)?;
+    let external = store.read_external_summaries(id)?;
 
     let contents = match format {
-        ExportFormat::Markdown => Ok(render_markdown(&meeting, &summaries, &notes)),
+        ExportFormat::Markdown => Ok(render_markdown(&meeting, &summaries, &external, &notes)),
         ExportFormat::Text => Ok(render_text(&meeting, &summaries)),
         ExportFormat::Json => render_json(&meeting, &summaries),
     }?;
@@ -343,7 +344,8 @@ pub fn render_contract(
     let meeting = store.get(id)?;
     let summaries = load_summaries(store, id, &meeting)?;
     let notes = store.read_notes(id)?;
-    let markdown = render_markdown(&meeting, &summaries, &notes);
+    let external = store.read_external_summaries(id)?;
+    let markdown = render_markdown(&meeting, &summaries, &external, &notes);
     Ok((meeting, markdown))
 }
 
@@ -357,7 +359,12 @@ pub fn render_contract(
 /// `source` are left out on purpose: the meeting record stores neither, and
 /// guessing them would hand wrong metadata to the tooling that reads this
 /// file.
-fn render_markdown(meeting: &Meeting, summaries: &[Summary], notes: &str) -> String {
+fn render_markdown(
+    meeting: &Meeting,
+    summaries: &[Summary],
+    external: &[ExternalSummary],
+    notes: &str,
+) -> String {
     let mut segments: Vec<&TranscriptSegment> = meeting
         .transcript
         .as_ref()
@@ -396,7 +403,7 @@ fn render_markdown(meeting: &Meeting, summaries: &[Summary], notes: &str) -> Str
         let list: Vec<String> = speakers.iter().map(|name| yaml_scalar(name)).collect();
         out.push_str(&format!("speakers: [{}]\n", list.join(", ")));
     }
-    out.push_str(if summaries.is_empty() {
+    out.push_str(if summaries.is_empty() && external.is_empty() {
         "status: to-summarize\n"
     } else {
         "status: summarized\n"
@@ -420,9 +427,16 @@ fn render_markdown(meeting: &Meeting, summaries: &[Summary], notes: &str) -> Str
     }
     out.push_str(&export_link::block("transcript", &transcript));
 
+    // Pasted summaries follow the generated ones, under the label the user gave.
     let sections: Vec<String> = summaries
         .iter()
-        .map(|summary| format!("## Summary: {}\n\n{}\n", summary.template, summary.markdown))
+        .map(|summary| (summary.template.as_str(), summary.markdown.as_str()))
+        .chain(
+            external
+                .iter()
+                .map(|e| (e.label.as_str(), e.markdown.as_str())),
+        )
+        .map(|(name, markdown)| format!("## Summary: {name}\n\n{}\n", markdown.trim_end()))
         .collect();
     out.push('\n');
     out.push_str(&export_link::block("summary", &sections.join("\n")));

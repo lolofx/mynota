@@ -428,3 +428,40 @@ fn the_notes_are_exported_last_in_their_own_block() {
         "{markdown}"
     );
 }
+
+#[test]
+fn a_pasted_summary_is_exported_under_its_label_after_the_generated_ones() {
+    use myna_app::domain::ExternalSummary;
+
+    let dir = tempfile::tempdir().expect("tempdir");
+    let store = store_at(dir.path());
+    let meeting = store.create("Pasted").expect("create");
+    store
+        .write_external_summaries(
+            meeting.id,
+            &[ExternalSummary {
+                id: 1,
+                label: "Claude Haiku".to_string(),
+                markdown: "- point one".to_string(),
+                created_at: time::OffsetDateTime::now_utc(),
+            }],
+        )
+        .expect("pasted");
+
+    let dest = dir.path().join("pasted.md");
+    export_meeting_confined(
+        &store,
+        meeting.id,
+        ExportFormat::Markdown,
+        &dest,
+        dir.path(),
+    )
+    .expect("export markdown");
+
+    let markdown = fs::read_to_string(&dest).expect("read markdown");
+    assert!(
+        markdown.contains("## Summary: Claude Haiku\n\n- point one\n"),
+        "{markdown}"
+    );
+    assert!(markdown.contains("\nstatus: summarized\n"), "{markdown}");
+}
