@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0-beta.4] - 2026-11-01
+
+### Added
+
+- **Interface in English and French** - every screen is translated, with a language setting (Settings > Interface language). The four built-in summary templates are shown in the interface language.
+- **Summary server** - summaries can be written by an Ollama server on your own network instead of the local model (Settings > Summary server). Private addresses and plain http only; only text is sent. See ADR 0021.
+
+### Changed
+
+- The interface runs on Angular 22 (Node 22 is required to build it).
+- The welcome screen adapts to longer wording.
+- A missing summary model is reported as a missing model, not as a meeting that cannot be found.
+
 ## [0.7.0-beta.3] - 2026-10-30
 
 ### Fixed
