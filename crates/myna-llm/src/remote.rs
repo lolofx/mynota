@@ -1,5 +1,5 @@
 //! Remote summary backend: an Ollama server run by the user on their own
-//! network (ADR 0019).
+//! network (ADR 0021).
 //!
 //! This is the one place where meeting text leaves the machine, so it is
 //! deliberately narrow:
