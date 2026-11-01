@@ -14,6 +14,7 @@
       @case ('missing') {
         <p class="message">{{ 'exportLink.missing' | transloco }}</p>
         <div class="actions">
+          <button type="button" class="rescan" [disabled]="busy()" (click)="rescanRequested.emit()">{{ 'exportLink.rescan' | transloco }}</button>
           <button type="button" class="relink" [disabled]="busy()" (click)="relinkRequested.emit()">{{ 'exportLink.relink' | transloco }}</button>
           <button type="button" class="recreate" [disabled]="busy()" (click)="recreateRequested.emit()">{{ 'exportLink.recreate' | transloco }}</button>
           <button type="button" class="unlink" [disabled]="busy()" (click)="unlinkRequested.emit()">{{ 'exportLink.unlink' | transloco }}</button>

@@ -482,6 +482,7 @@
     "relink": "Relink to a file…",
     "recreate": "Recreate the export",
     "exportNow": "Export now",
-    "unlink": "Unlink"
+    "unlink": "Unlink",
+    "rescan": "Look for it again"
   }
 }

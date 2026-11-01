@@ -23,6 +23,7 @@ export class ExportLinkStripComponent {
   /** Message of the last failed link action. */
   readonly error = input<string | null>(null);
 
+  readonly rescanRequested = output<void>();
   readonly relinkRequested = output<void>();
   readonly recreateRequested = output<void>();
   readonly unlinkRequested = output<void>();

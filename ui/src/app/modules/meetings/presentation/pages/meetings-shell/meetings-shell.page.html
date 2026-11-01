@@ -90,6 +90,7 @@
             [link]="exportLink.link()"
             [busy]="exportLink.busy()"
             [error]="exportLink.error()"
+            (rescanRequested)="exportLink.onRescan()"
             (relinkRequested)="exportLink.onRelink()"
             (recreateRequested)="exportLink.onRecreate()"
             (unlinkRequested)="exportLink.onUnlink()"
