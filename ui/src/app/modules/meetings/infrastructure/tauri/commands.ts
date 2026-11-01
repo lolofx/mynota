@@ -101,6 +101,10 @@ export const COMMAND_NAMES = [
   'list_external_summaries',
   'add_external_summary',
   'delete_external_summary',
+  'get_audio_usage',
+  'purge_meeting_audio',
+  'preview_audio_purge',
+  'purge_old_audio',
 ] as const;
 
 export type CommandName = (typeof COMMAND_NAMES)[number];

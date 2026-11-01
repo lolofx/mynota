@@ -1,9 +1,11 @@
 import type { Signal } from '@angular/core';
 import { computed, effect, inject, signal, untracked } from '@angular/core';
 
+import { AudioPurgeFacade } from '../../../application/facades/audio-purge.facade';
 import { ExternalSummariesFacade } from '../../../application/facades/external-summaries.facade';
 import { MeetingNotesFacade } from '../../../application/facades/meeting-notes.facade';
 import { MeetingsFacade } from '../../../application/facades/meetings.facade';
+import type { AudioUsage } from '../../../core/ports/audio-purge.port';
 import type { ExternalSummary } from '../../../core/models/external-summary.model';
 import type { PastedSummaryDraft } from '../../components/pasted-summaries/pasted-summaries.component';
 
@@ -85,5 +87,42 @@ export function createPastedSummariesControls(facade: MeetingsFacade): PastedSum
     error: computed(() => pasted?.error() ?? null),
     onAdded: (draft) => void pasted?.add(draft.label, draft.markdown),
     onRemoved: (summaryId) => void pasted?.remove(summaryId),
+  };
+}
+
+/** Audio-purge strip wiring (ADR 0022). */
+export interface AudioPurgeControls {
+  readonly usage: Signal<AudioUsage | null>;
+  readonly working: Signal<boolean>;
+  readonly error: Signal<string | null>;
+  readonly onPurge: () => void;
+}
+
+/**
+ * Keeps the audio state of the open meeting fresh and handles the purge. The
+ * facade is optional like the export-link one. The state is read again when
+ * the meeting object changes, which covers a recording that just finished
+ * and a re-transcription.
+ */
+export function createAudioPurgeControls(facade: MeetingsFacade): AudioPurgeControls {
+  const purge = inject(AudioPurgeFacade, { optional: true });
+  const selection = facade as Partial<Pick<MeetingsFacade, 'selectedMeeting'>>;
+  const selectedId = (): string | null => selection.selectedMeeting?.()?.id ?? null;
+
+  effect(() => {
+    const id = selectedId();
+    untracked(() => void purge?.refreshUsage(id));
+  });
+
+  return {
+    usage: computed(() => purge?.usage() ?? null),
+    working: computed(() => purge?.working() ?? false),
+    error: computed(() => purge?.error() ?? null),
+    onPurge: () => {
+      const id = selectedId();
+      if (id !== null) {
+        void purge?.purge(id);
+      }
+    },
   };
 }

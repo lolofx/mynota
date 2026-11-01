@@ -500,5 +500,18 @@
     "save": "Garder",
     "labelPlaceholder": "Étiquette (par exemple le nom de l'assistant)",
     "textPlaceholder": "Colle le résumé ici"
+  },
+  "audioPurge": {
+    "size": "Audio sur le disque : {{size}}.",
+    "free": "Libérer l'audio…",
+    "confirm": "Supprimer l'audio de cette réunion ({{size}}) ? La transcription, les résumés, les notes et l'export sont conservés, mais tu ne pourras plus la retranscrire ni détecter les intervenants. Action irréversible.",
+    "purged": "L'audio a été supprimé. La transcription, les résumés et les notes sont conservés ; la retranscription et la détection des intervenants ne sont plus possibles.",
+    "settingsTitle": "Libérer de l'espace disque",
+    "settingsNote": "Supprime l'audio des réunions qui ont déjà une transcription. Transcriptions, résumés, notes et exports sont conservés. Action irréversible.",
+    "olderThan": "Audio plus ancien que",
+    "days": "{{count}} jours",
+    "preview": "{{count}} réunion(s) concernée(s), {{size}} à libérer.",
+    "done": "{{count}} réunion(s) nettoyée(s), {{size}} libérés.",
+    "bulkConfirm": "Supprimer l'audio de {{count}} réunion(s) et libérer {{size}} ? Action irréversible."
   }
 }

@@ -8,6 +8,7 @@ import type { ModelDownloadState } from '../../../application/stores/meetings.st
 import type { SummaryModelSlot } from '../../../core/models/models-status.model';
 import type { SummaryLanguage } from '../../../core/models/summary-language.model';
 import type { UpdateCheck, UpdateConsent } from '../../../core/models/update.model';
+import { AudioPurgeSettingsComponent } from '../audio-purge-settings/audio-purge-settings.component';
 import { SummaryServerSettingsComponent } from '../summary-server-settings/summary-server-settings.component';
 
 /**
@@ -21,7 +22,7 @@ import { SummaryServerSettingsComponent } from '../summary-server-settings/summa
  */
 @Component({
   selector: 'app-settings',
-  imports: [TranslocoPipe, SummaryServerSettingsComponent],
+  imports: [TranslocoPipe, SummaryServerSettingsComponent, AudioPurgeSettingsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

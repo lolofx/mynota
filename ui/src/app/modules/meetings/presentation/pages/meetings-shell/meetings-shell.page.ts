@@ -17,6 +17,7 @@ import type { MeetingDragMoveRequest } from '../../components/meeting-sidebar/me
 import { MeetingSidebarComponent } from '../../components/meeting-sidebar/meeting-sidebar.component';
 import { RecordControlComponent } from '../../components/record-control/record-control.component';
 import { PastedSummariesComponent } from '../../components/pasted-summaries/pasted-summaries.component';
+import { AudioPurgeStripComponent } from '../../components/audio-purge-strip/audio-purge-strip.component';
 import { NotesPanelComponent } from '../../components/notes-panel/notes-panel.component';
 import { ExportLinkStripComponent } from '../../components/export-link-strip/export-link-strip.component';
 import { SettingsComponent } from '../../components/settings/settings.component';
@@ -26,7 +27,7 @@ import { UpdateConsentDialogComponent } from '../../components/update-consent-di
 import type { SpeakerRename, TranscriptSectionDelete, TranscriptSelectionSpeakerAssignment, TranscriptSegmentEdit, TranscriptSegmentGroupSpeakerReassign, TranscriptSegmentSpeakerReassign } from '../../components/transcript-view/transcript-view.component';
 import type { LiveTranscriptSegmentEdit } from '../../components/live-transcript/live-transcript.component';
 import { formatMmSs } from '../../utils/format-display.util';
-import { createNotesControls, createPastedSummariesControls } from './meetings-shell.page.notes.support';
+import { createAudioPurgeControls, createNotesControls, createPastedSummariesControls } from './meetings-shell.page.notes.support';
 import { createExportLinkControls } from './meetings-shell.page.export-link.support';
 import { buildExportFilename, CHECKING_SYSTEM_AUDIO, createLayoutControls, createSettingsControls, createSidebarNarrowControls, createSummaryInstructionControls, createUpdateHandlers, describeLatestSpeakerUndo, describeLatestTranscriptUndo, loadUpdatesOnLaunch, MeetingOpQueue, runErrorRetry, runLiveSegmentEdited, runMeetingDeleted, runMeetingMoveRequested, runSegmentEdited, runSummarize } from './meetings-shell.page.support';
 
@@ -37,7 +38,7 @@ import { buildExportFilename, CHECKING_SYSTEM_AUDIO, createLayoutControls, creat
  */
 @Component({
   selector: 'app-meetings-shell-page',
-  imports: [PastedSummariesComponent, NotesPanelComponent, ExportLinkStripComponent, MeetingSidebarComponent, SidebarSplitterComponent, MeetingDetailPaneComponent, RecordControlComponent, AttributionComponent, SettingsComponent, UpdateConsentDialogComponent, UpdateBannerComponent, TranslocoPipe],
+  imports: [AudioPurgeStripComponent, PastedSummariesComponent, NotesPanelComponent, ExportLinkStripComponent, MeetingSidebarComponent, SidebarSplitterComponent, MeetingDetailPaneComponent, RecordControlComponent, AttributionComponent, SettingsComponent, UpdateConsentDialogComponent, UpdateBannerComponent, TranslocoPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './meetings-shell.page.html',
   styleUrl: './meetings-shell.page.scss',
@@ -60,12 +61,11 @@ export class MeetingsShellPage implements OnInit {
   private readonly lifecycleSignals = this.facade as Partial<Pick<MeetingsFacade, 'stopPhase' | 'recordingHealth'>>;
   protected readonly stopPhase = computed(() => this.lifecycleSignals.stopPhase?.() ?? null);
   protected readonly recordingHealth = computed(() => this.lifecycleSignals.recordingHealth?.() ?? null);
-
   protected readonly updateHandlers = createUpdateHandlers(this.facade);
   /** Settings-modal surface: `showSettings()` + toggle/backdrop handlers; opens on native menu requests (see `createSettingsControls`). */
   protected readonly settings = createSettingsControls(this.facade, this.showAbout, this.destroyRef);
-  /** Export-file state of the open meeting and its relink actions (see `createExportLinkControls`). */
   protected readonly exportLink = createExportLinkControls(this.facade);
+  protected readonly audioPurge = createAudioPurgeControls(this.facade);
   /** Per-request summary-instructions wiring: active-meeting drafts keyed by template + the change handler (see `createSummaryInstructionControls`). */
   protected readonly summaryInstructions = createSummaryInstructionControls(this.facade);
   protected readonly elapsedSec = signal(0);

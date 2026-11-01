@@ -1,0 +1,13 @@
+@if (visible()) {
+  <div class="audio-purge-strip" role="status">
+    @if (usage()?.purged) {
+      <p class="message">{{ 'audioPurge.purged' | transloco }}</p>
+    } @else {
+      <p class="message">{{ 'audioPurge.size' | transloco: { size: size() } }}</p>
+      <button type="button" class="purge" [disabled]="working()" (click)="purge()">{{ 'audioPurge.free' | transloco }}</button>
+    }
+    @if (error(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+  </div>
+}

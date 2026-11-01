@@ -500,5 +500,18 @@
     "save": "Keep",
     "labelPlaceholder": "Label (for example the assistant's name)",
     "textPlaceholder": "Paste the summary here"
+  },
+  "audioPurge": {
+    "size": "Audio on disk: {{size}}.",
+    "free": "Free the audio…",
+    "confirm": "Remove the audio of this meeting ({{size}})? The transcript, summaries, notes and export are kept, but you will no longer be able to re-transcribe it or detect speakers. This cannot be undone.",
+    "purged": "The audio was removed. The transcript, summaries and notes are kept; re-transcription and speaker detection are no longer possible.",
+    "settingsTitle": "Free disk space",
+    "settingsNote": "Removes the audio of meetings that already have a transcript. Transcripts, summaries, notes and exports are kept. This cannot be undone.",
+    "olderThan": "Audio older than",
+    "days": "{{count}} days",
+    "preview": "{{count}} meeting(s) concerned, {{size}} to free.",
+    "done": "{{count}} meeting(s) cleaned, {{size}} freed.",
+    "bulkConfirm": "Remove the audio of {{count}} meeting(s) and free {{size}}? This cannot be undone."
   }
 }

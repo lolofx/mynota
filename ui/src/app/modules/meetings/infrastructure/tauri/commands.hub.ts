@@ -34,4 +34,22 @@ export interface HubCommandSignatures {
     args: { readonly meetingId: string; readonly summaryId: number };
     result: readonly ExternalSummaryDto[];
   };
+  /** Size, purge state and whether a purge is allowed for one meeting's audio (ADR 0022). */
+  readonly get_audio_usage: {
+    args: { readonly meetingId: string };
+    result: { readonly bytes: number; readonly purged: boolean; readonly canPurge: boolean };
+  };
+  readonly purge_meeting_audio: {
+    args: { readonly meetingId: string };
+    result: { readonly count: number; readonly freedBytes: number };
+  };
+  /** How many meetings, and how many bytes, a purge of audio older than N days would free. */
+  readonly preview_audio_purge: {
+    args: { readonly olderThanDays: number };
+    result: { readonly count: number; readonly bytes: number };
+  };
+  readonly purge_old_audio: {
+    args: { readonly olderThanDays: number };
+    result: { readonly count: number; readonly freedBytes: number };
+  };
 }
