@@ -52,6 +52,22 @@
       "download": "Télécharger {{size}}",
       "downloadFailed": "Le téléchargement a échoué."
     },
+    "summaryServer": {
+      "title": "Serveur de résumé (facultatif)",
+      "helper": "Faire rédiger les résumés par un serveur Ollama de votre réseau plutôt que par ce PC. Seul le texte de la réunion est envoyé, jamais l'audio, et uniquement vers une adresse de votre réseau privé.",
+      "addressLabel": "Adresse du serveur",
+      "addressPlaceholder": "http://ollama-host:11434",
+      "test": "Tester et lister les modèles",
+      "testing": "Connexion au serveur…",
+      "modelLabel": "Modèle sur le serveur",
+      "noModelYet": "Testez la connexion pour lister les modèles",
+      "useServer": "Rédiger les résumés sur ce serveur",
+      "privacy": "Les adresses publiques et le https sont refusés volontairement. Quand c'est désactivé, les résumés sont rédigés par le modèle local.",
+      "save": "Enregistrer",
+      "saved": "Enregistré.",
+      "connected": "Connecté : {{count}} modèle(s) disponible(s).",
+      "noModels": "Le serveur a répondu mais aucun modèle n'y est installé."
+    },
     "guidelines": {
       "title": "Consignes générales",
       "ariaLabel": "Consignes générales pour les résumés",
@@ -131,7 +147,7 @@
     "STT": "La reconnaissance vocale a échoué pendant le traitement de l’audio.",
     "LLM": "Le générateur de résumés n’a pas pu produire de réponse.",
     "AUDIO": "Impossible d’accéder au microphone.",
-    "MODELS_MISSING": "Des modèles locaux requis sont manquants.",
+    "MODELS_MISSING": "Un modèle requis est manquant. Pour les résumés, choisissez un modèle à télécharger ou configurez un serveur de résumé dans les paramètres.",
     "PATH": "L’emplacement de fichier sélectionné n’est pas valide.",
     "UPDATER": "Le programme de mise à jour n’a pas pu installer ou redémarrer l’application.",
     "CANCELLED": "L’opération a été annulée.",

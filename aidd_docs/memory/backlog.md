@@ -6,7 +6,7 @@
 | --- | --- |
 | GitHub Issues on this fork | defects and evolutions |
 | `aidd_docs/tasks/` | PRD, plans, run summaries, [resume-here.md](../tasks/2026_10/resume-here.md) |
-| `docs/adr/` | decisions (next free number: 0021) |
+| `docs/adr/` | decisions (next free number: 0022) |
 
 ## Roadmap
 
@@ -20,7 +20,7 @@ Status: **done**, **partly**, **todo**, **decide**. "Real PC" means the item nee
 | 3 | Markdown export contract (front matter and timestamped speaker lines) and a configurable export folder | **partly**: implemented, [ADR 0019](../../docs/adr/0019-markdown-export-contract-and-export-folder.md); recipe check T9 pending; `language` and `source` fields left out because the app does not store them |
 | 3b | **Settings coverage**: every setting the fork promises is reachable from the Settings window | **partly**, see the table below |
 | 4 | Tray icon, global hotkey, close-to-tray while capturing, installer | todo (real PC) |
-| 5 | Optional summary on the user's own server (Ollama on the local network) | **partly**: engine written and tested in `crates/myna-llm/src/remote.rs`; not wired into the app yet; ADR 0021 to write |
+| 5 | Optional summary on the user's own server (Ollama on the local network) | **partly**: engine, preferences, Settings section and routing implemented, [ADR 0021](../../docs/adr/0021-optional-summary-server-on-the-local-network.md); real-server check pending |
 | 6 | Interface language: English and French, switchable in Settings | ADR 0020 proposed (Transloco); implementation todo |
 | 7 | Beta releases and the fork's own update channel (the update check still points at the upstream project's releases) | **partly**: Windows-only beta workflow, manifest script and guide prepared; needs the fork's signing key, then the endpoint switch |
 | 8 | Cross-platform guard: macOS and Linux builds keep compiling and passing tests; correct local time off Windows (see ADR 0019) | todo |
@@ -42,7 +42,7 @@ Scope: the fork ships on Windows, macOS (upstream's) and Linux, and adds only wh
 | **Markdown export folder** | `preferences.json` (`export`) | **yes** (phase 3) |
 | **Transcription threads (1 to 4)** | `preferences.json` (`transcription.threads`) | **no**, hand-edited only |
 | **Transcription mode (after or live)** | `preferences.json` and `MYNA_TRANSCRIPTION` | **no**, hand-edited or environment only |
-| **Summary server (address, model)** | not stored yet | **no**, phase 5 |
+| **Summary server (address, model, on/off)** | `preferences.json` (`summary.server`) | **yes** (phase 5) |
 | **Interface language** | not stored yet | **no**, phase 6 |
 
 ## Rules

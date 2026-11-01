@@ -450,9 +450,8 @@ impl AppState {
                 .and_then(|root| summary_prefs::load(&root).model);
             let model =
                 summary_models::resolve(&models_root, selected.as_deref()).ok_or_else(|| {
-                    AppError::NotFound(
-                        "no summary model installed; pick and download one in Settings".to_string(),
-                    )
+                    // Not `NotFound`: the UI words that as "meeting not found".
+                    AppError::ModelsMissing(vec!["summary model".to_string()])
                 })?;
             let dir = models_root.join(model.dir_name);
             let file = paths::first_gguf(&dir)

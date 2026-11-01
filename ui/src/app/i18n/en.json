@@ -52,6 +52,22 @@
       "download": "Download {{size}}",
       "downloadFailed": "Download failed."
     },
+    "summaryServer": {
+      "title": "Summary server (optional)",
+      "helper": "Write summaries on an Ollama server of your own network instead of this PC. Only the text of the meeting is sent, never the audio, and only to an address on your private network.",
+      "addressLabel": "Server address",
+      "addressPlaceholder": "http://ollama-host:11434",
+      "test": "Test and list models",
+      "testing": "Contacting the server…",
+      "modelLabel": "Model on the server",
+      "noModelYet": "Test the connection to list the models",
+      "useServer": "Write summaries on this server",
+      "privacy": "Public addresses and https are refused on purpose. When this is off, summaries are written by the local model.",
+      "save": "Save",
+      "saved": "Saved.",
+      "connected": "Connected: {{count}} model(s) available.",
+      "noModels": "The server answered but has no model installed."
+    },
     "guidelines": {
       "title": "General guidelines",
       "ariaLabel": "General summary guidelines",
@@ -131,7 +147,7 @@
     "STT": "Speech-to-text failed while processing the audio.",
     "LLM": "The summarizer failed to generate a response.",
     "AUDIO": "The microphone could not be accessed.",
-    "MODELS_MISSING": "Required local models are missing.",
+    "MODELS_MISSING": "A required model is missing. For summaries, choose a model to download or set up a summary server in Settings.",
     "PATH": "The selected file location is invalid.",
     "UPDATER": "The updater could not install or restart the app.",
     "CANCELLED": "The operation was cancelled.",

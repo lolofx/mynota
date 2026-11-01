@@ -472,24 +472,46 @@ fn summarize_and_persist(
     let template = load_template(app, template_name)?;
     let resolved_instructions = resolve_instructions(&load_general_guidelines()?, instructions);
     let render_ctx = build_render_context(&meeting, language_label, resolved_instructions)?;
-    let summarizer = state.summarizer(app)?;
-    if state.cancel_summary.load(Ordering::SeqCst) {
-        // A cancel arriving while the model was (re)loading has no
-        // in-flight job to observe it; check here so it still takes
-        // effect before the (possibly minutes-long) inference call
-        // starts, rather than only once generation begins.
-        return Err(myna_llm::LlmError::Cancelled.into());
-    }
-
-    let markdown = run_inference(
-        app,
-        state,
-        &id,
-        template_name,
-        &template,
-        &render_ctx,
-        summarizer,
-    )?;
+    // A summary server the user switched on replaces the local model for
+    // every summary; nothing else changes below (ADR 0021).
+    let server = paths::data_root()
+        .ok()
+        .and_then(|root| summary_prefs::load(&root).active_server().cloned());
+    let markdown = match server {
+        Some(server) => {
+            if state.cancel_summary.load(Ordering::SeqCst) {
+                return Err(myna_llm::LlmError::Cancelled.into());
+            }
+            run_remote_inference(
+                app,
+                state,
+                &id,
+                template_name,
+                &template,
+                &render_ctx,
+                &server,
+            )?
+        }
+        None => {
+            let summarizer = state.summarizer(app)?;
+            if state.cancel_summary.load(Ordering::SeqCst) {
+                // A cancel arriving while the model was (re)loading has no
+                // in-flight job to observe it; check here so it still takes
+                // effect before the (possibly minutes-long) inference call
+                // starts, rather than only once generation begins.
+                return Err(myna_llm::LlmError::Cancelled.into());
+            }
+            run_inference(
+                app,
+                state,
+                &id,
+                template_name,
+                &template,
+                &render_ctx,
+                summarizer,
+            )?
+        }
+    };
 
     let created_at = OffsetDateTime::now_utc();
     let path = state
@@ -641,6 +663,36 @@ fn run_inference(
             }
         },
     )?;
+    if let Some(chunk) = batcher.flush() {
+        emit_token(app, &meeting_id_str, template_name, &chunk);
+    }
+
+    Ok(markdown)
+}
+
+/// [`run_inference`] on the user's own summary server. Same streaming and
+/// batching towards the UI; the transcript text leaves the machine only
+/// for the address the user configured, which the engine has already
+/// checked to be on a private network.
+fn run_remote_inference(
+    app: &AppHandle,
+    state: &State<'_, AppState>,
+    id: &MeetingId,
+    template_name: &str,
+    template: &Template,
+    render_ctx: &RenderContext,
+    server: &summary_prefs::SummaryServerPrefs,
+) -> Result<String, AppError> {
+    let summarizer = myna_llm::RemoteSummarizer::new(&server.url, &server.model)?;
+    let cancel = Arc::clone(&state.cancel_summary);
+    let meeting_id_str = id.to_string();
+    let mut batcher = SummaryTokenBatcher::new(Instant::now());
+
+    let markdown = summarizer.summarize_transcript(template, render_ctx, &cancel, |token| {
+        if let Some(chunk) = batcher.push(Instant::now(), token) {
+            emit_token(app, &meeting_id_str, template_name, &chunk);
+        }
+    })?;
     if let Some(chunk) = batcher.flush() {
         emit_token(app, &meeting_id_str, template_name, &chunk);
     }

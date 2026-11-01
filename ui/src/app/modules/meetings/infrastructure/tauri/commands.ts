@@ -5,6 +5,7 @@ import type { MeetingDto } from '../dto/meeting.dto';
 import type { ModelsStatusDto } from '../dto/models-status.dto';
 import type { RecordingStatePayloadDto } from '../dto/event-payload.dto';
 import type { SummaryDto, SummaryLanguageDto } from '../dto/summary.dto';
+import type { SummaryServerDto } from '../dto/summary-server.dto';
 import type { TemplateDto } from '../dto/template.dto';
 import type { TranscriptDto, TranscriptSegmentWireDto } from '../dto/transcript.dto';
 
@@ -57,6 +58,9 @@ export const COMMAND_NAMES = [
   'delete_summary',
   'get_summary_guidelines',
   'set_summary_guidelines',
+  'get_summary_server',
+  'set_summary_server',
+  'list_summary_server_models',
   'rename_speaker',
   'remove_speaker',
   'set_segment_speaker',
@@ -232,6 +236,9 @@ export interface CommandSignatures {
   readonly get_summary_guidelines: { args: NoArgs; result: string };
   /** Replaces the persisted general summary guidelines; empty string clears. */
   readonly set_summary_guidelines: { args: { readonly guidelines: string }; result: void };
+  readonly get_summary_server: { args: NoArgs; result: SummaryServerDto };
+  readonly set_summary_server: { args: { readonly server: SummaryServerDto }; result: void };
+  readonly list_summary_server_models: { args: { readonly url: string }; result: string[] };
   readonly cancel_summarization: { args: NoArgs; result: void };
   readonly models_status: { args: NoArgs; result: ModelsStatusDto };
   readonly export_meeting: {

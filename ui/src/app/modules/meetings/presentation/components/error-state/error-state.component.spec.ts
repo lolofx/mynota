@@ -14,7 +14,7 @@ describe('ErrorStateComponent', () => {
     const fixture = createFixture('MODELS_MISSING');
 
     expect(fixture.nativeElement.querySelector('.message').textContent).toBe(
-      'Required local models are missing.',
+      'A required model is missing. For summaries, choose a model to download or set up a summary server in Settings.',
     );
   });
 
