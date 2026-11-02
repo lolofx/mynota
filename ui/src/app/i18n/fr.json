@@ -96,7 +96,8 @@
     "tabs": {
       "general": "Général",
       "summary": "Résumés",
-      "storage": "Stockage"
+      "storage": "Stockage",
+      "vocabulary": "Vocabulaire"
     }
   },
   "updateBanner": {
@@ -521,5 +522,14 @@
     "preview": "{{count}} réunion(s) concernée(s), {{size}} à libérer.",
     "done": "{{count}} réunion(s) nettoyée(s), {{size}} libérés.",
     "bulkConfirm": "Supprimer l'audio de {{count}} réunion(s) et libérer {{size}} ? Action irréversible."
+  },
+  "vocabulary": {
+    "title": "Vocabulaire",
+    "note": "Une entrée par ligne. « entendu = voulu » corrige ce que le modèle comprend mal ; un mot seul est seulement donné aux résumés pour qu'il soit bien écrit. Les lignes commençant par # sont ignorées.",
+    "placeholder": "la F = l'AF\nfumur = fumure\nDia = Dyhia\nDyhia",
+    "save": "Enregistrer",
+    "apply": "Appliquer aux réunions existantes…",
+    "applyConfirm": "Corriger les transcriptions des réunions déjà transcrites ? Leurs résumés seront marqués comme périmés.",
+    "done": "{{count}} passage(s) corrigé(s)."
   }
 }

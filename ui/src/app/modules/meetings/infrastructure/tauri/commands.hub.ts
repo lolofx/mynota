@@ -52,4 +52,8 @@ export interface HubCommandSignatures {
     args: { readonly olderThanDays: number };
     result: { readonly count: number; readonly freedBytes: number };
   };
+  /** The user's vocabulary text (one `heard = wanted` entry per line) and its application to existing meetings. */
+  readonly get_dictionary: { args: NoArgs; result: string };
+  readonly set_dictionary: { args: { readonly text: string }; result: void };
+  readonly apply_dictionary_to_meetings: { args: NoArgs; result: number };
 }

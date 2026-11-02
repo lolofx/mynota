@@ -105,6 +105,9 @@ export const COMMAND_NAMES = [
   'purge_meeting_audio',
   'preview_audio_purge',
   'purge_old_audio',
+  'get_dictionary',
+  'set_dictionary',
+  'apply_dictionary_to_meetings',
 ] as const;
 
 export type CommandName = (typeof COMMAND_NAMES)[number];

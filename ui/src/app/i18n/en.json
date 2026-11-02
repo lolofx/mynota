@@ -96,7 +96,8 @@
     "tabs": {
       "general": "General",
       "summary": "Summaries",
-      "storage": "Storage"
+      "storage": "Storage",
+      "vocabulary": "Vocabulary"
     }
   },
   "updateBanner": {
@@ -521,5 +522,14 @@
     "preview": "{{count}} meeting(s) concerned, {{size}} to free.",
     "done": "{{count}} meeting(s) cleaned, {{size}} freed.",
     "bulkConfirm": "Remove the audio of {{count}} meeting(s) and free {{size}}? This cannot be undone."
+  },
+  "vocabulary": {
+    "title": "Vocabulary",
+    "note": "One entry per line. \"heard = wanted\" fixes what the speech model gets wrong; a bare word is only given to the summaries so it is spelled right. Lines starting with # are ignored.",
+    "placeholder": "la F = l'AF\nfumur = fumure\nDia = Dyhia\nDyhia",
+    "save": "Save",
+    "apply": "Apply to existing meetings…",
+    "applyConfirm": "Correct the transcripts of the meetings already transcribed? Their summaries will be marked as out of date.",
+    "done": "{{count}} passage(s) corrected."
   }
 }

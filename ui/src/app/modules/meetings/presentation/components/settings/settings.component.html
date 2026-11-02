@@ -131,6 +131,9 @@
   </section>
 
   </div>
+  <div class="group" role="tabpanel" [hidden]="tab() !== 'vocabulary'">
+  <app-vocabulary-settings />
+  </div>
   <div class="group" role="tabpanel" [hidden]="tab() !== 'storage'">
   <section class="meetings-storage" [attr.aria-label]="'settings.storage.title' | transloco">
     <h3>{{ 'settings.storage.title' | transloco }}</h3>

@@ -9,6 +9,7 @@ import type { SummaryModelSlot } from '../../../core/models/models-status.model'
 import type { SummaryLanguage } from '../../../core/models/summary-language.model';
 import type { UpdateCheck, UpdateConsent } from '../../../core/models/update.model';
 import { AudioPurgeSettingsComponent } from '../audio-purge-settings/audio-purge-settings.component';
+import { VocabularySettingsComponent } from '../vocabulary-settings/vocabulary-settings.component';
 import { SummaryServerSettingsComponent } from '../summary-server-settings/summary-server-settings.component';
 
 /**
@@ -22,7 +23,7 @@ import { SummaryServerSettingsComponent } from '../summary-server-settings/summa
  */
 @Component({
   selector: 'app-settings',
-  imports: [TranslocoPipe, SummaryServerSettingsComponent, AudioPurgeSettingsComponent],
+  imports: [TranslocoPipe, SummaryServerSettingsComponent, AudioPurgeSettingsComponent, VocabularySettingsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
@@ -32,7 +33,7 @@ export class SettingsComponent {
   private readonly language = inject(UiLanguageService);
 
   /** Settings are grouped by theme so each group fits without scrolling. */
-  protected readonly tabs = ['general', 'summary', 'storage'] as const;
+  protected readonly tabs = ['general', 'summary', 'vocabulary', 'storage'] as const;
   protected readonly tab = signal<(typeof this.tabs)[number]>('general');
   protected readonly interfaceLanguages = SUPPORTED_LANGUAGES;
   protected readonly uiLanguage = this.language.language;

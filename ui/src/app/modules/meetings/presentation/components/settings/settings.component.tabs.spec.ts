@@ -17,7 +17,7 @@ describe('SettingsComponent themed tabs', () => {
   it('opens on General and shows one theme at a time', () => {
     const fixture = createFixture();
 
-    expect(panels(fixture).length).toBe(3);
+    expect(panels(fixture).length).toBe(4);
     expect(shown(fixture)).toEqual([0]);
     expect(fixture.nativeElement.querySelector('.tab.active')?.getAttribute('data-tab')).toBe('general');
   });
@@ -31,7 +31,7 @@ describe('SettingsComponent themed tabs', () => {
 
     (fixture.nativeElement.querySelector('[data-tab="storage"]') as HTMLButtonElement).click();
     fixture.detectChanges();
-    expect(shown(fixture)).toEqual([2]);
+    expect(shown(fixture)).toEqual([3]);
   });
 
   it('keeps each section under its theme', () => {
@@ -43,6 +43,6 @@ describe('SettingsComponent themed tabs', () => {
     expect(inGroup('.update-settings')).toBe(0);
     expect(inGroup('.summary-model')).toBe(1);
     expect(inGroup('.summary-guidelines')).toBe(1);
-    expect(inGroup('.export-folder')).toBe(2);
+    expect(inGroup('.export-folder')).toBe(3);
   });
 });
