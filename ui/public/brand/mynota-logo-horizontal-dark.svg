@@ -1,5 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 36" role="img" aria-labelledby="title">
   <title id="title">Mynota</title>
-  <rect x="2" y="4" width="28" height="28" rx="7" fill="#fff"/>
+  <svg x="2" y="4" width="28" height="28" viewBox="48 56 368 368">
+<defs><mask id="cut" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512"><rect width="512" height="512" fill="#fff"/><rect x="90" y="294" width="330" height="26" fill="#000"/><path d="M68 288C88 292 98 262 124 262C146 262 140 352 160 352C178 352 176 200 190 200C206 200 204 346 226 346C244 346 242 247 260 247C280 247 276 290 300 288L350 286" fill="none" stroke="#000" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/><path d="M142 140h122M142 172h92" fill="none" stroke="#000" stroke-width="18" stroke-linecap="round"/></mask></defs>
+<g mask="url(#cut)" fill="#fff"><path d="M122 86H322L400 164V391a26 26 0 0 1-26 26H122a26 26 0 0 1-26-26V112a26 26 0 0 1 26-26z"/></g>
+<path d="M68 288C88 292 98 262 124 262C146 262 140 352 160 352C178 352 176 200 190 200C206 200 204 346 226 346C244 346 242 247 260 247C280 247 276 290 300 288L350 286" fill="none" stroke="#fff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
   <text x="38" y="25" font-family="Poppins, Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="600" letter-spacing="-0.5" fill="#fff">mynota</text>
 </svg>

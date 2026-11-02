@@ -1,6 +1,6 @@
 # Logo proposals
 
-Five sketches for an icon that says "meeting notes" (not recording, not a microphone), all on a 512 × 512 canvas with the same rounded square as the current placeholder so they drop in unchanged.
+Five sketches for an icon that says "meeting notes" (not recording, not a microphone), all on a 512 × 512 canvas with the same rounded square as the app icon so they drop in unchanged.
 
 | File | Idea |
 | --- | --- |
@@ -23,6 +23,6 @@ Open them in a browser to compare. They are sketches, not a final identity: the 
 1. Copy the chosen file over `brand/mynota-app-icon.svg`.
 2. Run `scripts/generate-icons.sh` to regenerate the icon set in `app/src-tauri/icons/`.
 3. Replace the mark and wordmark in `ui/public/brand/` (the mark is the icon without its rounded square; the wordmark is the name set in the app's font).
-4. Update `brand/README.md`: it still says the logo is a placeholder.
+4. Update `brand/README.md` to name the adopted proposal.
 
 Mynota is a fork of Myna and does not reuse Myna's name, logo or icon: keep any new design clearly different from the original.
