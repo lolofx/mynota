@@ -164,6 +164,12 @@ With an export folder set (a note vault, ideally Obsidian):
 1. Archive an exported meeting. Expect it to leave the list, to show in the **Archive** section with its count, and its file to say `status: archived`.
 2. Unarchive it: the status goes back, the file is the same one.
 
+## 3g. Vocabulary
+
+1. Settings, Vocabulary: add `fumur = fumure` and `la F = l'AF`, save. Record or import a short passage that says them. Expect the corrected spelling in the transcript.
+2. Edit the vocabulary, **Apply to existing meetings…**: an older transcript is corrected and its summaries show as out of date.
+3. Add a bare name such as `Dyhia`, regenerate a summary: the name is spelled as written.
+
 ## 4. Automated checks that need real hardware
 
 ```powershell

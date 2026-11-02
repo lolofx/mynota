@@ -77,9 +77,22 @@ Under each meeting, **My notes** opens a panel with a quick-note line and a free
 
 Archive a meeting from the library (or drop it on the **Archive** section) to tidy the list; nothing is deleted. Its exported file stays in the vault and its front matter says `status: archived`, going back to `to-summarize` or `summarized` when you unarchive it.
 
+## Vocabulary
+
+In **Settings > Vocabulary**, write what the speech model gets wrong, one entry per line:
+
+```text
+la F = l'AF
+fumur = fumure
+Dia = Dyhia
+Dyhia
+```
+
+`heard = wanted` replaces the text (whole words, any case, longest phrase first) in every new transcript; a corrected passage keeps what was heard in its history, like a hand correction. A bare word (`Dyhia`) changes nothing but is handed to the summaries as a spelling to respect, with the wanted side of every rule. **Apply to existing meetings…** corrects the transcripts already there and marks their summaries out of date. Lines starting with `#` are ignored. The rules fix words, not who spoke: to name a speaker, rename `Others 1`, `Others 2`… after **Detect speakers**.
+
 ## Settings
 
-Settings are grouped by theme in three tabs so each one fits on screen: **General** (interface language, updates), **Summaries** (language, model, server, instructions) and **Storage** (data location, export folder, freeing disk space).
+Settings are grouped by theme in four tabs so each one fits on screen: **General** (interface language, updates), **Summaries** (language, model, server, instructions), **Vocabulary** and **Storage** (data location, export folder, freeing disk space).
 
 ## Freeing disk space
 
