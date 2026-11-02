@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title">
+  <title id="title">Mynota proposal D: a speech bubble holding a sound wave and a note line</title>
+  <rect width="512" height="512" rx="112" fill="#1F3A5F"/>
+  <path d="M136 120h240a32 32 0 0 1 32 32v168a32 32 0 0 1-32 32H264l-64 56v-56h-64a32 32 0 0 1-32-32V152a32 32 0 0 1 32-32z" fill="#FFFFFF"/>
+  <g fill="none" stroke="#1F3A5F" stroke-width="18" stroke-linecap="round">
+    <path d="M168 210v32M208 186v80M248 164v124M288 190v72M328 204v44"/>
+  </g>
+  <g fill="none" stroke="#1F3A5F" stroke-width="16" stroke-linecap="round">
+    <path d="M168 312h128"/>
+  </g>
+  <circle cx="344" cy="312" r="14" fill="#E8A33D"/>
+</svg>
