@@ -11,7 +11,7 @@ use std::time::Instant;
 use crate::detokenize::Word;
 use crate::engine::SttEngine;
 use crate::error::SttError;
-use crate::suspect::score_segment;
+use crate::suspect::{is_noise_segment, score_segment};
 use crate::transcript::{Speaker, TranscriptSegment};
 use crate::vad::{VadConfig, VadSegmenter, TARGET_SAMPLE_RATE, VAD_WINDOW_SIZE};
 
@@ -625,13 +625,15 @@ impl SimulatedStreamer {
                         .engine
                         .transcribe_samples_words(TARGET_SAMPLE_RATE, slice)?;
                     let text = words_to_text(&words);
-                    events.push(final_segment_event(
-                        chunk_start_sample,
-                        chunk_end_sample,
-                        text,
-                        &words,
-                        slice,
-                    ));
+                    if !is_noise_segment(&text, rms_energy(slice)) {
+                        events.push(final_segment_event(
+                            chunk_start_sample,
+                            chunk_end_sample,
+                            text,
+                            &words,
+                            slice,
+                        ));
+                    }
                     // Advance only now that this chunk's decode completed —
                     // a failed decode must not mark its audio as emitted.
                     self.decoded_upto = self.decoded_upto.max(chunk_end_sample);
@@ -689,13 +691,15 @@ impl SimulatedStreamer {
                     .engine
                     .transcribe_samples_words(TARGET_SAMPLE_RATE, slice)?;
                 let text = words_to_text(&words);
-                events.push(final_segment_event(
-                    chunk_start_sample,
-                    chunk_end_sample,
-                    text,
-                    &words,
-                    slice,
-                ));
+                if !is_noise_segment(&text, rms_energy(slice)) {
+                    events.push(final_segment_event(
+                        chunk_start_sample,
+                        chunk_end_sample,
+                        text,
+                        &words,
+                        slice,
+                    ));
+                }
                 // Advance only now that this chunk's decode completed; once
                 // the whole prefix decodes this equals the post-detach
                 // `buffer_start_sample` — the end of the force-drained span.
@@ -810,7 +814,7 @@ impl SimulatedStreamer {
             .engine
             .transcribe_samples_words(TARGET_SAMPLE_RATE, &self.buffer)?;
         let text = words_to_text(&words);
-        let event = if text.trim().is_empty() {
+        let event = if is_noise_segment(&text, rms_energy(&self.buffer)) {
             None
         } else {
             let end_sample = self.total_samples;
