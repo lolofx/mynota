@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0-beta.1] - 2026-11-02
+
+### Added
+
+- **Meeting hub** - Mynota now reads as a meeting notebook: each meeting keeps its notes, pasted summaries and exported file together. See ADR 0022.
+- **Linked export file** - a meeting remembers its exported Markdown file, shows where it is, lets you relink it and can look for a moved file on demand.
+- **My notes** - a notes panel with time-stamped quick notes taken during or after the meeting.
+- **Pasted summaries** - paste a summary written elsewhere under a label and keep it with the meeting.
+- **Free the audio** - delete the audio of a meeting and keep its transcript and notes, one meeting at a time or by age (Settings).
+- **Archived meetings** - the exported Markdown file says `status: archived` for an archived meeting.
+- **Markdown preview** - the notes can be previewed as formatted Markdown.
+- **Vocabulary** - a user dictionary (Settings > Vocabulary) to fix words the speech model gets wrong.
+- **New logo** - a provisional logo and a regenerated icon set. Logo sketches are in `brand/proposals`.
+
+### Changed
+
+- Settings are grouped by theme in three tabs.
+
+### Fixed
+
+- Breaths and empty decodes no longer end up in the transcript.
+
 ## [0.7.0-beta.4] - 2026-11-01
 
 ### Added
