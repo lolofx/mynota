@@ -187,7 +187,13 @@ pub fn cancel_summarization(state: State<'_, AppState>) {
 #[tauri::command]
 pub fn get_summary_guidelines(_app: AppHandle) -> Result<String, AppError> {
     let root = paths::data_root().map_err(|err| AppError::Path(err.to_string()))?;
-    Ok(summary_prefs::load(&root).guidelines)
+    let guidelines = summary_prefs::load(&root).guidelines;
+    // The user's vocabulary rides along as terms to spell exactly.
+    Ok(match crate::commands::dictionary::vocabulary_hint() {
+        Some(hint) if guidelines.trim().is_empty() => hint,
+        Some(hint) => format!("{}\n\n{hint}", guidelines.trim_end()),
+        None => guidelines,
+    })
 }
 
 /// Persists the general guidelines applied to every summary generation.

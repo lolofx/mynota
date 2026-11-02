@@ -287,6 +287,7 @@ fn stop_recording_blocking(app: &AppHandle) -> Result<MeetingDto, AppError> {
         Ok(journaled) if journaled.segments.len() >= transcript.segments.len() => journaled,
         _ => transcript,
     };
+    let transcript = crate::commands::dictionary::apply_current(transcript);
     let meeting = state.store.get(meeting_id)?;
     let audio_path = state.store.audio_path(meeting_id);
     let updated = meeting

@@ -3,6 +3,7 @@
 pub mod app_info;
 pub mod audio_purge;
 pub mod devices;
+pub mod dictionary;
 pub mod export;
 pub mod external_summary;
 pub mod folders;

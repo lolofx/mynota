@@ -164,6 +164,7 @@ fn run_import(
         &mut on_progress,
     )?;
 
+    let transcript = crate::commands::dictionary::apply_current(transcript);
     let updated = meeting
         .with_transcript(transcript)
         .with_duration(total_sec)
@@ -361,6 +362,7 @@ fn run_retranscribe(
     // else's words would be the app lying about who spoke. The old map was
     // just snapshotted into `transcript.previous.json` below, so it's
     // recoverable on disk even though it's gone from the live meeting.
+    let transcript = crate::commands::dictionary::apply_current(transcript);
     let updated = meeting
         .with_all_summaries_stale()
         .with_transcript(transcript)
