@@ -8,7 +8,7 @@ use time::OffsetDateTime;
 
 use crate::domain::meeting::{Meeting, MeetingId};
 use crate::domain::placement::effective_position;
-use crate::domain::summary::Summary;
+use crate::domain::summary::{ExternalSummary, Summary};
 use crate::error::AppError;
 use crate::paths;
 use crate::store::MeetingStore;
@@ -16,6 +16,10 @@ use crate::store::MeetingStore;
 const MEETINGS_DIR: &str = "meetings";
 const MEETING_FILE: &str = "meeting.json";
 const MEETING_TMP_FILE: &str = "meeting.json.tmp";
+const EXTERNAL_FILE: &str = "external-summaries.json";
+const EXTERNAL_TMP_FILE: &str = "external-summaries.json.tmp";
+const NOTES_FILE: &str = "notes.md";
+const NOTES_TMP_FILE: &str = "notes.md.tmp";
 const AUDIO_FILE: &str = "audio.wav";
 const MIC_TRACK_FILE: &str = "track-mic.wav";
 const SYSTEM_TRACK_FILE: &str = "track-system.wav";
@@ -54,6 +58,25 @@ impl FsMeetingStore {
 
     fn meeting_tmp_path(&self, id: MeetingId) -> PathBuf {
         self.meeting_dir(id).join(MEETING_TMP_FILE)
+    }
+
+    /// Every `.wav` directly in the meeting folder.
+    fn audio_files(&self, id: MeetingId) -> Result<Vec<PathBuf>, AppError> {
+        let dir = self.meeting_dir(id);
+        if !dir.is_dir() {
+            return Err(AppError::NotFound(id.to_string()));
+        }
+        Ok(fs::read_dir(&dir)?
+            .flatten()
+            .map(|entry| entry.path())
+            .filter(|path| {
+                path.is_file()
+                    && path
+                        .extension()
+                        .and_then(|e| e.to_str())
+                        .is_some_and(|e| e.eq_ignore_ascii_case("wav"))
+            })
+            .collect())
     }
 
     fn summaries_dir(&self, id: MeetingId) -> PathBuf {
@@ -179,6 +202,79 @@ impl MeetingStore for FsMeetingStore {
 
     fn transcript_journal_path(&self, id: MeetingId) -> PathBuf {
         self.meeting_dir(id).join(JOURNAL_FILE)
+    }
+
+    fn audio_bytes(&self, id: MeetingId) -> Result<u64, AppError> {
+        Ok(self
+            .audio_files(id)?
+            .iter()
+            .filter_map(|path| fs::metadata(path).ok())
+            .map(|meta| meta.len())
+            .sum())
+    }
+
+    fn purge_audio(&self, id: MeetingId) -> Result<u64, AppError> {
+        let mut freed = 0;
+        for path in self.audio_files(id)? {
+            let len = fs::metadata(&path).map(|meta| meta.len()).unwrap_or(0);
+            fs::remove_file(&path)?;
+            freed += len;
+        }
+        Ok(freed)
+    }
+
+    fn read_notes(&self, id: MeetingId) -> Result<String, AppError> {
+        if !self.meeting_dir(id).is_dir() {
+            return Err(AppError::NotFound(id.to_string()));
+        }
+        match fs::read_to_string(self.meeting_dir(id).join(NOTES_FILE)) {
+            Ok(text) => Ok(text),
+            Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(String::new()),
+            Err(err) => Err(err.into()),
+        }
+    }
+
+    fn write_notes(&self, id: MeetingId, text: &str) -> Result<(), AppError> {
+        let dir = self.meeting_dir(id);
+        if !dir.is_dir() {
+            return Err(AppError::NotFound(id.to_string()));
+        }
+        let tmp = dir.join(NOTES_TMP_FILE);
+        paths::write_0600(&tmp, text.as_bytes())?;
+        fs::rename(&tmp, dir.join(NOTES_FILE)).inspect_err(|_| {
+            let _ = fs::remove_file(&tmp);
+        })?;
+        Ok(())
+    }
+
+    fn read_external_summaries(&self, id: MeetingId) -> Result<Vec<ExternalSummary>, AppError> {
+        if !self.meeting_dir(id).is_dir() {
+            return Err(AppError::NotFound(id.to_string()));
+        }
+        match fs::read_to_string(self.meeting_dir(id).join(EXTERNAL_FILE)) {
+            Ok(raw) => serde_json::from_str(&raw).map_err(|err| AppError::Store(err.to_string())),
+            Err(err) if err.kind() == std::io::ErrorKind::NotFound => Ok(Vec::new()),
+            Err(err) => Err(err.into()),
+        }
+    }
+
+    fn write_external_summaries(
+        &self,
+        id: MeetingId,
+        summaries: &[ExternalSummary],
+    ) -> Result<(), AppError> {
+        let dir = self.meeting_dir(id);
+        if !dir.is_dir() {
+            return Err(AppError::NotFound(id.to_string()));
+        }
+        let json = serde_json::to_string_pretty(summaries)
+            .map_err(|err| AppError::Store(err.to_string()))?;
+        let tmp = dir.join(EXTERNAL_TMP_FILE);
+        paths::write_0600(&tmp, json.as_bytes())?;
+        fs::rename(&tmp, dir.join(EXTERNAL_FILE)).inspect_err(|_| {
+            let _ = fs::remove_file(&tmp);
+        })?;
+        Ok(())
     }
 
     fn save_summary(

@@ -69,6 +69,43 @@ Above each meeting, a strip shows the file it is linked to:
 
 You can also export one meeting by hand from the library, as Markdown or JSON.
 
+## My notes
+
+Under each meeting, **My notes** opens a panel with a quick-note line and a free Markdown text. A quick note is stamped with the time of the talk: the recording clock while you record, or the playback position once you listen to the audio (for a talk played on the computer, record it as system audio like a meeting). The text is saved a moment after you stop typing, kept in its own file (so re-transcribing or summarizing never touches it) and exported as the last block of the Markdown file, under `## My notes`. Dictate with any tool that types into a field. The **Preview** tab shows the notes as formatted Markdown (headings, lists, quotes, code, tables).
+
+## Archiving
+
+Archive a meeting from the library (or drop it on the **Archive** section) to tidy the list; nothing is deleted. Its exported file stays in the vault and its front matter says `status: archived`, going back to `to-summarize` or `summarized` when you unarchive it.
+
+## Vocabulary
+
+In **Settings > Vocabulary**, write what the speech model gets wrong, one entry per line:
+
+```text
+la F = l'AF
+fumur = fumure
+Dia = Dyhia
+Dyhia
+```
+
+`heard = wanted` replaces the text (whole words, any case, longest phrase first) in every new transcript; a corrected passage keeps what was heard in its history, like a hand correction. A bare word (`Dyhia`) changes nothing but is handed to the summaries as a spelling to respect, with the wanted side of every rule. **Apply to existing meetings…** corrects the transcripts already there and marks their summaries out of date. Lines starting with `#` are ignored. The rules fix words, not who spoke: to name a speaker, rename `Others 1`, `Others 2`… after **Detect speakers**.
+
+## Settings
+
+Settings are grouped by theme in four tabs so each one fits on screen: **General** (interface language, updates), **Summaries** (language, model, server, instructions), **Vocabulary** and **Storage** (data location, export folder, freeing disk space).
+
+## Freeing disk space
+
+The audio is the heavy part of a meeting (about 1 GB per hour). Once a meeting has a transcript, a strip above it shows the audio size and **Free the audio…**. This removes the audio files and keeps the transcript, summaries, notes and exported file. It asks first, and it cannot be undone: a meeting without audio can no longer be re-transcribed or have its speakers detected (it says so). Playing the audio of that meeting is gone too.
+
+In **Settings > Free disk space**, choose an age (30 days to a year): the app shows how many meetings and how much disk are concerned, and removes the audio of all of them after you confirm. A meeting without a transcript, or being recorded, is never touched.
+
+## Pasted summaries
+
+Under **My notes**, **Pasted summaries** keeps a summary you wrote or obtained elsewhere, for example from an assistant. Give it a label (the assistant's name, say), paste the text, keep it. It is stored with the meeting, shown rendered, never regenerated, and not removed by anything the app does to generated summaries. It is exported in the summary block under `## Summary: <label>`, after the generated ones.
+
+The summary template that used to be called **Notes** is now **Minutes** (**Compte rendu** in French).
+
 ## Speakers
 
 Speaker detection splits `Others` into numbered speakers (`Others 1`, `Others 2`…). Rename them in the transcript and the export follows. It is not perfect, especially with similar voices or overlapping speech; see [diarization-accuracy.md](diarization-accuracy.md).

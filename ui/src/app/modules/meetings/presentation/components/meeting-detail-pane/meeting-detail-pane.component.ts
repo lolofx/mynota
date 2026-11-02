@@ -200,6 +200,7 @@ export class MeetingDetailPaneComponent {
   readonly retranscribeRequested = output<void>();
   readonly replaceAudioRequested = output<void>();
   readonly cancelImportRequested = output<void>();
+  readonly playbackTimeChanged = output<number>();
   /** User-triggered speaker detection over this meeting's system-audio track; see `meetings-shell.page.ts` for the wiring. */
   readonly diarizeRequested = output<void>();
   /** Cog sibling of a template tab — the shell opens the per-template prompt settings for `name`. */

@@ -6,6 +6,7 @@ import type { ModelsStatusDto } from '../dto/models-status.dto';
 import type { RecordingStatePayloadDto } from '../dto/event-payload.dto';
 import type { SummaryDto, SummaryLanguageDto } from '../dto/summary.dto';
 import type { SummaryServerDto } from '../dto/summary-server.dto';
+import type { HubCommandSignatures } from './commands.hub';
 import type { TemplateDto } from '../dto/template.dto';
 import type { TranscriptDto, TranscriptSegmentWireDto } from '../dto/transcript.dto';
 import type { UpdateCheckDto, UpdateConsentDto, UpdateInstallResultDto } from './commands.update-dto';
@@ -94,6 +95,19 @@ export const COMMAND_NAMES = [
   'recreate_export',
   'unlink_export',
   'rescan_export_folder',
+  'get_meeting_notes',
+  'set_meeting_notes',
+  'append_meeting_note',
+  'list_external_summaries',
+  'add_external_summary',
+  'delete_external_summary',
+  'get_audio_usage',
+  'purge_meeting_audio',
+  'preview_audio_purge',
+  'purge_old_audio',
+  'get_dictionary',
+  'set_dictionary',
+  'apply_dictionary_to_meetings',
 ] as const;
 
 export type CommandName = (typeof COMMAND_NAMES)[number];
@@ -134,7 +148,7 @@ export interface StopAcknowledgementDto {
  * names to camelCase for the JS-facing `invoke` call (e.g. `meeting_id` ->
  * `meetingId`), which every arg shape below reflects.
  */
-export interface CommandSignatures {
+export interface CommandSignatures extends HubCommandSignatures {
   readonly list_input_devices: { args: NoArgs; result: readonly DeviceInfoDto[] };
   readonly default_input_device: { args: NoArgs; result: DeviceInfoDto };
   readonly list_output_devices: { args: NoArgs; result: readonly DeviceInfoDto[] };
@@ -353,19 +367,6 @@ export interface CommandSignatures {
   readonly set_export_folder: { args: { readonly folder: string | null }; result: void };
   /** Exports one meeting into the configured folder now; resolves with the file path. */
   readonly export_meeting_to_folder: { args: { readonly meetingId: string }; result: string };
-  /** Whether the meeting's exported file is linked, missing or never exported (ADR 0022). */
-  readonly get_export_link: {
-    args: { readonly meetingId: string };
-    result: { readonly state: 'linked' | 'missing' | 'notExported' | 'noFolder'; readonly path: string | null };
-  };
-  /** Makes the meeting adopt a Markdown file chosen inside the export folder. */
-  readonly relink_export: { args: { readonly meetingId: string; readonly file: string }; result: void };
-  /** Writes a fresh file for the meeting and links it; resolves with its path. */
-  readonly recreate_export: { args: { readonly meetingId: string }; result: string };
-  /** Forgets the stored link; the file stays where it is. */
-  readonly unlink_export: { args: { readonly meetingId: string }; result: void };
-  /** Scans the export folder for moved files; resolves with how many meetings were relinked. */
-  readonly rescan_export_folder: { args: NoArgs; result: number };
 }
 
 /**

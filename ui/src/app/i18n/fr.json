@@ -92,6 +92,12 @@
       "note": "Chaque réunion y est écrite dans un fichier Markdown (titre, date, intervenants, puis lignes horodatées) dès que sa transcription est prête, et mise à jour quand les intervenants ou les résumés changent.",
       "choose": "Choisir…",
       "turnOff": "Désactiver"
+    },
+    "tabs": {
+      "general": "Général",
+      "summary": "Résumés",
+      "storage": "Stockage",
+      "vocabulary": "Vocabulaire"
     }
   },
   "updateBanner": {
@@ -193,7 +199,7 @@
       "description": "Extrait les actions concrètes, avec leur responsable et leur échéance lorsqu’elles sont mentionnées."
     },
     "meeting-notes": {
-      "label": "Notes",
+      "label": "Compte rendu",
       "description": "Produit un compte rendu complet : un résumé général, le fil des discussions et la liste des décisions."
     },
     "decisions": {
@@ -484,5 +490,46 @@
     "exportNow": "Exporter maintenant",
     "unlink": "Délier",
     "rescan": "La chercher à nouveau"
+  },
+  "notes": {
+    "title": "Mes notes",
+    "saving": "Enregistrement…",
+    "add": "Ajouter",
+    "quickPlaceholder": "Note rapide, Entrée pour ajouter",
+    "placeholder": "Tes propres notes sur cette réunion, en Markdown",
+    "stampHint": "La note est horodatée avec cette heure",
+    "edit": "Écrire",
+    "preview": "Aperçu",
+    "empty": "Rien à afficher pour l'instant."
+  },
+  "pasted": {
+    "title": "Résumés collés",
+    "paste": "Coller un résumé…",
+    "remove": "Retirer",
+    "save": "Garder",
+    "labelPlaceholder": "Étiquette (par exemple le nom de l'assistant)",
+    "textPlaceholder": "Colle le résumé ici"
+  },
+  "audioPurge": {
+    "size": "Audio sur le disque : {{size}}.",
+    "free": "Libérer l'audio…",
+    "confirm": "Supprimer l'audio de cette réunion ({{size}}) ? La transcription, les résumés, les notes et l'export sont conservés, mais tu ne pourras plus la retranscrire ni détecter les intervenants. Action irréversible.",
+    "purged": "L'audio a été supprimé. La transcription, les résumés et les notes sont conservés ; la retranscription et la détection des intervenants ne sont plus possibles.",
+    "settingsTitle": "Libérer de l'espace disque",
+    "settingsNote": "Supprime l'audio des réunions qui ont déjà une transcription. Transcriptions, résumés, notes et exports sont conservés. Action irréversible.",
+    "olderThan": "Audio plus ancien que",
+    "days": "{{count}} jours",
+    "preview": "{{count}} réunion(s) concernée(s), {{size}} à libérer.",
+    "done": "{{count}} réunion(s) nettoyée(s), {{size}} libérés.",
+    "bulkConfirm": "Supprimer l'audio de {{count}} réunion(s) et libérer {{size}} ? Action irréversible."
+  },
+  "vocabulary": {
+    "title": "Vocabulaire",
+    "note": "Une entrée par ligne. « entendu = voulu » corrige ce que le modèle comprend mal ; un mot seul est seulement donné aux résumés pour qu'il soit bien écrit. Les lignes commençant par # sont ignorées.",
+    "placeholder": "la F = l'AF\nfumur = fumure\nDia = Dyhia\nDyhia",
+    "save": "Enregistrer",
+    "apply": "Appliquer aux réunions existantes…",
+    "applyConfirm": "Corriger les transcriptions des réunions déjà transcrites ? Leurs résumés seront marqués comme périmés.",
+    "done": "{{count}} passage(s) corrigé(s)."
   }
 }

@@ -9,7 +9,7 @@ use std::path::PathBuf;
 
 use crate::domain::folder::{Folder, FolderId};
 use crate::domain::meeting::{Meeting, MeetingId};
-use crate::domain::summary::Summary;
+use crate::domain::summary::{ExternalSummary, Summary};
 use crate::error::AppError;
 
 /// Persistence port for meetings and their summaries.
@@ -85,6 +85,32 @@ pub trait MeetingStore {
         template: &str,
         language: &str,
     ) -> Result<Summary, AppError>;
+
+    /// Total size in bytes of a meeting's audio files (every `.wav` in its
+    /// folder: the recording, its parts and the STT tracks).
+    fn audio_bytes(&self, id: MeetingId) -> Result<u64, AppError>;
+
+    /// Removes a meeting's audio files and returns the bytes freed. Touches
+    /// nothing else: transcript, summaries and notes stay.
+    fn purge_audio(&self, id: MeetingId) -> Result<u64, AppError>;
+
+    /// Loads the user's own notes for a meeting, empty when none were taken.
+    /// Returns [`AppError::NotFound`] when the meeting does not exist.
+    fn read_notes(&self, id: MeetingId) -> Result<String, AppError>;
+
+    /// Replaces the user's own notes for a meeting. Notes live in their own
+    /// file, so re-transcribing or summarizing never touches them.
+    fn write_notes(&self, id: MeetingId, text: &str) -> Result<(), AppError>;
+
+    /// Loads the summaries the user pasted for a meeting, oldest first.
+    fn read_external_summaries(&self, id: MeetingId) -> Result<Vec<ExternalSummary>, AppError>;
+
+    /// Replaces the pasted summaries of a meeting.
+    fn write_external_summaries(
+        &self,
+        id: MeetingId,
+        summaries: &[ExternalSummary],
+    ) -> Result<(), AppError>;
 
     /// Deletes a previously saved summary's markdown for a
     /// meeting/template/language triple (`{template}__{language}.md`) and

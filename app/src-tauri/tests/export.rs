@@ -391,3 +391,97 @@ fn the_export_carries_the_meeting_id_and_both_marker_pairs() {
         "{markdown}"
     );
 }
+
+#[test]
+fn the_notes_are_exported_last_in_their_own_block() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let store = store_at(dir.path());
+    let meeting = store.create("With notes").expect("create");
+    store
+        .save(&meeting.with_transcript(Transcript {
+            segments: vec![segment(0.0, 1.0, "Hi.", Speaker::me())],
+        }))
+        .expect("save");
+    store
+        .write_notes(meeting.id, "[00:00:01] check this\n")
+        .expect("notes");
+
+    let dest = dir.path().join("notes.md");
+    export_meeting_confined(
+        &store,
+        meeting.id,
+        ExportFormat::Markdown,
+        &dest,
+        dir.path(),
+    )
+    .expect("export markdown");
+
+    let markdown = fs::read_to_string(&dest).expect("read markdown");
+    assert!(
+        markdown.contains(
+            "<!-- mynota:begin notes -->\n## My notes\n\n[00:00:01] check this\n<!-- mynota:end notes -->"
+        ),
+        "{markdown}"
+    );
+    assert!(
+        markdown.find("begin summary") < markdown.find("begin notes"),
+        "{markdown}"
+    );
+}
+
+#[test]
+fn a_pasted_summary_is_exported_under_its_label_after_the_generated_ones() {
+    use myna_app::domain::ExternalSummary;
+
+    let dir = tempfile::tempdir().expect("tempdir");
+    let store = store_at(dir.path());
+    let meeting = store.create("Pasted").expect("create");
+    store
+        .write_external_summaries(
+            meeting.id,
+            &[ExternalSummary {
+                id: 1,
+                label: "Claude Haiku".to_string(),
+                markdown: "- point one".to_string(),
+                created_at: time::OffsetDateTime::now_utc(),
+            }],
+        )
+        .expect("pasted");
+
+    let dest = dir.path().join("pasted.md");
+    export_meeting_confined(
+        &store,
+        meeting.id,
+        ExportFormat::Markdown,
+        &dest,
+        dir.path(),
+    )
+    .expect("export markdown");
+
+    let markdown = fs::read_to_string(&dest).expect("read markdown");
+    assert!(
+        markdown.contains("## Summary: Claude Haiku\n\n- point one\n"),
+        "{markdown}"
+    );
+    assert!(markdown.contains("\nstatus: summarized\n"), "{markdown}");
+}
+
+#[test]
+fn an_archived_meeting_exports_with_status_archived_and_goes_back_when_unarchived() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let store = store_at(dir.path());
+    let meeting = store.create("To archive").expect("create");
+    let meeting = meeting.with_transcript(Transcript {
+        segments: vec![segment(0.0, 1.0, "Hi.", Speaker::me())],
+    });
+    let dest = dir.path().join("archive.md");
+    let export = |m: &myna_app::domain::Meeting| {
+        store.save(m).expect("save");
+        export_meeting_confined(&store, m.id, ExportFormat::Markdown, &dest, dir.path())
+            .expect("export markdown");
+        fs::read_to_string(&dest).expect("read markdown")
+    };
+
+    assert!(export(&meeting.with_archived(true)).contains("\nstatus: archived\n"));
+    assert!(export(&meeting.with_archived(false)).contains("\nstatus: to-summarize\n"));
+}

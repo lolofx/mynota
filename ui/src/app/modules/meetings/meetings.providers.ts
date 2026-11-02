@@ -12,6 +12,10 @@ import { ModelsStatusPort } from './core/ports/models-status.port';
 import { PreferencesPort } from './core/ports/preferences.port';
 import { RecorderPort } from './core/ports/recorder.port';
 import { ExportFolderPort } from './core/ports/export-folder.port';
+import { VocabularyPort } from './core/ports/vocabulary.port';
+import { AudioPurgePort } from './core/ports/audio-purge.port';
+import { ExternalSummariesPort } from './core/ports/external-summaries.port';
+import { MeetingNotesPort } from './core/ports/meeting-notes.port';
 import { StorageLocationPort } from './core/ports/storage-location.port';
 import { SummarizerPort } from './core/ports/summarizer.port';
 import { SummaryServerPort } from './core/ports/summary-server.port';
@@ -85,6 +89,10 @@ import { StopRecordingUseCase } from './application/use-cases/stop-recording.use
 import { SummarizeMeetingUseCase } from './application/use-cases/summarize-meeting.usecase';
 import { DevicesFacade } from './application/facades/devices.facade';
 import { ExportFolderFacade } from './application/facades/export-folder.facade';
+import { VocabularyFacade } from './application/facades/vocabulary.facade';
+import { AudioPurgeFacade } from './application/facades/audio-purge.facade';
+import { ExternalSummariesFacade } from './application/facades/external-summaries.facade';
+import { MeetingNotesFacade } from './application/facades/meeting-notes.facade';
 import { MeetingsFacade } from './application/facades/meetings.facade';
 import { ModelsFacade } from './application/facades/models.facade';
 import { SpeakerFacade } from './application/facades/speaker.facade';
@@ -95,6 +103,10 @@ import { UpdatesStore } from './application/stores/updates.store';
 import { ModelInitializerPort } from './core/ports/model-initializer.port';
 import { TauriModelInitializerAdapter } from './infrastructure/tauri/tauri-model-initializer.adapter';
 import { TauriExportFolderAdapter } from './infrastructure/tauri/tauri-export-folder.adapter';
+import { TauriVocabularyAdapter } from './infrastructure/tauri/tauri-vocabulary.adapter';
+import { TauriAudioPurgeAdapter } from './infrastructure/tauri/tauri-audio-purge.adapter';
+import { TauriExternalSummariesAdapter } from './infrastructure/tauri/tauri-external-summaries.adapter';
+import { TauriMeetingNotesAdapter } from './infrastructure/tauri/tauri-meeting-notes.adapter';
 import { TauriStorageLocationAdapter } from './infrastructure/tauri/tauri-storage-location.adapter';
 
 /**
@@ -122,6 +134,10 @@ export function provideMeetings(): EnvironmentProviders {
     { provide: ModelInitializerPort, useClass: TauriModelInitializerAdapter },
     { provide: StorageLocationPort, useClass: TauriStorageLocationAdapter },
     { provide: ExportFolderPort, useClass: TauriExportFolderAdapter },
+    { provide: MeetingNotesPort, useClass: TauriMeetingNotesAdapter },
+    { provide: ExternalSummariesPort, useClass: TauriExternalSummariesAdapter },
+    { provide: AudioPurgePort, useClass: TauriAudioPurgeAdapter },
+    { provide: VocabularyPort, useClass: TauriVocabularyAdapter },
     { provide: UpdatesPort, useClass: TauriUpdatesAdapter },
     StartRecordingUseCase,
     StopRecordingUseCase,
@@ -182,5 +198,9 @@ export function provideMeetings(): EnvironmentProviders {
     UpdatesFacade,
     MeetingsFacade,
     ExportFolderFacade,
+    MeetingNotesFacade,
+    ExternalSummariesFacade,
+    AudioPurgeFacade,
+    VocabularyFacade,
   ]);
 }

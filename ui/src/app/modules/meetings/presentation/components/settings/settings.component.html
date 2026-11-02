@@ -4,6 +4,24 @@
     <button type="button" class="close" (click)="closed.emit()">{{ 'common.close' | transloco }}</button>
   </header>
 
+  <nav class="tabs" role="tablist" [attr.aria-label]="'settings.title' | transloco">
+    @for (entry of tabs; track entry) {
+      <button
+        type="button"
+        role="tab"
+        class="tab"
+        [class.active]="tab() === entry"
+        [attr.aria-selected]="tab() === entry"
+        [attr.data-tab]="entry"
+        (click)="tab.set(entry)"
+      >
+        {{ 'settings.tabs.' + entry | transloco }}
+      </button>
+    }
+  </nav>
+
+  <div class="groups">
+  <div class="group" role="tabpanel" [hidden]="tab() !== 'general'">
   <section class="interface-language" [attr.aria-label]="'settings.interfaceLanguage.title' | transloco">
     <h3>{{ 'settings.interfaceLanguage.title' | transloco }}</h3>
     <label class="language-picker">
@@ -37,6 +55,8 @@
     </div>
   </section>
 
+  </div>
+  <div class="group" role="tabpanel" [hidden]="tab() !== 'summary'">
   <section class="summary-language" [attr.aria-label]="'settings.summaryLanguage.title' | transloco">
     <h3>{{ 'settings.summaryLanguage.title' | transloco }}</h3>
     <label class="language-picker">
@@ -110,6 +130,11 @@
     </div>
   </section>
 
+  </div>
+  <div class="group" role="tabpanel" [hidden]="tab() !== 'vocabulary'">
+  <app-vocabulary-settings />
+  </div>
+  <div class="group" role="tabpanel" [hidden]="tab() !== 'storage'">
   <section class="meetings-storage" [attr.aria-label]="'settings.storage.title' | transloco">
     <h3>{{ 'settings.storage.title' | transloco }}</h3>
     <p class="storage-path">
@@ -168,4 +193,7 @@
       <p class="storage-error export-folder-error" role="alert">{{ exportError() }}</p>
     }
   </section>
+  <app-audio-purge-settings />
+  </div>
+  </div>
 </section>

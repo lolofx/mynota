@@ -50,6 +50,8 @@ export class AudioPlayerComponent {
 
   readonly playRequested = output<void>();
   readonly pauseRequested = output<void>();
+  /** Whole seconds into the meeting's audio, emitted each time they change (stamps the quick notes). */
+  readonly timeChanged = output<number>();
 
   private readonly facade = inject(MeetingsFacade);
   private readonly destroyRef = inject(DestroyRef);
@@ -108,7 +110,10 @@ export class AudioPlayerComponent {
     return d > 0 ? (c / d) * 100 : 0;
   });
 
+  private readonly wholeSeconds = computed(() => Math.floor(this._currentTime()));
+
   constructor() {
+    effect(() => this.timeChanged.emit(this.wholeSeconds()));
     effect(() => {
       const id = this.meetingId();
       const hasAudioValue = this.hasAudio();

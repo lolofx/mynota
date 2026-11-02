@@ -1,0 +1,48 @@
+<section class="pasted-summaries">
+  <button type="button" class="toggle" [attr.aria-expanded]="open()" (click)="toggle()">
+    <span aria-hidden="true">{{ open() ? '▾' : '▸' }}</span>
+    {{ 'pasted.title' | transloco }} ({{ items().length }})
+  </button>
+  @if (open()) {
+    @for (entry of rendered(); track entry.item.id) {
+      <details class="item">
+        <summary>
+          <span class="label">{{ entry.item.label }}</span>
+          <button type="button" class="remove" [disabled]="working()" (click)="$event.preventDefault(); remove(entry.item)">
+            {{ 'pasted.remove' | transloco }}
+          </button>
+        </summary>
+        <div class="markdown" [innerHTML]="entry.html"></div>
+      </details>
+    }
+    @if (pasting()) {
+      <form class="paste-form" (submit)="$event.preventDefault(); save()">
+        <input
+          type="text"
+          class="label-input"
+          [value]="label()"
+          [attr.placeholder]="'pasted.labelPlaceholder' | transloco"
+          [attr.aria-label]="'pasted.labelPlaceholder' | transloco"
+          (input)="onLabel($event)"
+        />
+        <textarea
+          class="text"
+          rows="6"
+          [value]="markdown()"
+          [attr.placeholder]="'pasted.textPlaceholder' | transloco"
+          [attr.aria-label]="'pasted.textPlaceholder' | transloco"
+          (input)="onMarkdown($event)"
+        ></textarea>
+        <div class="actions">
+          <button type="submit" class="save" [disabled]="!canSave()">{{ 'pasted.save' | transloco }}</button>
+          <button type="button" class="cancel" (click)="cancelPaste()">{{ 'common.cancel' | transloco }}</button>
+        </div>
+      </form>
+    } @else {
+      <button type="button" class="paste" (click)="startPaste()">{{ 'pasted.paste' | transloco }}</button>
+    }
+    @if (error(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+  }
+</section>

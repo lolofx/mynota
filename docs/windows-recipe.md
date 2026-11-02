@@ -137,6 +137,39 @@ With an export folder set (a note vault, ideally Obsidian):
 4. Delete the file, open the meeting. Expect "not found" with **Relink**, **Recreate**, **Unlink**. Try each.
 5. Remove one marker line from a file and export again. Expect no overwrite, and the strip to offer relink or recreate.
 
+## 3c. My notes
+
+1. Start a recording, open **My notes**, type a quick note. Expect `[mm:ss]`-style time next to the box counting up and the line stamped with it.
+2. Stop, wait for the transcript. Open the exported file: the notes are the last block, after the summaries.
+3. Play the audio, jump to a point, add a quick note: stamped with the playback position.
+4. Re-transcribe and generate a summary: the notes are unchanged.
+5. Restart the app: the notes are still there.
+
+## 3d. Pasted summaries
+
+1. Open a transcribed meeting, **Pasted summaries**, **Paste a summary…**, label it, paste a Markdown text, keep it. Expect it rendered under the label.
+2. Restart the app: still there. Open the exported file: a `## Summary: <label>` section in the summary block.
+3. Generate a summary with a template, re-transcribe: the pasted one is untouched.
+4. Remove it (after confirming): gone from the panel and from the next export.
+
+## 3e. Audio purge
+
+1. On a transcribed meeting, note the size shown in the strip, then **Free the audio…** and confirm. Expect the strip to say the audio was removed, the player to disappear, the meeting folder to shrink (`<data>/meetings/<id>`) and the transcript, notes and exported file to be unchanged.
+2. On that meeting, **Re-transcribe** and **Detect speakers** must refuse cleanly, not crash.
+3. Settings, **Free disk space**: pick an age, read the count and size, confirm. Expect the same effect on every concerned meeting, and a meeting recorded today to be left alone.
+4. During a recording, the open meeting shows no purge button.
+
+## 3f. Archive
+
+1. Archive an exported meeting. Expect it to leave the list, to show in the **Archive** section with its count, and its file to say `status: archived`.
+2. Unarchive it: the status goes back, the file is the same one.
+
+## 3g. Vocabulary
+
+1. Settings, Vocabulary: add `fumur = fumure` and `la F = l'AF`, save. Record or import a short passage that says them. Expect the corrected spelling in the transcript.
+2. Edit the vocabulary, **Apply to existing meetings…**: an older transcript is corrected and its summaries show as out of date.
+3. Add a bare name such as `Dyhia`, regenerate a summary: the name is spelled as written.
+
 ## 4. Automated checks that need real hardware
 
 ```powershell

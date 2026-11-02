@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager};
 
 use crate::auto_export;
-use crate::domain::{Meeting, MeetingId, Summary};
+use crate::domain::{ExternalSummary, Meeting, MeetingId, Summary};
 use crate::error::AppError;
 use crate::export_link::{self, LinkState};
 use crate::paths;
@@ -253,9 +253,11 @@ pub fn export_meeting_confined(
 
     let meeting = store.get(id)?;
     let summaries = load_summaries(store, id, &meeting)?;
+    let notes = store.read_notes(id)?;
+    let external = store.read_external_summaries(id)?;
 
     let contents = match format {
-        ExportFormat::Markdown => Ok(render_markdown(&meeting, &summaries)),
+        ExportFormat::Markdown => Ok(render_markdown(&meeting, &summaries, &external, &notes)),
         ExportFormat::Text => Ok(render_text(&meeting, &summaries)),
         ExportFormat::Json => render_json(&meeting, &summaries),
     }?;
@@ -341,21 +343,28 @@ pub fn render_contract(
 ) -> Result<(Meeting, String), AppError> {
     let meeting = store.get(id)?;
     let summaries = load_summaries(store, id, &meeting)?;
-    let markdown = render_markdown(&meeting, &summaries);
+    let notes = store.read_notes(id)?;
+    let external = store.read_external_summaries(id)?;
+    let markdown = render_markdown(&meeting, &summaries, &external, &notes);
     Ok((meeting, markdown))
 }
 
 /// Renders `meeting` and `summaries` as the fork's export contract
 /// (PRD R5): a YAML front matter, then one `[hh:mm:ss] Speaker: text` line
 /// per segment in chronological order, then any summaries. Transcript and
-/// summaries sit between `mynota` markers so a re-export can rewrite them
+/// summaries and notes sit between `mynota` markers so a re-export can rewrite them
 /// without touching text the user added around them (ADR 0022).
 ///
 /// The front matter only carries what the app really knows. `language` and
 /// `source` are left out on purpose: the meeting record stores neither, and
 /// guessing them would hand wrong metadata to the tooling that reads this
 /// file.
-fn render_markdown(meeting: &Meeting, summaries: &[Summary]) -> String {
+fn render_markdown(
+    meeting: &Meeting,
+    summaries: &[Summary],
+    external: &[ExternalSummary],
+    notes: &str,
+) -> String {
     let mut segments: Vec<&TranscriptSegment> = meeting
         .transcript
         .as_ref()
@@ -394,7 +403,10 @@ fn render_markdown(meeting: &Meeting, summaries: &[Summary]) -> String {
         let list: Vec<String> = speakers.iter().map(|name| yaml_scalar(name)).collect();
         out.push_str(&format!("speakers: [{}]\n", list.join(", ")));
     }
-    out.push_str(if summaries.is_empty() {
+    // An archived meeting says so; its file stays in the vault.
+    out.push_str(if meeting.archived {
+        "status: archived\n"
+    } else if summaries.is_empty() && external.is_empty() {
         "status: to-summarize\n"
     } else {
         "status: summarized\n"
@@ -418,18 +430,36 @@ fn render_markdown(meeting: &Meeting, summaries: &[Summary]) -> String {
     }
     out.push_str(&export_link::block("transcript", &transcript));
 
+    // Pasted summaries follow the generated ones, under the label the user gave.
     let sections: Vec<String> = summaries
         .iter()
-        .map(|summary| format!("## Summary: {}\n\n{}\n", summary.template, summary.markdown))
+        .map(|summary| (summary.template.as_str(), summary.markdown.as_str()))
+        .chain(
+            external
+                .iter()
+                .map(|e| (e.label.as_str(), e.markdown.as_str())),
+        )
+        .map(|(name, markdown)| format!("## Summary: {name}\n\n{}\n", markdown.trim_end()))
         .collect();
     out.push('\n');
     out.push_str(&export_link::block("summary", &sections.join("\n")));
+
+    // The user's own notes come last and are never touched by a summary run.
+    out.push('\n');
+    out.push_str(&export_link::block(
+        "notes",
+        &if notes.trim().is_empty() {
+            String::new()
+        } else {
+            format!("## My notes\n\n{}\n", notes.trim_end())
+        },
+    ));
 
     out
 }
 
 /// `hh:mm:ss` for a number of seconds (fractions dropped, negatives as 0).
-fn clock(seconds: f32) -> String {
+pub(crate) fn clock(seconds: f32) -> String {
     let total = seconds.max(0.0) as u64;
     format!(
         "{:02}:{:02}:{:02}",

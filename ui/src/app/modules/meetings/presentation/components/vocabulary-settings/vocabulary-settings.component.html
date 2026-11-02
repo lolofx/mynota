@@ -1,0 +1,29 @@
+@if (facade) {
+  <section class="vocabulary" [attr.aria-label]="'vocabulary.title' | transloco">
+    <h3>{{ 'vocabulary.title' | transloco }}</h3>
+    <p class="note">{{ 'vocabulary.note' | transloco }}</p>
+    <textarea
+      class="vocabulary-text"
+      rows="9"
+      spellcheck="false"
+      [value]="facade.draft()"
+      [attr.placeholder]="'vocabulary.placeholder' | transloco"
+      [attr.aria-label]="'vocabulary.title' | transloco"
+      (input)="onInput($event)"
+    ></textarea>
+    <div class="actions">
+      <button type="button" class="save" [disabled]="facade.working() || !facade.dirty()" (click)="facade.save()">
+        {{ 'vocabulary.save' | transloco }}
+      </button>
+      <button type="button" class="apply" [disabled]="facade.working()" (click)="apply()">
+        {{ 'vocabulary.apply' | transloco }}
+      </button>
+    </div>
+    @if (facade.corrected(); as count) {
+      <p class="note done" role="status">{{ 'vocabulary.done' | transloco: { count } }}</p>
+    }
+    @if (facade.error(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+  </section>
+}

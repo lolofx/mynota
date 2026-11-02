@@ -1,6 +1,6 @@
 # ADR 0022: Meeting Hub, Personal Notes and a Linked Export
 
-**Status**: Proposed (Windows fork)
+**Status**: Accepted, implemented on the `win/hub-*` branches (Windows fork), recipe pending
 **Date**: 2026-11-02
 **Builds on**: [ADR 0019: Markdown Export Contract and Export Folder](0019-markdown-export-contract-and-export-folder.md), [ADR 0021: Optional Summary Server](0021-optional-summary-server-on-the-local-network.md)
 **Context**: Mynota records, transcribes and summarizes. The user wants it to be the one place that holds everything about a meeting, a web conference or a technical talk played on the computer (all three are captured the same way, as system audio): the transcript, the summaries (a local model, a server, or text pasted from an outside assistant), the user's own notes taken while listening, and a Markdown export in a note vault such as Obsidian. Four gaps stand in the way:

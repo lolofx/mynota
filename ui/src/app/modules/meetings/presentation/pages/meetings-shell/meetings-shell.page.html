@@ -86,6 +86,12 @@
 
       <div content class="content-slot">
         @if (facade.selectedMeeting()) {
+          <app-audio-purge-strip
+            [usage]="audioPurge.usage()"
+            [working]="audioPurge.working()"
+            [error]="audioPurge.error()"
+            (purgeRequested)="audioPurge.onPurge()"
+          />
           <app-export-link-strip
             [link]="exportLink.link()"
             [busy]="exportLink.busy()"
@@ -128,6 +134,7 @@
           [speakerUndoLabel]="speakerUndoLabel()"
           [summaryGuidelines]="facade.summaryGuidelines()"
           [summaryInstructionDrafts]="summaryInstructions.drafts()"
+          (playbackTimeChanged)="notes.onPlaybackTime($event)"
           (renameRequested)="onMeetingRenamed($event)"
           (segmentEdited)="onSegmentEdited($event)"
           (liveSegmentEdited)="onLiveSegmentEdited($event)"
@@ -162,6 +169,25 @@
           (diarizeRequested)="onDiarizeRequested()"
           (summaryInstructionDraftChanged)="summaryInstructions.onDraftChanged($event)"
         />
+        @if (pasted.visible()) {
+          <app-pasted-summaries
+            [items]="pasted.items()"
+            [working]="pasted.working()"
+            [error]="pasted.error()"
+            (added)="pasted.onAdded($event)"
+            (removed)="pasted.onRemoved($event)"
+          />
+        }
+        @if (notes.visible()) {
+          <app-notes-panel
+            [text]="notes.text()"
+            [clockSec]="notes.clockSec()"
+            [saving]="notes.saving()"
+            [error]="notes.error()"
+            (textChanged)="notes.onTextChanged($event)"
+            (noteAdded)="notes.onNoteAdded($event)"
+          />
+        }
       </div>
     </app-sidebar-splitter>
   </div>

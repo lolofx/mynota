@@ -22,7 +22,7 @@ Acceptance: rename a meeting, export again, one file in the vault; move the file
 Goal: dictate or type remarks next to the transcript.
 
 1. Back end: notes text per meeting (own file), load and save commands, guarded while another write is running.
-2. UI: "My notes" tab; the summary template tab gets a different visible label. Live note box during recording and playback that prefixes the elapsed time.
+2. UI: a collapsible "My notes" panel under the meeting detail (a panel rather than a tab: the detail tabs are the summary templates and the split layout); the summary template "Notes" is renamed "Minutes" / "Compte rendu" to avoid the clash. Live note box during recording and playback that prefixes the elapsed time.
 3. Export: notes block, written last, never touched by a summary run.
 4. Tests: notes survive re-transcription, re-summary and re-export; the time prefix matches the recording clock.
 
@@ -52,7 +52,7 @@ Acceptance: purge a meeting, the audio folder shrinks, transcript, notes and exp
 
 Goal: tidy the list without losing anything.
 
-1. Check what the interface already offers around `set_meeting_archived`; add the action, the filter and the count where missing.
+1. The interface already had the archive action, the Archive section and its count (checked); nothing to add there.
 2. Export: `status: archived` on archive, back on unarchive; the file stays in the vault.
 3. Tests and translations.
 

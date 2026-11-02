@@ -212,6 +212,40 @@ fn is_language_drift_risk(text: &str, seg_len_sec: f32) -> bool {
     !text.trim().is_empty() && seg_len_sec > DRIFT_RISK_SEGMENT_SEC
 }
 
+/// Words a speech model typically invents from a breath, a click or room
+/// noise on a quiet track (lowercase, punctuation stripped).
+const NOISE_WORDS: &[&str] = &[
+    "yeah", "yes", "uh", "um", "hm", "hmm", "mm", "mhm", "mm-hmm", "oh", "ah", "ha", "huh", "okay",
+    "ok", "thank", "you", "bye", "so", "the", "euh", "bah", "ben",
+];
+
+/// Whether a decoded segment is only noise and should not reach the
+/// transcript: no text at all, or a very short run of filler words on audio
+/// quieter than ordinary speech (a breath read as "Yeah." or "Thank you.").
+/// Real short answers spoken at normal volume are kept.
+pub fn is_noise_segment(text: &str, rms_energy: f32) -> bool {
+    let words: Vec<String> = text
+        .split_whitespace()
+        .map(|w| {
+            w.trim_matches(|c: char| !c.is_alphanumeric())
+                .to_lowercase()
+        })
+        .filter(|w| !w.is_empty())
+        .collect();
+    if words.is_empty() {
+        return true;
+    }
+    words.len() <= 2
+        && rms_energy.is_finite()
+        && rms_energy < NOISE_MAX_RMS_ENERGY
+        && words.iter().all(|w| NOISE_WORDS.contains(&w.as_str()))
+}
+
+/// Segments of at most two filler words are dropped below this energy. Set
+/// above [`MIN_SPEECH_RMS_ENERGY`] (which only flags) because a breath
+/// picked up by a headset microphone is louder than silence.
+pub const NOISE_MAX_RMS_ENERGY: f32 = 0.02;
+
 /// Reports whether `rms_energy` is finite and below
 /// [`MIN_SPEECH_RMS_ENERGY`]. Non-finite energy means the measurement
 /// itself is broken, not that the audio is quiet, so it does not flag.
@@ -427,5 +461,32 @@ mod tests {
             SuspectReason::LowSpeechEnergy,
         ];
         assert_eq!(reasons, expected);
+    }
+}
+
+#[cfg(test)]
+mod noise_tests {
+    use super::*;
+
+    #[test]
+    fn an_empty_or_punctuation_only_text_is_noise() {
+        assert!(is_noise_segment("", 0.5));
+        assert!(is_noise_segment("  ", 0.5));
+        assert!(is_noise_segment(" . ", 0.5));
+    }
+
+    #[test]
+    fn a_quiet_filler_is_noise_but_the_same_words_at_speech_volume_are_kept() {
+        assert!(is_noise_segment("Yeah.", 0.004));
+        assert!(is_noise_segment("Thank you.", 0.01));
+        assert!(is_noise_segment("Mm-hmm.", 0.01));
+        assert!(!is_noise_segment("Yeah.", 0.08));
+    }
+
+    #[test]
+    fn real_content_is_never_dropped_even_when_quiet() {
+        assert!(!is_noise_segment("Oui, c'est bon.", 0.004));
+        assert!(!is_noise_segment("Yeah that works for me", 0.004));
+        assert!(!is_noise_segment("Dyhia", 0.004));
     }
 }

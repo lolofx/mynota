@@ -1,0 +1,28 @@
+@if (facade) {
+  <section class="meetings-storage audio-purge" [attr.aria-label]="'audioPurge.settingsTitle' | transloco">
+    <h3>{{ 'audioPurge.settingsTitle' | transloco }}</h3>
+    <p class="storage-note">{{ 'audioPurge.settingsNote' | transloco }}</p>
+    <div class="storage-actions">
+      <label>
+        {{ 'audioPurge.olderThan' | transloco }}
+        <select class="purge-age" (change)="onDays($event)">
+          @for (age of ages; track age) {
+            <option [value]="age" [selected]="age === days()">{{ 'audioPurge.days' | transloco: { count: age } }}</option>
+          }
+        </select>
+      </label>
+      <button type="button" class="purge-old" [disabled]="facade.working() || !(facade.preview()?.count)" (click)="purge()">
+        {{ 'audioPurge.free' | transloco }}
+      </button>
+    </div>
+    @if (facade.preview(); as preview) {
+      <p class="storage-note purge-preview">{{ 'audioPurge.preview' | transloco: { count: preview.count, size: previewSize() } }}</p>
+    }
+    @if (facade.done(); as done) {
+      <p class="storage-note purge-done" role="status">{{ 'audioPurge.done' | transloco: { count: done.count, size: doneSize() } }}</p>
+    }
+    @if (facade.error(); as message) {
+      <p class="storage-error" role="alert">{{ message }}</p>
+    }
+  </section>
+}

@@ -367,6 +367,8 @@ fn set_meeting_archived_blocking(
     }
     let updated = meeting.with_archived(archived);
     state.store.save(&updated)?;
+    // The exported file carries `status: archived`; keep it in step.
+    crate::commands::notes::export_if_ready(state.store.as_ref(), id);
     Ok(MeetingDto::from_meeting(
         updated,
         has_audio,

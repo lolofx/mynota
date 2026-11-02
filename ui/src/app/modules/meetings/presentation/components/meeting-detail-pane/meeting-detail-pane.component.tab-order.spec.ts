@@ -58,7 +58,7 @@ describe('MeetingDetailPaneComponent — summary tab order', () => {
     const fixture = createFixture(builtInsAlphabetical);
 
     // Narrow layout prepends the Transcript tab; the template tabs follow in display order.
-    expect(tabNames(fixture)).toEqual(['📄 Transcript', '📝 Notes', '🔑 Key Points', '⚖️ Decisions', '✅ Action Items']);
+    expect(tabNames(fixture)).toEqual(['📄 Transcript', '📝 Minutes', '🔑 Key Points', '⚖️ Decisions', '✅ Action Items']);
   });
 
   it('keeps custom templates after the built-ins in their incoming relative order', () => {
@@ -69,7 +69,7 @@ describe('MeetingDetailPaneComponent — summary tab order', () => {
     ]);
 
     expect(tabNames(fixture).slice(1)).toEqual([
-      '📝 Notes',
+      '📝 Minutes',
       '🔑 Key Points',
       '⚖️ Decisions',
       '✅ Action Items',
@@ -87,7 +87,7 @@ describe('MeetingDetailPaneComponent — summary tab order', () => {
 
     expect(notesTab.classList.contains('active')).toBe(true);
     expect(fixture.nativeElement.querySelector('.generate')).toBeTruthy();
-    expect(fixture.nativeElement.querySelector('.headline')?.textContent).toContain('Notes');
+    expect(fixture.nativeElement.querySelector('.headline')?.textContent).toContain('Minutes');
   });
 
   it('defaults the wide layout summary column to the first displayed tab (Notes)', () => {
@@ -103,6 +103,6 @@ describe('MeetingDetailPaneComponent — summary tab order', () => {
       'Notes',
     );
     const tabs: HTMLElement[] = Array.from(fixture.nativeElement.querySelectorAll('.tab-row .tab'));
-    expect(tabs.find((tab) => tab.textContent?.includes('Notes'))?.classList.contains('active')).toBe(true);
+    expect(tabs.find((tab) => tab.textContent?.includes('Minutes'))?.classList.contains('active')).toBe(true);
   });
 });

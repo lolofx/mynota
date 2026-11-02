@@ -92,6 +92,12 @@
       "note": "Each meeting is written there as one Markdown file (title, date, speakers, then timestamped lines) as soon as its transcript is ready, and refreshed when speakers or summaries change.",
       "choose": "Choose…",
       "turnOff": "Turn off"
+    },
+    "tabs": {
+      "general": "General",
+      "summary": "Summaries",
+      "storage": "Storage",
+      "vocabulary": "Vocabulary"
     }
   },
   "updateBanner": {
@@ -193,7 +199,7 @@
       "description": "Extract concrete action items with an owner and due date where mentioned."
     },
     "meeting-notes": {
-      "label": "Notes",
+      "label": "Minutes",
       "description": "Produce a full set of meeting notes: an overall summary, a discussion narrative, and a list of decisions."
     },
     "decisions": {
@@ -484,5 +490,46 @@
     "exportNow": "Export now",
     "unlink": "Unlink",
     "rescan": "Look for it again"
+  },
+  "notes": {
+    "title": "My notes",
+    "saving": "Saving…",
+    "add": "Add",
+    "quickPlaceholder": "Quick note, Enter to add",
+    "placeholder": "Your own notes on this meeting, in Markdown",
+    "stampHint": "The note is stamped with this time",
+    "edit": "Write",
+    "preview": "Preview",
+    "empty": "Nothing to preview yet."
+  },
+  "pasted": {
+    "title": "Pasted summaries",
+    "paste": "Paste a summary…",
+    "remove": "Remove",
+    "save": "Keep",
+    "labelPlaceholder": "Label (for example the assistant's name)",
+    "textPlaceholder": "Paste the summary here"
+  },
+  "audioPurge": {
+    "size": "Audio on disk: {{size}}.",
+    "free": "Free the audio…",
+    "confirm": "Remove the audio of this meeting ({{size}})? The transcript, summaries, notes and export are kept, but you will no longer be able to re-transcribe it or detect speakers. This cannot be undone.",
+    "purged": "The audio was removed. The transcript, summaries and notes are kept; re-transcription and speaker detection are no longer possible.",
+    "settingsTitle": "Free disk space",
+    "settingsNote": "Removes the audio of meetings that already have a transcript. Transcripts, summaries, notes and exports are kept. This cannot be undone.",
+    "olderThan": "Audio older than",
+    "days": "{{count}} days",
+    "preview": "{{count}} meeting(s) concerned, {{size}} to free.",
+    "done": "{{count}} meeting(s) cleaned, {{size}} freed.",
+    "bulkConfirm": "Remove the audio of {{count}} meeting(s) and free {{size}}? This cannot be undone."
+  },
+  "vocabulary": {
+    "title": "Vocabulary",
+    "note": "One entry per line. \"heard = wanted\" fixes what the speech model gets wrong; a bare word is only given to the summaries so it is spelled right. Lines starting with # are ignored.",
+    "placeholder": "la F = l'AF\nfumur = fumure\nDia = Dyhia\nDyhia",
+    "save": "Save",
+    "apply": "Apply to existing meetings…",
+    "applyConfirm": "Correct the transcripts of the meetings already transcribed? Their summaries will be marked as out of date.",
+    "done": "{{count}} passage(s) corrected."
   }
 }

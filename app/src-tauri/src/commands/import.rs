@@ -164,6 +164,7 @@ fn run_import(
         &mut on_progress,
     )?;
 
+    let transcript = crate::commands::dictionary::apply_current(transcript);
     let updated = meeting
         .with_transcript(transcript)
         .with_duration(total_sec)
@@ -211,6 +212,10 @@ pub async fn retranscribe_meeting(
         ))
     })
 }
+
+/// Said when a purged meeting is asked for work that needs its audio.
+const PURGED_AUDIO_MESSAGE: &str =
+    "the audio of this meeting was purged: re-transcription and speaker detection need it";
 
 /// Synchronous body of [`retranscribe_meeting`], run on a blocking-pool
 /// thread.
@@ -271,6 +276,9 @@ fn run_retranscribe(
     path: Option<String>,
 ) -> Result<MeetingDto, AppError> {
     let meeting = state.store.get(id)?;
+    if meeting.audio_purged && path.is_none() {
+        return Err(AppError::Store(PURGED_AUDIO_MESSAGE.to_string()));
+    }
     let audio_dest = state.store.audio_path(id);
     let cancel = Arc::clone(&state.cancel_import);
     let (engine, vad_cfg) = build_engine_and_vad_cfg(app, state)?;
@@ -354,6 +362,7 @@ fn run_retranscribe(
     // else's words would be the app lying about who spoke. The old map was
     // just snapshotted into `transcript.previous.json` below, so it's
     // recoverable on disk even though it's gone from the live meeting.
+    let transcript = crate::commands::dictionary::apply_current(transcript);
     let updated = meeting
         .with_all_summaries_stale()
         .with_transcript(transcript)
@@ -444,7 +453,8 @@ pub fn promote_and_persist_retranscribe(
         ingest::backup_transcript(meeting_dir, transcript, speaker_names)?;
     }
 
-    store.save(updated)?;
+    // The replacement file is new audio: the meeting is no longer purged.
+    store.save(&updated.with_audio_purged(false))?;
 
     fs::rename(staged, audio_dest)?;
 
@@ -578,6 +588,9 @@ fn diarize_and_relabel(
     id: MeetingId,
 ) -> Result<MeetingDto, AppError> {
     let meeting = state.store.get(id)?;
+    if meeting.audio_purged {
+        return Err(AppError::Store(PURGED_AUDIO_MESSAGE.to_string()));
+    }
     let audio_dest = state.store.audio_path(id);
     let system_track = state.store.system_track_path(id);
     guard_system_track_present(&system_track)?;

@@ -8,4 +8,4 @@ pub mod summary;
 pub use folder::{Folder, FolderId};
 pub use meeting::{Meeting, MeetingId};
 pub use placement::{effective_position, resolve_placement, Placement, RANK_GAP};
-pub use summary::{Summary, SummaryRef};
+pub use summary::{ExternalSummary, Summary, SummaryRef};

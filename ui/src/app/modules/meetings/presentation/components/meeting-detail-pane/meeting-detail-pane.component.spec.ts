@@ -143,9 +143,9 @@ describe('MeetingDetailPaneComponent', () => {
     fixture.detectChanges();
 
     const tabs: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('.tab'));
-    const notesTab = tabs.find((tab) => tab.textContent?.includes('Notes'));
+    const notesTab = tabs.find((tab) => tab.textContent?.includes('Minutes'));
 
-    expect(notesTab?.textContent?.trim()).toBe('📝 Notes');
+    expect(notesTab?.textContent?.trim()).toBe('📝 Minutes');
     expect(notesTab?.textContent).not.toContain('A long sentence');
     expect(notesTab?.title).toBe('A long sentence describing this template in full.');
   });
