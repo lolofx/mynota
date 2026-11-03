@@ -551,5 +551,21 @@
     "it": "Italian",
     "nl": "Dutch",
     "pt": "Portuguese"
+  },
+  "combined": {
+    "title": "Several summaries at once",
+    "hint": "Tick the tabs to fill. The model reads the transcript once and writes them all, using each tab's own skill. Or take the request to an outside assistant and import its answer.",
+    "choose": "Summaries to generate",
+    "generate": "Generate in one pass",
+    "copy": "Copy the request for an assistant",
+    "import": "Import a report…",
+    "working": "Generating the report…",
+    "copied": "Copied: the instructions and the transcript are in one text. Paste it into your assistant, then import its answer here.",
+    "importPlaceholder": "Paste the report here (sections starting with ### SECTION: name)",
+    "importSave": "Import",
+    "generatedCount": "{{count}} summaries written.",
+    "importedCount": "{{count}} summaries imported.",
+    "missing": "Left out: {{names}}.",
+    "ignored": "Not matching any tab: {{names}}."
   }
 }

@@ -1,3 +1,4 @@
+import type { CombinedResultDto } from '../dto/summary.dto';
 import type { ExternalSummaryDto } from '../dto/external-summary.dto';
 import type { NoArgs } from './commands';
 
@@ -33,6 +34,21 @@ export interface HubCommandSignatures {
   readonly delete_external_summary: {
     args: { readonly meetingId: string; readonly summaryId: number };
     result: readonly ExternalSummaryDto[];
+  };
+  /** One model run over the transcript fills several summary tabs. */
+  readonly summarize_combined: {
+    args: { readonly meetingId: string; readonly templates: string[]; readonly language: string };
+    result: CombinedResultDto;
+  };
+  /** The instructions of several tabs and the transcript as one Markdown text for an outside assistant. */
+  readonly build_external_prompt: {
+    args: { readonly meetingId: string; readonly templates: string[]; readonly language: string };
+    result: string;
+  };
+  /** Splits a pasted report into one summary per tab. */
+  readonly import_combined_report: {
+    args: { readonly meetingId: string; readonly language: string; readonly text: string };
+    result: CombinedResultDto;
   };
   /** Size, purge state and whether a purge is allowed for one meeting's audio (ADR 0022). */
   readonly get_audio_usage: {

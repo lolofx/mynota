@@ -33,7 +33,10 @@ export class SummaryResumeFacade {
       this.store.resetSummaryStream();
       this.store.setSummarizingKey({ template: active.template, language: active.language });
       await this.untilFinished();
-      await this.landResult(active.meetingId, active.template, active.language);
+      const tabs = active.templates.length > 0 ? active.templates : [active.template];
+      for (const tab of tabs) {
+        await this.landResult(active.meetingId, tab, active.language);
+      }
     } catch (caught) {
       console.warn('resumeActiveSummarization failed', caught);
     } finally {

@@ -173,6 +173,21 @@
           (diarizeRequested)="onDiarizeRequested()"
           (summaryInstructionDraftChanged)="summaryInstructions.onDraftChanged($event)"
         />
+        @if (combined.visible()) {
+          <app-combined-report
+            [templates]="combined.options()"
+            [selected]="combined.selected()"
+            [working]="combined.working()"
+            [error]="combined.error()"
+            [outcome]="combined.outcome()"
+            [requestCopied]="combined.requestCopied()"
+            (toggled)="combined.onToggle($event)"
+            (generateRequested)="combined.onGenerate()"
+            (cancelRequested)="cancelSummary()"
+            (copyRequested)="combined.onCopy()"
+            (importRequested)="combined.onImport($event)"
+          />
+        }
         @if (pasted.visible()) {
           <app-pasted-summaries
             [items]="pasted.items()"

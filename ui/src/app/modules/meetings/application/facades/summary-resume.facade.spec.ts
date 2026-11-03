@@ -15,7 +15,7 @@ import { InMemoryTranscriberFake } from '../testing/in-memory-transcriber.fake';
 import { MeetingsStore } from '../stores/meetings.store';
 import { SUMMARY_RESUME_POLL_MS, SummaryResumeFacade } from './summary-resume.facade';
 
-const ACTIVE = { meetingId: 'm-1', template: 'key-points', language: 'fr' };
+const ACTIVE = { meetingId: 'm-1', template: 'key-points', language: 'fr', templates: [] as string[] };
 
 describe('SummaryResumeFacade', () => {
   let facade: SummaryResumeFacade;
@@ -96,5 +96,22 @@ describe('SummaryResumeFacade', () => {
     await resumed;
 
     expect(store.summarizingKey()).toBeNull();
+  });
+
+  it('lands every tab of a combined run once it has finished', async () => {
+    const id = toMeetingId('m-1');
+    for (const template of ['key-points', 'decisions']) {
+      summarizer.seedSummary(id, { template, language: 'fr', markdown: `- ${template}`, createdAt: new Date(), stale: false });
+    }
+    summarizer.setActiveSummarization({ meetingId: 'm-1', template: 'combined', language: 'fr', templates: ['key-points', 'decisions'] });
+
+    const resumed = facade.resume();
+    await vi.advanceTimersByTimeAsync(0);
+    summarizer.setActiveSummarization(null);
+    await vi.advanceTimersByTimeAsync(SUMMARY_RESUME_POLL_MS);
+    await resumed;
+
+    expect(store.getSummaryCacheEntry(id, 'key-points', 'fr')?.summary?.markdown).toBe('- key-points');
+    expect(store.getSummaryCacheEntry(id, 'decisions', 'fr')?.summary?.markdown).toBe('- decisions');
   });
 });

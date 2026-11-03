@@ -551,5 +551,21 @@
     "it": "Italien",
     "nl": "Néerlandais",
     "pt": "Portugais"
+  },
+  "combined": {
+    "title": "Plusieurs résumés d'un coup",
+    "hint": "Cochez les onglets à remplir. Le modèle lit la transcription une seule fois et les écrit tous, avec le skill propre à chaque onglet. Ou emportez la demande dans un assistant externe et importez sa réponse.",
+    "choose": "Résumés à générer",
+    "generate": "Générer en une passe",
+    "copy": "Copier la demande pour un assistant",
+    "import": "Importer un rapport…",
+    "working": "Génération du rapport…",
+    "copied": "Copié : les instructions et la transcription sont dans un seul texte. Collez-le dans votre assistant, puis importez sa réponse ici.",
+    "importPlaceholder": "Collez le rapport ici (sections commençant par ### SECTION: nom)",
+    "importSave": "Importer",
+    "generatedCount": "{{count}} résumés écrits.",
+    "importedCount": "{{count}} résumés importés.",
+    "missing": "Non fournis : {{names}}.",
+    "ignored": "Sans onglet correspondant : {{names}}."
   }
 }
