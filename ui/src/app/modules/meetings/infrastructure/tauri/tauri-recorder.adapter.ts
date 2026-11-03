@@ -12,6 +12,8 @@ import type {
   StopAcknowledgement,
   StopPhase,
 } from '../../core/models/recording-lifecycle.model';
+import { AUTO_AUDIO_LANGUAGE } from '../../core/models/recording-hints.model';
+import type { RecordingHints } from '../../core/models/recording-hints.model';
 import type { RecordingState } from '../../core/models/recording-state.model';
 import { RecorderPort } from '../../core/ports/recorder.port';
 import type { RecordingSnapshot } from '../../core/ports/recorder.port';
@@ -30,12 +32,15 @@ export class TauriRecorderAdapter extends RecorderPort {
     deviceName?: string,
     source?: CaptureSource,
     systemSource?: string,
+    hints?: RecordingHints,
   ): Promise<Meeting> {
     const dto = await invokeCommand('start_recording', {
       title,
       ...(deviceName !== undefined ? { device: deviceName } : {}),
       ...(source !== undefined ? { source } : {}),
       ...(systemSource !== undefined ? { systemSource } : {}),
+      ...(hints !== undefined && hints.language !== AUTO_AUDIO_LANGUAGE ? { language: hints.language } : {}),
+      ...(hints?.speakers != null ? { speakers: hints.speakers } : {}),
     });
     return mapMeetingDtoToDomain(dto);
   }

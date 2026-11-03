@@ -20,6 +20,7 @@ import type { TranscriptSegment } from '../../../core/models/transcript.model';
 import type { ImportProgress } from '../../../core/ports/audio-import.port';
 import { RecordControlComponent } from '../../components/record-control/record-control.component';
 import { MeetingsShellPage } from './meetings-shell.page';
+import { createRecordingHintsStub } from '../../../application/testing/recording-hints.stub';
 
 const readyModelsStatus: ModelsStatus = {
   parakeet: { present: true, expectedFiles: [] },
@@ -183,6 +184,7 @@ describe('MeetingsShellPage route-selection reactivity', () => {
     appVersion,
     audioSources,
     selectedAudioSource,
+    recordingHints: createRecordingHintsStub(),
     effectiveSystemSource,
     splitRatio,
     transcriptCollapsed,

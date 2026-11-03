@@ -4,6 +4,9 @@ import type { CaptureSource } from '../../core/models/capture-source.model';
 /** localStorage key the selected summary output language is persisted under. */
 export const SUMMARY_LANGUAGE_PREFERENCE_KEY = 'meetings.summaryLanguage';
 
+/** localStorage key the default audio language (what is spoken in meetings) is persisted under. */
+export const AUDIO_LANGUAGE_PREFERENCE_KEY = 'meetings.audioLanguage';
+
 /** localStorage key the selected capture source is persisted under. */
 export const CAPTURE_SOURCE_PREFERENCE_KEY = 'meetings.captureSource';
 

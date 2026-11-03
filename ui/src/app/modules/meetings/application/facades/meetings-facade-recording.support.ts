@@ -24,7 +24,14 @@ export async function runStartRecording(
   store.setStartingRecording(true);
   try {
     store.resetLiveTranscript();
-    const meeting = await startRecordingUseCase.with(title, deviceName, store.captureSource(), store.selectedAudioSource());
+    const meeting = await startRecordingUseCase.with(
+      title,
+      deviceName,
+      store.captureSource(),
+      store.selectedAudioSource(),
+      store.recordingHints.current(),
+    );
+    store.recordingHints.clearNextRecording();
     store.setSelectedMeeting(meeting);
     store.addMeeting(meeting);
     // Starting a recording switches the selection to a different meeting —

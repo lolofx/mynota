@@ -12,6 +12,7 @@ import type {
   StopAcknowledgement,
   StopPhase,
 } from '../../core/models/recording-lifecycle.model';
+import type { RecordingHints } from '../../core/models/recording-hints.model';
 import type { RecordingState } from '../../core/models/recording-state.model';
 import { RecorderPort } from '../../core/ports/recorder.port';
 import type { RecordingSnapshot } from '../../core/ports/recorder.port';
@@ -41,6 +42,7 @@ export class InMemoryRecorderFake extends RecorderPort {
   private lastRequestedDevice: string | undefined;
   private lastRequestedSource: CaptureSource | undefined;
   private lastRequestedSystemSource: string | undefined;
+  private lastRequestedHints: RecordingHints | undefined;
   private effectiveSystemSource: AudioSource | null = null;
   private stopOverrides: Partial<Meeting> = {};
 
@@ -49,7 +51,9 @@ export class InMemoryRecorderFake extends RecorderPort {
     deviceName?: string,
     source?: CaptureSource,
     systemSource?: string,
+    hints?: RecordingHints,
   ): Promise<Meeting> {
+    this.lastRequestedHints = hints;
     this.lastRequestedDevice = deviceName;
     this.lastRequestedSource = source;
     this.lastRequestedSystemSource = systemSource;
@@ -246,6 +250,11 @@ export class InMemoryRecorderFake extends RecorderPort {
   /** Test helper: the `source` argument passed to the most recent start() call. */
   getLastRequestedSource(): CaptureSource | undefined {
     return this.lastRequestedSource;
+  }
+
+  /** Test helper: the `hints` argument passed to the most recent start() call. */
+  getLastRequestedHints(): RecordingHints | undefined {
+    return this.lastRequestedHints;
   }
 
   /** Test helper: the `systemSource` argument passed to the most recent start() call. */

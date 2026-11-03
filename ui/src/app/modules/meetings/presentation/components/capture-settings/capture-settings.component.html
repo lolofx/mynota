@@ -38,6 +38,35 @@
         (selectionChange)="onAudioSourceChange($event)"
       />
 
+      <label class="device-label" for="capture-language">{{ 'capture.language' | transloco }}</label>
+      <select
+        id="capture-language"
+        class="device-select"
+        [attr.aria-label]="'capture.language' | transloco"
+        [disabled]="disabled()"
+        (change)="onLanguageChange($event)"
+      >
+        <option [value]="autoLanguage" [selected]="audioLanguage() === autoLanguage">{{ 'capture.languageAuto' | transloco }}</option>
+        @for (code of audioLanguageCodes; track code) {
+          <option [value]="code" [selected]="audioLanguage() === code">{{ 'audioLanguages.' + code | transloco }}</option>
+        }
+      </select>
+
+      <label class="device-label" for="capture-speakers">{{ 'capture.speakers' | transloco }}</label>
+      <input
+        id="capture-speakers"
+        class="device-select"
+        type="number"
+        inputmode="numeric"
+        [min]="speakersMin"
+        [max]="speakersMax"
+        [value]="expectedSpeakers() ?? ''"
+        [placeholder]="'capture.speakersAuto' | transloco"
+        [attr.aria-label]="'capture.speakers' | transloco"
+        [disabled]="disabled() || captureSource() === 'microphone'"
+        (change)="onSpeakersChange($event)"
+      />
+
       <app-capture-source-picker
         [captureSource]="captureSource()"
         [systemAudioStatus]="systemAudioStatus()"

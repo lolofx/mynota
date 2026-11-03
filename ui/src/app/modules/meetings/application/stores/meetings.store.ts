@@ -1,4 +1,4 @@
-/* eslint max-lines: ["error", 452] */
+/* eslint max-lines: ["error", 454] */
 import { Injectable, computed, inject, type InjectionToken, type Signal } from '@angular/core';
 import { Store } from 'flurryx';
 
@@ -46,6 +46,7 @@ import {
 } from './meetings-store-preferences.util';
 import { readSummaryInstructionDraft, storeSummaryInstructionDraft } from './summary-instructions-preferences.util';
 import { applySummaryCacheFailed, applySummaryCacheLoading, applySummaryCacheResult, readSummaryCacheEntry, removeSummaryCacheEntry } from './meetings-store-summary-cache.support';
+import { RecordingHintsState } from './recording-hints.state';
 import { createLiveHotPathSignals } from './meetings-store-live-signals.support';
 import { mergeFinalizedSegments, seedPersistedPreferences, wireRecorderAndTranscriberEvents } from './meetings-store-wiring.support';
 import { summaryCacheKey } from './summary-cache.model';
@@ -100,6 +101,7 @@ export class MeetingsStore {
   private readonly preferences = inject(PreferencesPort);
   /** Hot (up to 10 Hz) live-recording state, kept OFF flurryx — see `createLiveHotPathSignals`. */
   private readonly hotPath = createLiveHotPathSignals();
+  readonly recordingHints = new RecordingHintsState(this.preferences);
 
   readonly meetings: Signal<readonly Meeting[]> = computed(() => this.slots.get('MEETINGS')().data ?? []);
   readonly selectedMeeting: Signal<Meeting | undefined> = computed(() => this.slots.get('SELECTED_MEETING')().data);

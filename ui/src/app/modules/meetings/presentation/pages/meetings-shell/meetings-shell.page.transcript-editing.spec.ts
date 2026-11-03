@@ -19,6 +19,7 @@ import type { TranscriptSegment } from '../../../core/models/transcript.model';
 import type { ImportProgress } from '../../../core/ports/audio-import.port';
 import { transcriptSegment } from '../../../application/testing/transcript-segment.factory';
 import { MeetingsShellPage } from './meetings-shell.page';
+import { createRecordingHintsStub } from '../../../application/testing/recording-hints.stub';
 
 const readyModelsStatus: ModelsStatus = {
   parakeet: { present: true, expectedFiles: [] },
@@ -85,7 +86,7 @@ describe('MeetingsShellPage — transcript segment editing', () => {
     meetings, selectedMeeting, modelsStatus, devices, selectedDevice, recordingState, level,
     finalizedSegments, partialTextMe, partialTextOthers, error, busy, systemAudioStatus, captureSource, templates,
     summaryStream, summarizing, summarizingKey, startingRecording, summaryLanguages, selectedSummaryLanguage,
-    summaryCache, appVersion, audioSources, selectedAudioSource, effectiveSystemSource,
+    summaryCache, appVersion, audioSources, selectedAudioSource, recordingHints: createRecordingHintsStub(), effectiveSystemSource,
     splitRatio, transcriptCollapsed, sidebarWidth, sidebarCollapsed, importing, importProgress, setSplitRatio, setTranscriptCollapsed, setSidebarWidth, setSidebarCollapsed, setMeetingArchived,
     editTranscriptSegment,
     loadMeetings: vi.fn(noop), loadTemplates: vi.fn(noop), checkModels: vi.fn(noop), loadDevices: vi.fn(noop),

@@ -49,6 +49,8 @@ export class RecordControlComponent {
   readonly systemAudioStatus = input.required<SystemAudioStatus>();
   readonly audioSources = input<readonly AudioSource[]>([]);
   readonly selectedAudioSource = input<string>('');
+  readonly audioLanguage = input<string>('auto');
+  readonly expectedSpeakers = input<number | null>(null);
   readonly effectiveSystemSource = input<AudioSource | null>(null);
   readonly level = input<AudioLevel | undefined>(undefined);
   readonly elapsedLabel = input('00:00');
@@ -64,6 +66,8 @@ export class RecordControlComponent {
   readonly sourceSelected = output<CaptureSource>();
   readonly audioSourceSelected = output<string>();
   readonly permissionRequested = output<void>();
+  readonly audioLanguageSelected = output<string>();
+  readonly expectedSpeakersChanged = output<number | null>();
   readonly recordClicked = output<void>();
   readonly stopClicked = output<void>();
   readonly cancelClicked = output<void>();

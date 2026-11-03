@@ -18,6 +18,7 @@ import type { SummaryTemplate } from '../../../core/models/summary-template.mode
 import type { TranscriptSegment } from '../../../core/models/transcript.model';
 import type { ImportProgress } from '../../../core/ports/audio-import.port';
 import { MeetingsShellPage } from './meetings-shell.page';
+import { createRecordingHintsStub } from '../../../application/testing/recording-hints.stub';
 
 /**
  * Diarization is MANUAL-ONLY per ADR 0009: the single entry point is the
@@ -124,7 +125,7 @@ describe('MeetingsShellPage — manual-only diarization (ADR 0009)', () => {
     meetings, selectedMeeting, modelsStatus, devices, selectedDevice, recordingState, level,
     finalizedSegments, partialTextMe, partialTextOthers, error, busy, systemAudioStatus, captureSource, templates,
     summaryStream, summarizing, summarizingKey, startingRecording, summaryLanguages, selectedSummaryLanguage,
-    summaryCache, appVersion, audioSources, selectedAudioSource, effectiveSystemSource,
+    summaryCache, appVersion, audioSources, selectedAudioSource, recordingHints: createRecordingHintsStub(), effectiveSystemSource,
     splitRatio, transcriptCollapsed, sidebarWidth, sidebarCollapsed, importing, importProgress, folders, expandedFolders,
     diarizeMeeting, stopRecording,
     loadMeetings: vi.fn(noop), loadTemplates: vi.fn(noop), checkModels: vi.fn(noop), loadDevices: vi.fn(noop),

@@ -7,10 +7,14 @@
       [systemAudioStatus]="systemAudioStatus()"
       [audioSources]="audioSources()"
       [selectedAudioSource]="selectedAudioSource()"
+      [audioLanguage]="audioLanguage()"
+      [expectedSpeakers]="expectedSpeakers()"
       [disabled]="disabled() || startingRecording()"
       (deviceChanged)="deviceChanged.emit($event)"
       (sourceSelected)="sourceSelected.emit($event)"
       (audioSourceSelected)="audioSourceSelected.emit($event)"
+      (audioLanguageSelected)="audioLanguageSelected.emit($event)"
+      (expectedSpeakersChanged)="expectedSpeakersChanged.emit($event)"
       (permissionRequested)="permissionRequested.emit()"
     />
     @if (startingRecording()) {

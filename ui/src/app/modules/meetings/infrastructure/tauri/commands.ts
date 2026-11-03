@@ -160,6 +160,8 @@ export interface CommandSignatures extends HubCommandSignatures {
       readonly device?: string;
       readonly source?: CaptureSource;
       readonly systemSource?: string;
+      readonly language?: string;
+      readonly speakers?: number;
     };
     result: MeetingDto;
   };

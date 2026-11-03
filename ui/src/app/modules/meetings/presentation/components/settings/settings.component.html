@@ -38,6 +38,24 @@
     </label>
   </section>
 
+  <section class="audio-language" [attr.aria-label]="'settings.audioLanguage.title' | transloco">
+    <h3>{{ 'settings.audioLanguage.title' | transloco }}</h3>
+    <p class="model-helper">{{ 'settings.audioLanguage.helper' | transloco }}</p>
+    <label class="language-picker">
+      <span class="language-label">{{ 'settings.audioLanguage.label' | transloco }}</span>
+      <select
+        class="audio-language-select"
+        [attr.aria-label]="'settings.audioLanguage.ariaLabel' | transloco"
+        (change)="onAudioLanguageChanged($event)"
+      >
+        <option [value]="autoLanguage" [selected]="audioLanguage() === autoLanguage">{{ 'capture.languageAuto' | transloco }}</option>
+        @for (code of audioLanguageCodes; track code) {
+          <option [value]="code" [selected]="code === audioLanguage()">{{ 'audioLanguages.' + code | transloco }}</option>
+        }
+      </select>
+    </label>
+  </section>
+
   <section class="update-settings" [attr.aria-label]="'updates.title' | transloco">
     <h3>{{ 'updates.title' | transloco }}</h3>
     <label class="auto-check">

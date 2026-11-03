@@ -6,6 +6,7 @@ import { SUPPORTED_LANGUAGES, isUiLanguage } from '../../../../../i18n/supported
 import { UiLanguageService } from '../../../../../i18n/ui-language.service';
 import type { ModelDownloadState } from '../../../application/stores/meetings.store';
 import type { SummaryModelSlot } from '../../../core/models/models-status.model';
+import { AUDIO_LANGUAGE_CODES, AUTO_AUDIO_LANGUAGE } from '../../../core/models/recording-hints.model';
 import type { SummaryLanguage } from '../../../core/models/summary-language.model';
 import type { UpdateCheck, UpdateConsent } from '../../../core/models/update.model';
 import { AudioPurgeSettingsComponent } from '../audio-purge-settings/audio-purge-settings.component';
@@ -47,6 +48,8 @@ export class SettingsComponent {
   /** The Rust-owned language list (`SummarizerPort.listLanguages()` via the store) — never a second hardcoded copy. */
   readonly summaryLanguages = input<readonly SummaryLanguage[]>([]);
   readonly selectedSummaryLanguage = input.required<string>();
+  /** Language spoken in meetings by default: a code from the list, or 'auto'. */
+  readonly audioLanguage = input<string>(AUTO_AUDIO_LANGUAGE);
   /** The selectable summary models with their presence, from `modelsStatus().summaryModels`; empty until the status loads. */
   readonly summaryModels = input<readonly SummaryModelSlot[]>([]);
   /** Download slice of the store, shown inline while a summary model downloads. */
@@ -76,6 +79,7 @@ export class SettingsComponent {
   readonly updateConsentChanged = output<UpdateConsent>();
   readonly checkNowRequested = output<void>();
   readonly summaryLanguageSelected = output<string>();
+  readonly audioLanguageSelected = output<string>();
   /** The id of the summary model picked; the shell persists it, never this component. */
   readonly summaryModelSelected = output<string>();
   /** Download requested for the summary model currently chosen. */
@@ -152,6 +156,13 @@ export class SettingsComponent {
     if (isUiLanguage(code)) {
       this.language.set(code);
     }
+  }
+
+  protected readonly autoLanguage = AUTO_AUDIO_LANGUAGE;
+  protected readonly audioLanguageCodes = AUDIO_LANGUAGE_CODES;
+
+  onAudioLanguageChanged(event: Event): void {
+    this.audioLanguageSelected.emit((event.target as HTMLSelectElement).value);
   }
 
   onSummaryLanguageChanged(event: Event): void {

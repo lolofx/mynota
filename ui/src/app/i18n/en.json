@@ -98,6 +98,12 @@
       "summary": "Summaries",
       "storage": "Storage",
       "vocabulary": "Vocabulary"
+    },
+    "audioLanguage": {
+      "title": "Meeting language",
+      "helper": "Language spoken in your meetings. It is only a hint: it can be changed for each recording from the Audio menu, is saved in the exported file, and is used to flag passages transcribed in the wrong language.",
+      "label": "Default language of meetings",
+      "ariaLabel": "Default meeting language"
     }
   },
   "updateBanner": {
@@ -365,7 +371,11 @@
     "triggerMic": "Audio: Mic only",
     "triggerSource": "Audio: {{name}}",
     "triggerMicSystem": "Audio: Mic + System",
-    "triggerMicSource": "Audio: Mic + {{name}}"
+    "triggerMicSource": "Audio: Mic + {{name}}",
+    "language": "Meeting language",
+    "languageAuto": "Auto",
+    "speakers": "Remote speakers",
+    "speakersAuto": "Auto"
   },
   "live": {
     "earlier": "Show earlier transcript",
@@ -531,5 +541,14 @@
     "apply": "Apply to existing meetings…",
     "applyConfirm": "Correct the transcripts of the meetings already transcribed? Their summaries will be marked as out of date.",
     "done": "{{count}} passage(s) corrected."
+  },
+  "audioLanguages": {
+    "fr": "French",
+    "en": "English",
+    "de": "German",
+    "es": "Spanish",
+    "it": "Italian",
+    "nl": "Dutch",
+    "pt": "Portuguese"
   }
 }

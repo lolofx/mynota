@@ -28,6 +28,10 @@ export interface Meeting {
   readonly speakerNames?: Readonly<Record<string, string>>;
   /** Set only on the meeting returned right after a capture-only recording: the audio is saved but not yet transcribed, so the facade starts the transcription (the "Re-transcribe" path). Absent otherwise. */
   readonly transcriptionPending?: boolean;
+  /** Language the user said the meeting is in; absent when unspecified. */
+  readonly audioLanguage?: string;
+  /** Remote speakers announced before recording; absent when unspecified. */
+  readonly expectedSpeakers?: number;
 }
 
 /**
