@@ -105,10 +105,15 @@ Note: all figures, and which build (dev or packaged). Add them to `docs/perf-bas
 
 1. Record or import a French meeting of about 10 minutes and an English webinar.
 2. Expect: correct language per segment, readable punctuation. Mixed French and English in one recording: note how often a segment comes out in the wrong language.
+3. In Settings > General, set the meeting language to French. In a new recording, open the Audio menu and check that the language shown is the default, and that the title bar shows it (for example `· FR`). Pick another language for one recording: the next one is back on the default.
+4. After the transcript is done, the English lines carry the "possibly mis-transcribed" mark with the tooltip about another language; French lines, "okay" and short acknowledgements do not. Note false marks and missed English lines.
+5. Export the meeting: the front matter has `language: fr`. A meeting recorded with `auto` has no `language` line.
 
 ### T8. Speaker labels
 
 With diarization models installed, run **Detect speakers** on T2 or T7. Note the number of speakers found against the real number.
+
+Then record a call with several remote speakers, announcing their number in the Audio menu (Remote speakers, 1 to 12; leave it empty for the usual guess). After **Detect speakers**, the number of speakers found for the system track equals the number announced. Compare with the same call left on Auto.
 
 ### T9. Markdown export folder
 
