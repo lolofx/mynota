@@ -22,7 +22,8 @@ The user can say, before recording, **which language is spoken** and **how many 
 ### Remote speaker count
 
 - Chosen in the same menu, 1 to 12, for the next recording only. It applies to the system track, so the microphone ("Me") is not counted.
-- When set, "Detect speakers" pins the number of clusters to it and skips the centroid merge of [ADR 0016](0016-diarization-centroid-merge.md), which could only lower it. Without it nothing changes.
+- When set, "Detect speakers" no longer lets the centroid merge of [ADR 0016](0016-diarization-centroid-merge.md) decide. The clusterer is asked for twice as many clusters as announced (at most 32), clusters with under 3 s of speech are dissolved into their nearest neighbour, then the two most similar clusters merge until at most the announced number is left (`merge_to_count`). It never splits: fewer people found than announced stays as found. Without a count nothing changes.
+- **Why not pin the cluster count in the clusterer.** A first version did, and a one-hour meeting with ten people came back with two clusters of a single segment each while real speakers stayed merged: cutting the clustering at `k` keeps outliers as clusters of their own.
 - The diarizer is loaded per run, so the count is read from the meeting each time.
 
 ## Consequences

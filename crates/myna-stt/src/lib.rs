@@ -27,7 +27,7 @@ pub use align::align_words_to_diar;
 pub use cli::{Cli, DEFAULT_VAD_MODEL};
 pub use cluster_merge::{
     apply_cluster_mapping, cluster_durations, cosine_similarity, l2_normalize, merge_and_reassign,
-    merge_centroids, reassign_short_clusters, ClusterMergeConfig,
+    merge_centroids, merge_to_count, reassign_short_clusters, ClusterMergeConfig,
 };
 pub use detokenize::{detokenize, Word};
 pub use diarize::{
