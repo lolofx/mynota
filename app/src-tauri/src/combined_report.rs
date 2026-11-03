@@ -167,8 +167,7 @@ fn marker_name(line: &str) -> Option<String> {
 pub fn parse_sections(text: &str) -> ParsedReport {
     let mut sections: Vec<(String, String)> = Vec::new();
     let mut current: Option<(String, Vec<&str>)> = None;
-    let finish = |current: Option<(String, Vec<&str>)>,
-                      sections: &mut Vec<(String, String)>| {
+    let finish = |current: Option<(String, Vec<&str>)>, sections: &mut Vec<(String, String)>| {
         if let Some((name, lines)) = current {
             let body = lines.join("\n").trim().to_string();
             if !body.is_empty() && !sections.iter().any(|(existing, _)| *existing == name) {
