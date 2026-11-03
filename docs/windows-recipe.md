@@ -132,6 +132,12 @@ Note: whether the `date` matches the wall clock, the file name, and anything the
 3. Note for each size: time to first output, peak memory, and a one-line quality judgement (misses, invented items, language).
 4. Restart the app: the choice must persist.
 
+## 3a. Long summaries
+
+1. Record or import a meeting of about an hour. Open **Full Report** (first tab) and generate it. Expect the four sections (summary, key points, decisions, action items) from one run, and the window to stay responsive for the whole run.
+2. While it runs, reload the window (right-click, Reload, or close and reopen from the tray). Expect the template to show as generating again with Stop available, the streamed text to continue, and the saved report to appear when it finishes. Starting another summary meanwhile is refused with a clear message, not silently.
+3. Open **Pasted summaries**, press **Copy the prompt and transcript**, paste into another assistant: the prompt and the named transcript are there in one block.
+
 ## 3b. Linked export file
 
 With an export folder set (a note vault, ideally Obsidian):
