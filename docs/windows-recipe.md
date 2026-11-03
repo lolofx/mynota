@@ -132,11 +132,12 @@ Note: whether the `date` matches the wall clock, the file name, and anything the
 3. Note for each size: time to first output, peak memory, and a one-line quality judgement (misses, invented items, language).
 4. Restart the app: the choice must persist.
 
-## 3a. Long summaries
+## 3a. Long summaries and several tabs at once
 
-1. Record or import a meeting of about an hour. Open **Full Report** (first tab) and generate it. Expect the four sections (summary, key points, decisions, action items) from one run, and the window to stay responsive for the whole run.
-2. While it runs, reload the window (right-click, Reload, or close and reopen from the tray). Expect the template to show as generating again with Stop available, the streamed text to continue, and the saved report to appear when it finishes. Starting another summary meanwhile is refused with a clear message, not silently.
-3. Open **Pasted summaries**, press **Copy the prompt and transcript**, paste into another assistant: the prompt and the named transcript are there in one block.
+1. Record or import a meeting of about an hour. Under the meeting open **Several summaries at once**, tick Notes, Key Points, Decisions and Action Items, and press **Generate in one pass**. Expect one run, a status line with Cancel, the window to stay responsive for the whole run, and the four tabs filled afterwards. The line under the panel says how many were written and names any tab left out.
+2. While it runs, reload the window (right-click, Reload, or close and reopen from the tray). Expect it to show as generating again with Cancel available, and the four tabs to be filled when it finishes. Starting another summary meanwhile is refused with a clear message.
+3. Press **Copy the request for an assistant**, paste it into an outside assistant (Claude Code or a chat) and check that it holds the instructions of the ticked tabs, the output format and the named transcript. Paste its answer into **Import a report**: the tabs are filled and any section that matches no tab is named.
+4. In Settings > Summaries, **Edit** a skill with no meeting open (for example add a sentence to Key Points) and save. Generate again in one pass: the Key Points tab follows the new sentence.
 
 ## 3b. Linked export file
 
