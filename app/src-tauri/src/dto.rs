@@ -133,6 +133,30 @@ impl From<Transcript> for TranscriptDto {
     }
 }
 
+/// Wire name of [`SuspectReason::WrongLanguage`].
+const WRONG_LANGUAGE_LABEL: &str = "WrongLanguage";
+
+impl TranscriptDto {
+    /// Builds the DTO of a meeting's transcript, marking the segments that
+    /// read as another language than `language` (the meeting's, when the
+    /// user gave one). The mark is derived here on every presentation and
+    /// never stored: it follows the meeting's language if that changes, and
+    /// a segment the user corrects stops being marked.
+    pub fn for_language(transcript: Transcript, language: Option<&str>) -> Self {
+        let mut dto = Self::from(transcript);
+        if let Some(language) = language {
+            for segment in &mut dto.segments {
+                if myna_stt::is_wrong_language(&segment.text, language) {
+                    segment
+                        .suspect_reasons
+                        .push(WRONG_LANGUAGE_LABEL.to_string());
+                }
+            }
+        }
+        dto
+    }
+}
+
 /// A transcript segment passed FROM the UI as an invoke argument — the
 /// inbound counterpart to [`TranscriptSegmentDto`], consumed by
 /// `restore_transcript_segments`. Unlike the outbound DTO, `speaker_pinned`
@@ -196,6 +220,10 @@ fn parse_suspect_reason(label: &str) -> Option<SuspectReason> {
         "LowSpeechEnergy" => Some(SuspectReason::LowSpeechEnergy),
         "TimingAnomaly" => Some(SuspectReason::TimingAnomaly),
         "DegenerateLength" => Some(SuspectReason::DegenerateLength),
+        // Derived when a meeting is presented (see
+        // `TranscriptDto::for_language`), never stored: dropping it here
+        // keeps a round trip through the UI from freezing the mark.
+        WRONG_LANGUAGE_LABEL => None,
         _ => None,
     }
 }
@@ -361,7 +389,9 @@ impl From<Meeting> for MeetingDto {
             audio_path: meeting
                 .audio_path
                 .map(|path| path.to_string_lossy().into_owned()),
-            transcript: meeting.transcript.map(TranscriptDto::from),
+            transcript: meeting.transcript.map(|transcript| {
+                TranscriptDto::for_language(transcript, meeting.audio_language.as_deref())
+            }),
             summaries: meeting.summaries.into_iter().map(Into::into).collect(),
             archived: meeting.archived,
             dropped_audio_chunks: meeting.dropped_audio_chunks,
@@ -461,4 +491,57 @@ pub struct UpdateCheckDto {
 fn rfc3339(at: OffsetDateTime) -> String {
     at.format(&time::format_description::well_known::Rfc3339)
         .unwrap_or_else(|_| at.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use myna_stt::TranscriptSegment;
+
+    fn transcript(texts: &[&str]) -> Transcript {
+        Transcript {
+            segments: texts
+                .iter()
+                .enumerate()
+                .map(|(index, text)| TranscriptSegment {
+                    start_sec: index as f32,
+                    end_sec: index as f32 + 1.0,
+                    speaker: Speaker::others(),
+                    text: (*text).to_string(),
+                    suspect_reasons: Vec::new(),
+                    edited: false,
+                    original_text: None,
+                    speaker_pinned: false,
+                })
+                .collect(),
+        }
+    }
+
+    #[test]
+    fn a_segment_in_the_wrong_language_is_marked() {
+        let dto = TranscriptDto::for_language(transcript(&["Let's see.", "Voilà."]), Some("fr"));
+
+        assert_eq!(dto.segments[0].suspect_reasons, vec!["WrongLanguage"]);
+        assert!(dto.segments[1].suspect_reasons.is_empty());
+    }
+
+    #[test]
+    fn nothing_is_marked_without_a_meeting_language() {
+        let dto = TranscriptDto::for_language(transcript(&["Let's see."]), None);
+
+        assert!(dto.segments[0].suspect_reasons.is_empty());
+    }
+
+    #[test]
+    fn the_mark_is_never_read_back_from_the_ui() {
+        assert_eq!(
+            format!("{:?}", SuspectReason::WrongLanguage),
+            WRONG_LANGUAGE_LABEL
+        );
+        assert_eq!(parse_suspect_reason(WRONG_LANGUAGE_LABEL), None);
+        assert_eq!(
+            parse_suspect_reason("RepetitionLoop"),
+            Some(SuspectReason::RepetitionLoop)
+        );
+    }
 }

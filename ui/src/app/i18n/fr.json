@@ -328,7 +328,8 @@
     "LanguageDriftHint": "Dérive de langue possible",
     "LowSpeechEnergy": "Parole peu audible",
     "TimingAnomaly": "Durée des mots inhabituelle",
-    "DegenerateLength": "Longueur inhabituelle"
+    "DegenerateLength": "Longueur inhabituelle",
+    "WrongLanguage": "Semble être dans une autre langue que celle de la réunion"
   },
   "layout": {
     "show": "Afficher {{name}}",

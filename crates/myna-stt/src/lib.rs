@@ -15,6 +15,7 @@ mod diarize;
 mod diarize_eval;
 mod engine;
 mod error;
+mod language_check;
 mod relabel;
 mod stream;
 mod suspect;
@@ -39,6 +40,7 @@ pub use engine::{
     MODIFIED_BEAM_SEARCH,
 };
 pub use error::SttError;
+pub use language_check::is_wrong_language;
 pub use relabel::{
     relabel_others, relabel_others_with_config, relabel_others_word_level,
     MIN_DIARIZED_SEGMENT_SEC, MIN_SPEAKER_COVERAGE,

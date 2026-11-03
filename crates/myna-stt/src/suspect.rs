@@ -45,6 +45,11 @@ pub enum SuspectReason {
     /// non-positive segment duration, text with no word timing at all, or
     /// far more characters per second than speech can carry.
     DegenerateLength,
+    /// The text reads as French while the meeting is English, or the other
+    /// way round (see [`crate::language_check`]). Never produced by
+    /// [`score_segment`]: it depends on the meeting's language, so it is
+    /// derived when a meeting is presented and never stored.
+    WrongLanguage,
 }
 
 /// Minimum RMS energy (linear, full-scale sine == ~0.707) below which
