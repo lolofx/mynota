@@ -22,6 +22,9 @@ export class ExternalSummariesFacade {
   /** Message of the last failed action; `null` once the next one starts. */
   readonly error = this.errorState.asReadonly();
   readonly working = this.workingState.asReadonly();
+  private readonly copiedState = signal(false);
+  /** `true` from a successful copy of the prompt until the open meeting changes. */
+  readonly promptCopied = this.copiedState.asReadonly();
 
   /** Shows the pasted summaries of `meetingId`; `null`: no meeting. */
   async load(meetingId: string | null): Promise<void> {
@@ -29,6 +32,7 @@ export class ExternalSummariesFacade {
     this.meetingId = meetingId;
     this.errorState.set(null);
     this.itemsState.set([]);
+    this.copiedState.set(false);
     if (meetingId === null) {
       return;
     }
@@ -47,6 +51,27 @@ export class ExternalSummariesFacade {
   /** Keeps `markdown` with the meeting under `label`. Resolves `true` when it was kept. */
   add(label: string, markdown: string): Promise<boolean> {
     return this.run((id) => this.port.add(id, label, markdown));
+  }
+
+  /**
+   * Puts the prompt of `template`, transcript included, on the clipboard so it
+   * can be pasted into an outside assistant. Resolves `true` when copied.
+   */
+  async copyPrompt(template: string, language: string): Promise<boolean> {
+    const id = this.meetingId;
+    if (id === null) {
+      return false;
+    }
+    this.errorState.set(null);
+    this.copiedState.set(false);
+    try {
+      await navigator.clipboard.writeText(await this.port.buildPrompt(id, template, language));
+      this.copiedState.set(true);
+      return true;
+    } catch (error) {
+      this.errorState.set(messageOf(error));
+      return false;
+    }
   }
 
   remove(summaryId: number): Promise<boolean> {

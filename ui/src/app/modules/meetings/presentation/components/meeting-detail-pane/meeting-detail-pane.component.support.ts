@@ -171,13 +171,13 @@ export const diarizeDisabledReason = (
 };
 
 /**
- * The four built-in summary templates in the order their tabs must appear.
+ * The built-in summary templates in the order their tabs must appear.
  * The backend lists templates alphabetically by name (`action-items`,
- * `decisions`, `key-points`, `meeting-notes`), which reads backwards on
- * screen; the product order is broadest-summary first: Notes, Key Points,
- * Decisions, Action Items.
+ * `decisions`, `full-report`, `key-points`, `meeting-notes`), which reads
+ * backwards on screen; the product order is broadest-summary first: Full
+ * Report (everything in one pass), Notes, Key Points, Decisions, Action Items.
  */
-export const BUILT_IN_TEMPLATE_TAB_ORDER = ['meeting-notes', 'key-points', 'decisions', 'action-items'] as const;
+export const BUILT_IN_TEMPLATE_TAB_ORDER = ['full-report', 'meeting-notes', 'key-points', 'decisions', 'action-items'] as const;
 
 /**
  * Stable priority sort for the tab strip: built-ins render in

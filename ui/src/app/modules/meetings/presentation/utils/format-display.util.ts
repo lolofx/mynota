@@ -89,6 +89,10 @@ const STOCK_TEMPLATE_TEXT: Readonly<Record<string, Readonly<Record<'label' | 'de
     label: 'Notes',
     description: 'Produce a full set of meeting notes: an overall summary, a discussion narrative, and a list of decisions.',
   },
+  'full-report': {
+    label: 'Full Report',
+    description: 'Produce the whole report in one pass: an overall summary, the key points, the decisions and the action items.',
+  },
   decisions: {
     label: 'Decisions',
     description: 'Extract the decisions that were made in the meeting along with the reasoning behind each one.',

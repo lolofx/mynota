@@ -60,4 +60,53 @@ describe('ExternalSummariesFacade', () => {
   it('does nothing without an open meeting', async () => {
     expect(await facade.add('A', 'x')).toBe(false);
   });
+
+  describe('copyPrompt', () => {
+    let written: string[];
+
+    beforeEach(() => {
+      written = [];
+      Object.defineProperty(navigator, 'clipboard', {
+        configurable: true,
+        value: { writeText: async (text: string) => void written.push(text) },
+      });
+    });
+
+    it('puts the prompt of the template, for the open meeting and language, on the clipboard', async () => {
+      await facade.load('m1');
+
+      const copied = await facade.copyPrompt('full-report', 'fr');
+
+      expect(copied).toBe(true);
+      expect(written).toEqual(['PROMPT m1 full-report fr']);
+      expect(facade.promptCopied()).toBe(true);
+    });
+
+    it('does nothing without an open meeting', async () => {
+      await facade.load(null);
+
+      expect(await facade.copyPrompt('full-report', 'fr')).toBe(false);
+      expect(written).toEqual([]);
+    });
+
+    it('reports the failure and does not claim a copy', async () => {
+      await facade.load('m1');
+      fake.prompt = () => {
+        throw new Error('no transcript');
+      };
+
+      expect(await facade.copyPrompt('full-report', 'fr')).toBe(false);
+      expect(facade.error()).toBe('no transcript');
+      expect(facade.promptCopied()).toBe(false);
+    });
+
+    it('forgets the copy when another meeting opens', async () => {
+      await facade.load('m1');
+      await facade.copyPrompt('full-report', 'fr');
+
+      await facade.load('m2');
+
+      expect(facade.promptCopied()).toBe(false);
+    });
+  });
 });

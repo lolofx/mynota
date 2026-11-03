@@ -15,6 +15,10 @@
         <div class="markdown" [innerHTML]="entry.html"></div>
       </details>
     }
+    <div class="external-prompt">
+      <button type="button" class="copy-prompt" (click)="promptRequested.emit()">{{ 'pasted.copyPrompt' | transloco }}</button>
+      <span class="hint">{{ (promptCopied() ? 'pasted.promptCopied' : 'pasted.promptHint') | transloco }}</span>
+    </div>
     @if (pasting()) {
       <form class="paste-form" (submit)="$event.preventDefault(); save()">
         <input

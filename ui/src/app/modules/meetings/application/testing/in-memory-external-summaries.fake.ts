@@ -24,6 +24,13 @@ export class InMemoryExternalSummariesFake extends ExternalSummariesPort {
     return this.list(meetingId);
   }
 
+  /** What `buildPrompt` resolves; a function so specs can see its arguments. */
+  prompt = (meetingId: string, template: string, language: string): string => `PROMPT ${meetingId} ${template} ${language}`;
+
+  override async buildPrompt(meetingId: string, template: string, language: string): Promise<string> {
+    return this.prompt(meetingId, template, language);
+  }
+
   override async remove(meetingId: string, summaryId: number): Promise<readonly ExternalSummary[]> {
     this.byMeeting.set(
       meetingId,
