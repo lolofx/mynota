@@ -321,6 +321,8 @@ pub struct ActiveSummary {
     pub meeting_id: String,
     pub template: String,
     pub language: String,
+    /// The tabs a combined run fills; empty for a single-template run.
+    pub templates: Vec<String>,
 }
 
 /// Application state managed by Tauri and injected into every command.

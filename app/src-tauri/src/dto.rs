@@ -286,6 +286,16 @@ impl From<SummaryRef> for SummaryRefDto {
     }
 }
 
+/// The outcome of a combined report: the summaries saved, the requested tabs
+/// the report left out, and the sections whose name matches no template.
+#[derive(Serialize, Clone, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct CombinedResultDto {
+    pub saved: Vec<SummaryDto>,
+    pub missing: Vec<String>,
+    pub ignored: Vec<String>,
+}
+
 /// The summary being generated now, IPC-facing.
 #[derive(Serialize, Clone, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -293,6 +303,7 @@ pub struct ActiveSummaryDto {
     pub meeting_id: String,
     pub template: String,
     pub language: String,
+    pub templates: Vec<String>,
 }
 
 impl From<ActiveSummary> for ActiveSummaryDto {
@@ -301,6 +312,7 @@ impl From<ActiveSummary> for ActiveSummaryDto {
             meeting_id: active.meeting_id,
             template: active.template,
             language: active.language,
+            templates: active.templates,
         }
     }
 }

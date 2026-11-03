@@ -84,6 +84,7 @@ pub async fn summarize_meeting(
         meeting_id: meeting_id.clone(),
         template: template.clone(),
         language: language_code.to_string(),
+        templates: Vec::new(),
     });
 
     let app_for_worker = app.clone();
@@ -184,48 +185,6 @@ pub async fn get_summary(
 #[tauri::command]
 pub fn cancel_summarization(state: State<'_, AppState>) {
     state.cancel_summary.store(true, Ordering::SeqCst);
-}
-
-/// The complete prompt for a template, with the meeting's transcript inside,
-/// ready to paste into an outside assistant (Claude Code, a chat, a bigger
-/// model). It is the very text the local model would receive for a short
-/// meeting, so the result can come back through "paste a summary". Nothing is
-/// sent anywhere: the text only goes to the clipboard on the user's action.
-#[tauri::command]
-pub async fn build_external_prompt(
-    app: AppHandle,
-    meeting_id: String,
-    template: String,
-    language: Option<String>,
-    instructions: Option<SummarizeInstructionsDto>,
-) -> Result<String, AppError> {
-    let id = parse_meeting_id(&meeting_id)?;
-    tauri::async_runtime::spawn_blocking(move || {
-        let state = app.state::<AppState>();
-        let meeting = state.store.get(id)?;
-        let template = load_template(&app, &template)?;
-        let (_, language_label) = resolve(language.as_deref());
-        let resolved = resolve_instructions(&load_general_guidelines()?, instructions.as_ref());
-        render_external_prompt(&meeting, &template, language_label, resolved)
-    })
-    .await
-    .unwrap_or_else(|_| {
-        Err(AppError::Store(
-            "build_external_prompt worker thread panicked".to_string(),
-        ))
-    })
-}
-
-/// Pure body of [`build_external_prompt`]: the template rendered over the
-/// meeting's speaker-attributed transcript, exactly as a summary run builds it.
-pub fn render_external_prompt(
-    meeting: &Meeting,
-    template: &Template,
-    language_label: &str,
-    instructions: Option<SummaryInstructions>,
-) -> Result<String, AppError> {
-    let ctx = build_render_context(meeting, language_label, instructions)?;
-    Ok(template.render(&ctx))
 }
 
 /// The summary being generated right now, or `None`. A webview that reloaded
@@ -482,8 +441,8 @@ pub fn delete_summary_from(
 /// busy guard held by [`summarize_meeting`] guarantees no second concurrent
 /// summarization references the slot. Cross-guard `Busy` semantics are
 /// unchanged: this releases only the model slot, never the busy flag.
-struct SummarizerReleaseGuard<'a> {
-    state: &'a AppState,
+pub(crate) struct SummarizerReleaseGuard<'a> {
+    pub(crate) state: &'a AppState,
 }
 
 impl Drop for SummarizerReleaseGuard<'_> {
@@ -535,46 +494,7 @@ fn summarize_and_persist(
     let template = load_template(app, template_name)?;
     let resolved_instructions = resolve_instructions(&load_general_guidelines()?, instructions);
     let render_ctx = build_render_context(&meeting, language_label, resolved_instructions)?;
-    // A summary server the user switched on replaces the local model for
-    // every summary; nothing else changes below (ADR 0021).
-    let server = paths::data_root()
-        .ok()
-        .and_then(|root| summary_prefs::load(&root).active_server().cloned());
-    let markdown = match server {
-        Some(server) => {
-            if state.cancel_summary.load(Ordering::SeqCst) {
-                return Err(myna_llm::LlmError::Cancelled.into());
-            }
-            run_remote_inference(
-                app,
-                state,
-                &id,
-                template_name,
-                &template,
-                &render_ctx,
-                &server,
-            )?
-        }
-        None => {
-            let summarizer = state.summarizer(app)?;
-            if state.cancel_summary.load(Ordering::SeqCst) {
-                // A cancel arriving while the model was (re)loading has no
-                // in-flight job to observe it; check here so it still takes
-                // effect before the (possibly minutes-long) inference call
-                // starts, rather than only once generation begins.
-                return Err(myna_llm::LlmError::Cancelled.into());
-            }
-            run_inference(
-                app,
-                state,
-                &id,
-                template_name,
-                &template,
-                &render_ctx,
-                summarizer,
-            )?
-        }
-    };
+    let markdown = infer_markdown(app, state, &id, template_name, &template, &render_ctx)?;
 
     let created_at = OffsetDateTime::now_utc();
     let path = state
@@ -608,10 +528,53 @@ fn summarize_and_persist(
     }))
 }
 
+/// Generates the markdown of `template` over `render_ctx` with whatever the
+/// user configured: the summary server when switched on (ADR 0021), else the
+/// local model. Tokens stream to the UI under `template_name`.
+pub(crate) fn infer_markdown(
+    app: &AppHandle,
+    state: &State<'_, AppState>,
+    id: &MeetingId,
+    template_name: &str,
+    template: &Template,
+    render_ctx: &RenderContext,
+) -> Result<String, AppError> {
+    let server = paths::data_root()
+        .ok()
+        .and_then(|root| summary_prefs::load(&root).active_server().cloned());
+    match server {
+        Some(server) => {
+            if state.cancel_summary.load(Ordering::SeqCst) {
+                return Err(myna_llm::LlmError::Cancelled.into());
+            }
+            run_remote_inference(app, state, id, template_name, template, render_ctx, &server)
+        }
+        None => {
+            let summarizer = state.summarizer(app)?;
+            if state.cancel_summary.load(Ordering::SeqCst) {
+                // A cancel arriving while the model was (re)loading has no
+                // in-flight job to observe it; check here so it still takes
+                // effect before the (possibly minutes-long) inference call
+                // starts, rather than only once generation begins.
+                return Err(myna_llm::LlmError::Cancelled.into());
+            }
+            run_inference(
+                app,
+                state,
+                id,
+                template_name,
+                template,
+                render_ctx,
+                summarizer,
+            )
+        }
+    }
+}
+
 /// Reads the persisted general guidelines from the data root's preferences
 /// file. [`summary_prefs::load`] itself never fails; only resolving the
 /// data root can.
-fn load_general_guidelines() -> Result<String, AppError> {
+pub(crate) fn load_general_guidelines() -> Result<String, AppError> {
     let root = paths::data_root().map_err(|err| AppError::Path(err.to_string()))?;
     Ok(summary_prefs::load(&root).guidelines)
 }
@@ -765,7 +728,7 @@ fn run_remote_inference(
 
 /// Loads `template_name` from the templates root by discovering every valid
 /// template rather than trusting the name as a path segment.
-fn load_template(app: &AppHandle, template_name: &str) -> Result<Template, AppError> {
+pub(crate) fn load_template(app: &AppHandle, template_name: &str) -> Result<Template, AppError> {
     let builtin = myna_llm::list_templates(&paths::templates_root(app))?
         .into_iter()
         .find(|candidate| candidate.name == template_name)
@@ -849,7 +812,13 @@ fn emit_token(app: &AppHandle, meeting_id: &str, template: &str, token: &str) {
     let _ = app.emit(SUMMARY_TOKEN, payload);
 }
 
-fn emit_done(app: &AppHandle, meeting_id: &str, template: &str, language: &str, markdown: &str) {
+pub(crate) fn emit_done(
+    app: &AppHandle,
+    meeting_id: &str,
+    template: &str,
+    language: &str,
+    markdown: &str,
+) {
     let payload = SummaryDonePayload {
         meeting_id: meeting_id.to_string(),
         template: template.to_string(),
@@ -861,64 +830,13 @@ fn emit_done(app: &AppHandle, meeting_id: &str, template: &str, language: &str, 
 
 /// Parses a meeting id from its string form, surfacing an invalid id as
 /// [`AppError::NotFound`] rather than a parse error.
-fn parse_meeting_id(id: &str) -> Result<MeetingId, AppError> {
+pub(crate) fn parse_meeting_id(id: &str) -> Result<MeetingId, AppError> {
     id.parse().map_err(|_| AppError::NotFound(id.to_string()))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn external_template() -> Template {
-        Template {
-            name: "t".to_string(),
-            description: "d".to_string(),
-            prompt: "Meeting {title} ({duration}).\n{transcript}\nIn {language}.".to_string(),
-            label: None,
-            emoji: None,
-            section_schema: None,
-        }
-    }
-
-    #[test]
-    fn the_external_prompt_carries_the_named_transcript_and_the_meeting_facts() {
-        let mut meeting = Meeting::new("Weekly sync").with_duration(65.0);
-        meeting.transcript = Some(myna_stt::Transcript {
-            segments: vec![myna_stt::TranscriptSegment {
-                start_sec: 0.0,
-                end_sec: 2.0,
-                text: "On livre jeudi.".to_string(),
-                speaker: myna_stt::Speaker::me(),
-                speaker_pinned: false,
-                suspect_reasons: Vec::new(),
-                original_text: None,
-                edited: false,
-            }],
-        });
-
-        let prompt =
-            render_external_prompt(&meeting, &external_template(), "French", None).expect("prompt");
-
-        assert!(prompt.contains("Meeting Weekly sync (1:05)."));
-        assert!(prompt.contains("Me: On livre jeudi."));
-        assert!(prompt.contains("In French."));
-    }
-
-    #[test]
-    fn the_external_prompt_needs_a_transcript() {
-        let meeting = Meeting::new("Empty");
-
-        let result = render_external_prompt(&meeting, &external_template(), "French", None);
-
-        assert!(matches!(result, Err(AppError::NotFound(_))));
-    }
-
-    fn dto(include_general: bool, specific: Option<&str>) -> SummarizeInstructionsDto {
-        SummarizeInstructionsDto {
-            specific: specific.map(str::to_string),
-            include_general,
-        }
-    }
 
     #[test]
     fn resolve_instructions_returns_none_when_both_channels_are_empty() {

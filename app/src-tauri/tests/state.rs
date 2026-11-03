@@ -550,6 +550,7 @@ fn the_active_summary_is_known_while_its_guard_lives_and_forgotten_after() {
         meeting_id: "m-1".into(),
         template: "key-points".into(),
         language: "fr".into(),
+        templates: Vec::new(),
     };
 
     // Act / Assert

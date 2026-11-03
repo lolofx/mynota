@@ -6,6 +6,7 @@
 
 pub mod audio_purge;
 pub mod auto_export;
+pub mod combined_report;
 pub mod commands;
 pub mod diarize_judge;
 pub mod dictionary;
@@ -161,7 +162,9 @@ pub fn run() {
             commands::summary::summarize_meeting,
             commands::summary::cancel_summarization,
             commands::summary::summarization_status,
-            commands::summary::build_external_prompt,
+            commands::combined::summarize_combined,
+            commands::combined::build_external_prompt,
+            commands::combined::import_combined_report,
             commands::summary::get_summary,
             commands::summary::edit_summary,
             commands::summary::delete_summary,
