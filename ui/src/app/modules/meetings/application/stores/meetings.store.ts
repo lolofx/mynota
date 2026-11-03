@@ -121,7 +121,7 @@ export class MeetingsStore {
   /** Names with an in-flight prompt load/save/reset; empty = idle. Never mutated in place. */
   readonly templatePromptLoading: Signal<ReadonlySet<string>> = computed(() => this.slots.get('TEMPLATE_PROMPT_LOADING')().data ?? new Set());
   readonly modelsStatus: Signal<ModelsStatus | undefined> = computed(() => this.slots.get('MODELS_STATUS')().data);
-  readonly summaryStream: Signal<string> = computed(() => this.slots.get('SUMMARY_STREAM')().data ?? '');
+  readonly summaryStream: Signal<string> = this.hotPath.summaryStream.asReadonly();
   readonly error: Signal<MeetingsErrorInfo | undefined> = computed(() => this.slots.get('ERROR')().data);
   readonly busy: Signal<boolean> = computed(() => this.recordingState() !== 'idle');
   readonly devices: Signal<readonly AudioDevice[]> = computed(() => this.slots.get('DEVICES')().data ?? []);
@@ -287,9 +287,7 @@ export class MeetingsStore {
   clearActiveRecording(): void { this.slots.update('ACTIVE_RECORDING', { data: null, status: 'Success', isLoading: false }); }
   seedFinalizedSegments(segments: readonly TranscriptSegment[]): void { this.hotPath.finalizedSegments.set(mergeFinalizedSegments(this.finalizedSegments(), segments)); }
 
-  resetSummaryStream(): void {
-    this.slots.update('SUMMARY_STREAM', { data: '', status: 'Success', isLoading: false });
-  }
+  resetSummaryStream(): void { this.hotPath.summaryStream.set(''); }
 
   setDevices(devices: readonly AudioDevice[]): void { this.slots.update('DEVICES', { data: devices, status: 'Success', isLoading: false }); }
 

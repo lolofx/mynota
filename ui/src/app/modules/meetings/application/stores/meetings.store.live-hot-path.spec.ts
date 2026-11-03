@@ -21,6 +21,7 @@ const MAX_ACCEPTABLE_HISTORY_GROWTH = 50;
 
 const LEVEL_UPDATE_COUNT = 5000;
 const LIVE_SEGMENT_COUNT = 300;
+const SUMMARY_TOKEN_COUNT = 3000;
 
 /**
  * White-box perf regression guard. Reaches into the store's private flurryx
@@ -41,6 +42,7 @@ describe('MeetingsStore live hot path (perf regression guard)', () => {
   let store: MeetingsStore;
   let recorder: InMemoryRecorderFake;
   let transcriber: InMemoryTranscriberFake;
+  let summarizer: InMemorySummarizerFake;
 
   beforeEach(() => {
     // Fake timers BEFORE construction: the finals batch window schedules its
@@ -62,6 +64,7 @@ describe('MeetingsStore live hot path (perf regression guard)', () => {
     store = TestBed.inject(MeetingsStore);
     recorder = TestBed.inject(InMemoryRecorderFake);
     transcriber = TestBed.inject(InMemoryTranscriberFake);
+    summarizer = TestBed.inject(SummarizerPort) as InMemorySummarizerFake;
   });
 
   afterEach(() => {
@@ -107,5 +110,29 @@ describe('MeetingsStore live hot path (perf regression guard)', () => {
     // stream duration. This fails (RED) until PARTIAL_TEXT_ME/OTHERS and
     // FINALIZED_SEGMENTS move off flurryx onto plain signals.
     expect(after - before).toBeLessThan(MAX_ACCEPTABLE_HISTORY_GROWTH);
+  });
+
+  it('keeps store history bounded while a long summary streams in, and still shows the text', () => {
+    store.setSummarizingKey({ template: 'key-points', language: 'fr' });
+    const before = historyLengthOf(store);
+
+    for (let i = 0; i < SUMMARY_TOKEN_COUNT; i += 1) {
+      summarizer.emitToken({ meetingId: toMeetingId('m-1'), template: 'key-points', token: `mot${i} ` });
+    }
+
+    expect(store.summaryStream().startsWith('mot0 mot1 ')).toBe(true);
+    // Every flush used to be a flurryx update, i.e. a deep copy of the whole
+    // store (a one-hour transcript included): a long map-reduce summary ran
+    // the webview out of memory.
+    expect(historyLengthOf(store) - before).toBeLessThan(MAX_ACCEPTABLE_HISTORY_GROWTH);
+  });
+
+  it('empties the streamed summary when it is reset', () => {
+    store.setSummarizingKey({ template: 'key-points', language: 'fr' });
+    summarizer.emitToken({ meetingId: toMeetingId('m-1'), template: 'key-points', token: 'abc' });
+
+    store.resetSummaryStream();
+
+    expect(store.summaryStream()).toBe('');
   });
 });

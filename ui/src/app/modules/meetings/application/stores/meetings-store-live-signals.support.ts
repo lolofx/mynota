@@ -20,5 +20,6 @@ export function createLiveHotPathSignals(): LiveHotPathSignals {
     partialTextMe: signal(''),
     partialTextOthers: signal(''),
     finalizedSegments: signal<readonly TranscriptSegment[]>([]),
+    summaryStream: signal(''),
   };
 }

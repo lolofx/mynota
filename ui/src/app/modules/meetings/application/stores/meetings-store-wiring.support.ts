@@ -125,6 +125,8 @@ export interface LiveHotPathSignals {
   readonly partialTextMe: WritableSignal<string>;
   readonly partialTextOthers: WritableSignal<string>;
   readonly finalizedSegments: WritableSignal<readonly TranscriptSegment[]>;
+  /** Summary text as it streams in: one write per flush, so it must not go through flurryx (full-store snapshot each time). */
+  readonly summaryStream: WritableSignal<string>;
 }
 
 /**
@@ -296,16 +298,11 @@ export function wireRecorderAndTranscriberEvents(
     if (activeKey?.template !== token.template) {
       return;
     }
-    const current = slots.get('SUMMARY_STREAM')().data ?? '';
-    slots.update('SUMMARY_STREAM', {
-      data: current + token.token,
-      status: 'Success',
-      isLoading: false,
-    });
+    hotPath.summaryStream.update((current) => current + token.token);
   });
 
   summarizer.done().subscribe((summary) => {
-    slots.update('SUMMARY_STREAM', { data: summary.markdown, status: 'Success', isLoading: false });
+    hotPath.summaryStream.set(summary.markdown);
   });
 }
 
