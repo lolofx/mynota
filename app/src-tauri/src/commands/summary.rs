@@ -838,6 +838,13 @@ pub(crate) fn parse_meeting_id(id: &str) -> Result<MeetingId, AppError> {
 mod tests {
     use super::*;
 
+    fn dto(include_general: bool, specific: Option<&str>) -> SummarizeInstructionsDto {
+        SummarizeInstructionsDto {
+            specific: specific.map(str::to_string),
+            include_general,
+        }
+    }
+
     #[test]
     fn resolve_instructions_returns_none_when_both_channels_are_empty() {
         assert_eq!(resolve_instructions("", None), None);
