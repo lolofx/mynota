@@ -6,7 +6,7 @@
 | --- | --- |
 | GitHub Issues on this fork | defects and evolutions |
 | `aidd_docs/tasks/` | PRD, plans, run summaries, [resume-here.md](../tasks/2026_10/resume-here.md) |
-| `docs/adr/` | decisions (next free number: 0023) |
+| `docs/adr/` | decisions (next free number: 0024) |
 
 ## Roadmap
 
