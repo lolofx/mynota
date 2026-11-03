@@ -92,6 +92,7 @@ import { ExportFolderFacade } from './application/facades/export-folder.facade';
 import { VocabularyFacade } from './application/facades/vocabulary.facade';
 import { AudioPurgeFacade } from './application/facades/audio-purge.facade';
 import { ExternalSummariesFacade } from './application/facades/external-summaries.facade';
+import { SummaryResumeFacade } from './application/facades/summary-resume.facade';
 import { MeetingNotesFacade } from './application/facades/meeting-notes.facade';
 import { MeetingsFacade } from './application/facades/meetings.facade';
 import { ModelsFacade } from './application/facades/models.facade';
@@ -200,6 +201,7 @@ export function provideMeetings(): EnvironmentProviders {
     ExportFolderFacade,
     MeetingNotesFacade,
     ExternalSummariesFacade,
+    SummaryResumeFacade,
     AudioPurgeFacade,
     VocabularyFacade,
   ]);

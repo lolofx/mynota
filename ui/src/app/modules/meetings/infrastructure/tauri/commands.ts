@@ -1,3 +1,4 @@
+import type { ActiveSummarization } from '../../core/models/active-summarization.model';
 import type { CaptureSource, SystemAudioStatus } from '../../core/models/capture-source.model';
 import type { AudioSourceDto, DeviceInfoDto } from '../dto/device.dto';
 import type { FolderDto } from '../dto/folder.dto';
@@ -40,6 +41,7 @@ export const COMMAND_NAMES = [
   'list_summary_languages',
   'summarize_meeting',
   'cancel_summarization',
+  'summarization_status',
   'models_status',
   'export_meeting',
   'system_audio_status',
@@ -231,6 +233,7 @@ export interface CommandSignatures extends HubCommandSignatures {
   readonly set_summary_server: { args: { readonly server: SummaryServerDto }; result: void };
   readonly list_summary_server_models: { args: { readonly url: string }; result: string[] };
   readonly cancel_summarization: { args: NoArgs; result: void };
+  readonly summarization_status: { args: NoArgs; result: ActiveSummarization | null };
   readonly models_status: { args: NoArgs; result: ModelsStatusDto };
   readonly export_meeting: {
     args: { readonly meetingId: string; readonly format: ExportFormatDto; readonly dest: string };

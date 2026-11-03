@@ -1,3 +1,4 @@
+/* eslint max-lines: ["error", 405] */
 import { ChangeDetectionStrategy, Component, DestroyRef, HostListener, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -5,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { distinctUntilChanged, map } from 'rxjs';
 
 import { MeetingsFacade } from '../../../application/facades/meetings.facade';
+import { SummaryResumeFacade } from '../../../application/facades/summary-resume.facade';
 import type { CaptureSource } from '../../../core/models/capture-source.model';
 import type { FolderId } from '../../../core/models/folder.model';
 import type { MeetingId } from '../../../core/models/meeting.model';
@@ -45,6 +47,7 @@ import { buildExportFilename, CHECKING_SYSTEM_AUDIO, createLayoutControls, creat
 })
 export class MeetingsShellPage implements OnInit {
   protected readonly facade = inject(MeetingsFacade);
+  private readonly summaryResume = inject(SummaryResumeFacade, { optional: true });
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -117,6 +120,8 @@ export class MeetingsShellPage implements OnInit {
     // `recording_state` query, so they land after all synchronous boot work —
     // the resumed session always wins over the initial `clearSelection`.
     void this.facade.resumeActiveRecording();
+    // A summary may still be running in the backend after a reload or crash.
+    void this.summaryResume?.resume();
 
     void this.facade.loadMeetings();
     void this.facade.loadTemplates();

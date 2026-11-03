@@ -12,6 +12,7 @@ use myna_audio::{SystemAudioSource, SystemAudioStatus};
 use myna_stt::{Speaker, SuspectReason, Transcript, TranscriptSegment};
 
 use crate::domain::{Folder, Meeting, Summary, SummaryRef};
+use crate::state::ActiveSummary;
 
 /// [`SystemAudioSource`], IPC-facing: a pickable system-audio capture
 /// source — either the synthetic all-output source or one running
@@ -281,6 +282,25 @@ impl From<SummaryRef> for SummaryRefDto {
             path: summary_ref.path.to_string_lossy().into_owned(),
             language: summary_ref.language,
             stale: summary_ref.stale,
+        }
+    }
+}
+
+/// The summary being generated now, IPC-facing.
+#[derive(Serialize, Clone, Debug, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ActiveSummaryDto {
+    pub meeting_id: String,
+    pub template: String,
+    pub language: String,
+}
+
+impl From<ActiveSummary> for ActiveSummaryDto {
+    fn from(active: ActiveSummary) -> Self {
+        Self {
+            meeting_id: active.meeting_id,
+            template: active.template,
+            language: active.language,
         }
     }
 }

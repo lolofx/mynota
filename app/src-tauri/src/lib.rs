@@ -160,6 +160,7 @@ pub fn run() {
             commands::languages::list_summary_languages,
             commands::summary::summarize_meeting,
             commands::summary::cancel_summarization,
+            commands::summary::summarization_status,
             commands::summary::get_summary,
             commands::summary::edit_summary,
             commands::summary::delete_summary,

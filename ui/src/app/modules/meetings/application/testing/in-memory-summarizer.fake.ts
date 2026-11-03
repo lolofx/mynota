@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 
+import type { ActiveSummarization } from '../../core/models/active-summarization.model';
 import type { MeetingId } from '../../core/models/meeting.model';
 import { MeetingsError } from '../../core/models/recording-state.model';
 import { DEFAULT_SUMMARY_LANGUAGE_CODE, type SummaryLanguage } from '../../core/models/summary-language.model';
@@ -66,6 +67,17 @@ export class InMemorySummarizerFake extends SummarizerPort {
 
   override async cancel(): Promise<void> {
     return Promise.resolve();
+  }
+
+  private active: ActiveSummarization | null = null;
+
+  override async activeSummarization(): Promise<ActiveSummarization | null> {
+    return this.active;
+  }
+
+  /** Test helper: what the backend reports as running; `null` once it has finished. */
+  setActiveSummarization(active: ActiveSummarization | null): void {
+    this.active = active;
   }
 
   override async getSummary(id: MeetingId, template: string, language: string): Promise<Summary | null> {

@@ -24,12 +24,12 @@ use myna_llm::{resolve, RenderContext, SummaryInstructions, SummaryOptions, Temp
 
 use crate::commands::recording::lock_session;
 use crate::domain::{Meeting, MeetingId, Summary, SummaryRef};
-use crate::dto::{SummarizeInstructionsDto, SummaryDto};
+use crate::dto::{ActiveSummaryDto, SummarizeInstructionsDto, SummaryDto};
 use crate::error::AppError;
 use crate::events::{SummaryDonePayload, TokenPayload, SUMMARY_DONE, SUMMARY_TOKEN};
 use crate::paths;
 use crate::session::guard_not_recording;
-use crate::state::{guard_summary_vs_import, AppState};
+use crate::state::{guard_summary_vs_import, ActiveSummary, AppState};
 use crate::store::MeetingStore;
 use crate::summary_prefs;
 use crate::template_prefs;
@@ -79,6 +79,12 @@ pub async fn summarize_meeting(
     let state = app.state::<AppState>();
     guard_summary_vs_import(state.import_busy())?;
     let _guard = state.summarization_guard()?;
+    let (language_code, _) = resolve(language.as_deref());
+    let _active = state.begin_active_summary(ActiveSummary {
+        meeting_id: meeting_id.clone(),
+        template: template.clone(),
+        language: language_code.to_string(),
+    });
 
     let app_for_worker = app.clone();
     tauri::async_runtime::spawn_blocking(move || {
@@ -178,6 +184,15 @@ pub async fn get_summary(
 #[tauri::command]
 pub fn cancel_summarization(state: State<'_, AppState>) {
     state.cancel_summary.store(true, Ordering::SeqCst);
+}
+
+/// The summary being generated right now, or `None`. A webview that reloaded
+/// or crashed mid-generation calls this at start-up: the work goes on in the
+/// backend, and without it the interface would show nothing yet refuse any
+/// new summary as busy.
+#[tauri::command]
+pub fn summarization_status(state: State<'_, AppState>) -> Option<ActiveSummaryDto> {
+    state.active_summary().map(ActiveSummaryDto::from)
 }
 
 /// Returns the persisted general guidelines applied to every summary

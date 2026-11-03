@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import type { Observable } from 'rxjs';
 import { map } from 'rxjs';
 
+import type { ActiveSummarization } from '../../core/models/active-summarization.model';
 import { toMeetingId } from '../../core/models/meeting.model';
 import type { MeetingId } from '../../core/models/meeting.model';
 import type { SummaryLanguage } from '../../core/models/summary-language.model';
@@ -73,6 +74,10 @@ export class TauriSummarizerAdapter extends SummarizerPort {
 
   override async cancel(): Promise<void> {
     await invokeCommand('cancel_summarization', {});
+  }
+
+  override async activeSummarization(): Promise<ActiveSummarization | null> {
+    return invokeCommand('summarization_status', {});
   }
 
   override async getSummary(id: MeetingId, template: string, language: string): Promise<Summary | null> {

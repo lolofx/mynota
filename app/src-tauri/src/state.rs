@@ -313,6 +313,16 @@ pub struct StoppingSession {
     pub elapsed_sec: f32,
 }
 
+/// The summary being generated now, so a webview that reloaded mid-run (or
+/// crashed and came back) can find out and show it instead of hitting
+/// [`AppError::Busy`] with nothing on screen.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ActiveSummary {
+    pub meeting_id: String,
+    pub template: String,
+    pub language: String,
+}
+
 /// Application state managed by Tauri and injected into every command.
 pub struct AppState {
     pub store: Arc<FsMeetingStore>,
@@ -346,6 +356,9 @@ pub struct AppState {
     /// `true` while a summarization is running, guarding against
     /// concurrent `summarize_meeting` calls.
     summary_busy: AtomicBool,
+    /// What the running summarization is about; `Some` exactly while
+    /// [`AppState::summary_busy`] is `true` on a path that set it.
+    active_summary: Mutex<Option<ActiveSummary>>,
     /// Shared cancellation flag for the in-flight import or re-transcribe,
     /// if any. Reset to `false` at the start of every run by
     /// [`AppState::begin_import`]; the in-flight
@@ -375,6 +388,7 @@ impl AppState {
             diarizer: ModelSlot::new(),
             cancel_summary: Arc::new(AtomicBool::new(false)),
             summary_busy: AtomicBool::new(false),
+            active_summary: Mutex::new(None),
             cancel_import: Arc::new(AtomicBool::new(false)),
             import_busy: AtomicBool::new(false),
             storage_busy: AtomicBool::new(false),
@@ -712,6 +726,24 @@ impl AppState {
         Ok(SummarizationGuard { state: self })
     }
 
+    /// Records which summary is being generated and returns an RAII guard
+    /// that forgets it when dropped, on every exit path including a panic.
+    pub fn begin_active_summary(&self, active: ActiveSummary) -> ActiveSummaryGuard<'_> {
+        *self.lock_active_summary() = Some(active);
+        ActiveSummaryGuard { state: self }
+    }
+
+    /// The summary being generated now, if any.
+    pub fn active_summary(&self) -> Option<ActiveSummary> {
+        self.lock_active_summary().clone()
+    }
+
+    fn lock_active_summary(&self) -> MutexGuard<'_, Option<ActiveSummary>> {
+        self.active_summary
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+    }
+
     /// Panic-safe counterpart to [`AppState::begin_storage_change`]/
     /// [`AppState::end_storage_change`] — mirrors [`AppState::import_guard`]
     /// for `storage_busy`. `commands::storage` holds this for the whole
@@ -759,6 +791,18 @@ impl AppState {
         self.stopping
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner())
+    }
+}
+
+/// RAII guard returned by [`AppState::begin_active_summary`]. Forgets the
+/// active summary when dropped.
+pub struct ActiveSummaryGuard<'a> {
+    state: &'a AppState,
+}
+
+impl Drop for ActiveSummaryGuard<'_> {
+    fn drop(&mut self) {
+        *self.state.lock_active_summary() = None;
     }
 }
 

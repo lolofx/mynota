@@ -13,8 +13,9 @@ use std::sync::{Arc, Weak};
 use std::time::Duration;
 
 use myna_app::state::{
-    clamp_thread_count, guard_import_vs_summary, guard_summary_vs_import, AppState, ModelSlot,
-    IDLE_MODEL_TTL, STT_ENGINE_THREADS_FALLBACK, STT_ENGINE_THREADS_MAX, STT_ENGINE_THREADS_MIN,
+    clamp_thread_count, guard_import_vs_summary, guard_summary_vs_import, ActiveSummary, AppState,
+    ModelSlot, IDLE_MODEL_TTL, STT_ENGINE_THREADS_FALLBACK, STT_ENGINE_THREADS_MAX,
+    STT_ENGINE_THREADS_MIN,
 };
 use myna_app::store::folder_store::FsFolderStore;
 use myna_app::store::fs_store::FsMeetingStore;
@@ -534,4 +535,26 @@ fn dropping_the_summarizer_returns_rss_to_the_os() {
          (loaded={loaded} MB, after_drop={after_drop} MB, freed={} MB)",
         loaded - after_drop
     );
+}
+
+#[test]
+fn the_active_summary_is_known_while_its_guard_lives_and_forgotten_after() {
+    // Arrange
+    let dir = tempfile::tempdir().expect("tempdir");
+    let state = AppState::new(
+        FsMeetingStore::new(dir.path()),
+        FsFolderStore::new(dir.path().to_path_buf()),
+    );
+    assert_eq!(state.active_summary(), None);
+    let active = ActiveSummary {
+        meeting_id: "m-1".into(),
+        template: "key-points".into(),
+        language: "fr".into(),
+    };
+
+    // Act / Assert
+    let guard = state.begin_active_summary(active.clone());
+    assert_eq!(state.active_summary(), Some(active));
+    drop(guard);
+    assert_eq!(state.active_summary(), None);
 }
