@@ -104,6 +104,11 @@
       "helper": "Langue parlée dans vos réunions. C'est une indication : elle se change à chaque enregistrement depuis le menu Audio, elle est écrite dans le fichier exporté et sert à repérer les passages transcrits dans la mauvaise langue.",
       "label": "Langue par défaut des réunions",
       "ariaLabel": "Langue par défaut des réunions"
+    },
+    "skills": {
+      "title": "Skills des onglets de résumé",
+      "helper": "Les instructions que suit chaque onglet. Modifiez-en une ici, sans réunion ouverte : l'onglet et le rapport « plusieurs résumés d'un coup » l'utilisent tous les deux.",
+      "edit": "Modifier…"
     }
   },
   "updateBanner": {

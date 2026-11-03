@@ -93,6 +93,21 @@
     </label>
   </section>
 
+  <section class="skills" [attr.aria-label]="'settings.skills.title' | transloco">
+    <h3>{{ 'settings.skills.title' | transloco }}</h3>
+    <p class="model-helper">{{ 'settings.skills.helper' | transloco }}</p>
+    <ul class="skill-list">
+      @for (skill of skills(); track skill.name) {
+        <li class="skill">
+          <span class="skill-label">{{ skill.label }}</span>
+          <button type="button" class="edit-skill" [attr.data-skill]="skill.name" (click)="skillEditRequested.emit(skill.name)">
+            {{ 'settings.skills.edit' | transloco }}
+          </button>
+        </li>
+      }
+    </ul>
+  </section>
+
   <section class="summary-model" [attr.aria-label]="'settings.summaryModel.title' | transloco">
     <h3>{{ 'settings.summaryModel.title' | transloco }}</h3>
     <p class="model-helper">{{ 'settings.summaryModel.helper' | transloco }}</p>

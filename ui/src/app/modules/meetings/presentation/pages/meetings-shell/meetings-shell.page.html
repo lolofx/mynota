@@ -254,6 +254,7 @@
         [summaryLanguages]="facade.summaryLanguages()"
         [selectedSummaryLanguage]="facade.selectedSummaryLanguage()"
         [audioLanguage]="facade.recordingHints.defaultLanguage()"
+        [skills]="skills.options()"
         [summaryModels]="facade.modelsStatus()?.summaryModels ?? []"
         [modelDownload]="facade.modelDownload()"
         [guidelines]="settings.guidelines()"
@@ -270,6 +271,7 @@
         (checkNowRequested)="updateHandlers.onCheckNow()"
         (summaryLanguageSelected)="onSummaryLanguageSelected($event)"
         (audioLanguageSelected)="facade.recordingHints.setDefaultLanguage($event)"
+        (skillEditRequested)="skills.onOpen($event)"
         (summaryModelSelected)="settings.onSummaryModelSelected($event)"
         (summaryModelDownloadRequested)="settings.onSummaryModelDownloadRequested($event)"
         (guidelinesChanged)="settings.onGuidelinesChanged($event)"
@@ -288,5 +290,20 @@
     (granted)="updateHandlers.onGranted()"
     (declined)="updateHandlers.onDeclined()"
     (postponed)="updateHandlers.onPostponed()"
+  />
+}
+
+@if (skills.open(); as skillName) {
+  <app-template-prompt-dialog
+    [templateName]="skillName"
+    [templateLabel]="skills.label()"
+    [templateDescription]="skills.description()"
+    [builtinPrompt]="skills.builtin()"
+    [effectivePrompt]="skills.effective()"
+    [confirmDisabled]="skills.loading()"
+    [error]="skills.error()"
+    (saved)="skills.onSaved($event)"
+    (resetRequested)="skills.onReset()"
+    (cancelled)="skills.onClose()"
   />
 }

@@ -22,6 +22,13 @@ import { SummaryServerSettingsComponent } from '../summary-server-settings/summa
  * stays disabled while unchanged).
  * Injects only the interface-language service; the shell owns every `MeetingsFacade` call.
  */
+/** A summary skill (template) offered for editing in Settings. */
+export interface SkillOption {
+  readonly name: string;
+  readonly label: string;
+  readonly description: string;
+}
+
 @Component({
   selector: 'app-settings',
   imports: [TranslocoPipe, SummaryServerSettingsComponent, AudioPurgeSettingsComponent, VocabularySettingsComponent],
@@ -50,6 +57,8 @@ export class SettingsComponent {
   readonly selectedSummaryLanguage = input.required<string>();
   /** Language spoken in meetings by default: a code from the list, or 'auto'. */
   readonly audioLanguage = input<string>(AUTO_AUDIO_LANGUAGE);
+  /** The skills of the summary tabs, each editable from here. */
+  readonly skills = input<readonly SkillOption[]>([]);
   /** The selectable summary models with their presence, from `modelsStatus().summaryModels`; empty until the status loads. */
   readonly summaryModels = input<readonly SummaryModelSlot[]>([]);
   /** Download slice of the store, shown inline while a summary model downloads. */
@@ -80,6 +89,7 @@ export class SettingsComponent {
   readonly checkNowRequested = output<void>();
   readonly summaryLanguageSelected = output<string>();
   readonly audioLanguageSelected = output<string>();
+  readonly skillEditRequested = output<string>();
   /** The id of the summary model picked; the shell persists it, never this component. */
   readonly summaryModelSelected = output<string>();
   /** Download requested for the summary model currently chosen. */
