@@ -211,10 +211,6 @@
     "decisions": {
       "label": "Decisions",
       "description": "Extract the decisions that were made in the meeting along with the reasoning behind each one."
-    },
-    "full-report": {
-      "label": "Full Report",
-      "description": "Produce the whole report in one pass: an overall summary, the key points, the decisions and the action items."
     }
   },
   "onboarding": {
@@ -523,10 +519,7 @@
     "remove": "Remove",
     "save": "Keep",
     "labelPlaceholder": "Label (for example the assistant's name)",
-    "textPlaceholder": "Paste the summary here",
-    "copyPrompt": "Copy the prompt and transcript",
-    "promptHint": "Everything an outside assistant needs: the full-report prompt and this meeting's transcript.",
-    "promptCopied": "Copied. Paste it into your assistant, then paste its answer back here."
+    "textPlaceholder": "Paste the summary here"
   },
   "audioPurge": {
     "size": "Audio on disk: {{size}}.",

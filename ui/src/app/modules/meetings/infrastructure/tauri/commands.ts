@@ -103,7 +103,6 @@ export const COMMAND_NAMES = [
   'list_external_summaries',
   'add_external_summary',
   'delete_external_summary',
-  'build_external_prompt',
   'get_audio_usage',
   'purge_meeting_audio',
   'preview_audio_purge',

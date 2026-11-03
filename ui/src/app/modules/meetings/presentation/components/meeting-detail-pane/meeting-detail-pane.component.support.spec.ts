@@ -57,8 +57,8 @@ describe('sortTemplatesForDisplay', () => {
     expect(input.map((candidate) => candidate.name)).toEqual(['action-items', 'meeting-notes']);
   });
 
-  it('orders exactly the five known built-in names, the one-pass report first', () => {
-    expect(BUILT_IN_TEMPLATE_TAB_ORDER).toEqual(['full-report', 'meeting-notes', 'key-points', 'decisions', 'action-items']);
+  it('orders exactly the four known built-in names', () => {
+    expect(BUILT_IN_TEMPLATE_TAB_ORDER).toEqual(['meeting-notes', 'key-points', 'decisions', 'action-items']);
   });
 });
 

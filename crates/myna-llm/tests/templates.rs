@@ -6,13 +6,8 @@ use std::path::{Path, PathBuf};
 
 use myna_llm::{list_templates, LlmError, RenderContext, SummaryInstructions, Template};
 
-const BUILTIN_TEMPLATE_NAMES: [&str; 5] = [
-    "action-items",
-    "decisions",
-    "full-report",
-    "key-points",
-    "meeting-notes",
-];
+const BUILTIN_TEMPLATE_NAMES: [&str; 4] =
+    ["action-items", "decisions", "key-points", "meeting-notes"];
 
 /// Resolve the repo-root `templates/` directory from this crate's manifest
 /// dir (`crates/myna-llm` -> repo root -> `templates`).
@@ -367,10 +362,9 @@ fn load_rejects_a_template_with_an_empty_emoji() {
 fn every_builtin_template_carries_its_expected_label_and_emoji() {
     // Arrange
     let dir = templates_dir();
-    let expected: [(&str, &str, &str); 5] = [
+    let expected: [(&str, &str, &str); 4] = [
         ("action-items", "Action Items", "✅"),
         ("decisions", "Decisions", "⚖️"),
-        ("full-report", "Full Report", "📋"),
         ("key-points", "Key Points", "🔑"),
         ("meeting-notes", "Minutes", "📝"),
     ];

@@ -26,13 +26,9 @@ export class PastedSummariesComponent {
   readonly items = input<readonly ExternalSummary[]>([]);
   readonly working = input(false);
   readonly error = input<string | null>(null);
-  /** The prompt was just copied. */
-  readonly promptCopied = input(false);
 
   readonly added = output<PastedSummaryDraft>();
   readonly removed = output<number>();
-  /** The user wants the prompt with the transcript, to give to an outside assistant. */
-  readonly promptRequested = output<void>();
 
   protected readonly open = signal(false);
   protected readonly pasting = signal(false);

@@ -211,10 +211,6 @@
     "decisions": {
       "label": "Décisions",
       "description": "Extrait les décisions prises pendant la réunion, avec la justification de chacune."
-    },
-    "full-report": {
-      "label": "Compte rendu",
-      "description": "Produit tout le compte rendu en une seule passe : résumé, points clés, décisions et actions."
     }
   },
   "onboarding": {
@@ -523,10 +519,7 @@
     "remove": "Retirer",
     "save": "Garder",
     "labelPlaceholder": "Étiquette (par exemple le nom de l'assistant)",
-    "textPlaceholder": "Colle le résumé ici",
-    "copyPrompt": "Copier le prompt et la transcription",
-    "promptHint": "Tout ce qu'il faut à un assistant externe : le prompt du compte rendu complet et la transcription de cette réunion.",
-    "promptCopied": "Copié. Collez-le dans votre assistant, puis collez sa réponse ici."
+    "textPlaceholder": "Colle le résumé ici"
   },
   "audioPurge": {
     "size": "Audio sur le disque : {{size}}.",

@@ -9,9 +9,4 @@ export abstract class ExternalSummariesPort {
   abstract list(meetingId: string): Promise<readonly ExternalSummary[]>;
   abstract add(meetingId: string, label: string, markdown: string): Promise<readonly ExternalSummary[]>;
   abstract remove(meetingId: string, summaryId: number): Promise<readonly ExternalSummary[]>;
-  /**
-   * The whole prompt of `template` with the meeting's transcript inside, to
-   * hand to an assistant outside the app (Rust command build_external_prompt).
-   */
-  abstract buildPrompt(meetingId: string, template: string, language: string): Promise<string>;
 }

@@ -178,8 +178,6 @@
             [items]="pasted.items()"
             [working]="pasted.working()"
             [error]="pasted.error()"
-            [promptCopied]="pasted.promptCopied()"
-            (promptRequested)="pasted.onCopyPrompt()"
             (added)="pasted.onAdded($event)"
             (removed)="pasted.onRemoved($event)"
           />

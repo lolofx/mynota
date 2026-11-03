@@ -69,25 +69,4 @@ describe('PastedSummariesComponent', () => {
     expect(seen).toEqual([1]);
     confirm.mockRestore();
   });
-
-  it('asks for the prompt when its button is pressed, even while collapsed state is open', () => {
-    const requested = vi.fn();
-    fixture.componentInstance.promptRequested.subscribe(requested);
-    click('.toggle');
-
-    click('.copy-prompt');
-
-    expect(requested).toHaveBeenCalledTimes(1);
-  });
-
-  it('says the prompt was copied once it was', () => {
-    click('.toggle');
-    const hint = (): string => el().querySelector('.external-prompt .hint')?.textContent ?? '';
-    const before = hint();
-
-    fixture.componentRef.setInput('promptCopied', true);
-    fixture.detectChanges();
-
-    expect(hint()).not.toBe(before);
-  });
 });

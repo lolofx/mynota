@@ -59,25 +59,18 @@ export function createNotesControls(facade: MeetingsFacade, recordingElapsedSec:
   };
 }
 
-/** The template whose prompt is handed to an outside assistant: the one-pass report. */
-const PROMPT_TEMPLATE = 'full-report';
-
 /** Pasted-summaries panel wiring (ADR 0022). */
 export interface PastedSummariesControls {
   readonly visible: Signal<boolean>;
   readonly items: Signal<readonly ExternalSummary[]>;
   readonly working: Signal<boolean>;
   readonly error: Signal<string | null>;
-  readonly promptCopied: Signal<boolean>;
   readonly onAdded: (draft: PastedSummaryDraft) => void;
-  readonly onCopyPrompt: () => void;
   readonly onRemoved: (summaryId: number) => void;
 }
 
 /** Loads the pasted summaries of the open meeting; the facade is optional like the notes one. */
 export function createPastedSummariesControls(facade: MeetingsFacade): PastedSummariesControls {
-  const languageOf = facade as Partial<Pick<MeetingsFacade, 'selectedSummaryLanguage'>>;
-  const summaryLanguage = (): string => languageOf.selectedSummaryLanguage?.() ?? 'en';
   const pasted = inject(ExternalSummariesFacade, { optional: true });
   const selection = facade as Partial<Pick<MeetingsFacade, 'selectedMeeting'>>;
   const selectedId = computed(() => selection.selectedMeeting?.()?.id ?? null);
@@ -92,9 +85,7 @@ export function createPastedSummariesControls(facade: MeetingsFacade): PastedSum
     items: computed(() => pasted?.items() ?? []),
     working: computed(() => pasted?.working() ?? false),
     error: computed(() => pasted?.error() ?? null),
-    promptCopied: computed(() => pasted?.promptCopied() ?? false),
     onAdded: (draft) => void pasted?.add(draft.label, draft.markdown),
-    onCopyPrompt: () => void pasted?.copyPrompt(PROMPT_TEMPLATE, summaryLanguage()),
     onRemoved: (summaryId) => void pasted?.remove(summaryId),
   };
 }

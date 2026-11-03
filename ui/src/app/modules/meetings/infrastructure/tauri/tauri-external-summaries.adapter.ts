@@ -22,8 +22,4 @@ export class TauriExternalSummariesAdapter extends ExternalSummariesPort {
   override async remove(meetingId: string, summaryId: number): Promise<readonly ExternalSummary[]> {
     return toDomain(await invokeCommand('delete_external_summary', { meetingId, summaryId }));
   }
-
-  override async buildPrompt(meetingId: string, template: string, language: string): Promise<string> {
-    return invokeCommand('build_external_prompt', { meetingId, template, language });
-  }
 }

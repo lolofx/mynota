@@ -34,11 +34,6 @@ export interface HubCommandSignatures {
     args: { readonly meetingId: string; readonly summaryId: number };
     result: readonly ExternalSummaryDto[];
   };
-  /** The full prompt of a template with the meeting's transcript inside, for an outside assistant. */
-  readonly build_external_prompt: {
-    args: { readonly meetingId: string; readonly template: string; readonly language: string };
-    result: string;
-  };
   /** Size, purge state and whether a purge is allowed for one meeting's audio (ADR 0022). */
   readonly get_audio_usage: {
     args: { readonly meetingId: string };
