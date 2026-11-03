@@ -81,9 +81,18 @@ pub async fn start_recording(
     device: Option<String>,
     source: Option<CaptureSource>,
     system_source: Option<String>,
+    language: Option<String>,
+    speakers: Option<u8>,
 ) -> Result<MeetingDto, AppError> {
     tauri::async_runtime::spawn_blocking(move || {
-        start_recording_blocking(&app, title, device, source, system_source)
+        start_recording_blocking(
+            &app,
+            title,
+            device,
+            source,
+            system_source,
+            RecordingHints { language, speakers },
+        )
     })
     .await
     .unwrap_or_else(|_| {
@@ -91,6 +100,14 @@ pub async fn start_recording(
             "start_recording worker thread panicked".to_string(),
         ))
     })
+}
+
+/// What the user said about the meeting before recording: its language and
+/// how many people speak on the remote side. Both optional; unusable values
+/// are dropped by `Meeting::with_capture_hints`.
+struct RecordingHints {
+    language: Option<String>,
+    speakers: Option<u8>,
 }
 
 /// Synchronous body of [`start_recording`], run on a blocking-pool thread.
@@ -103,13 +120,18 @@ fn start_recording_blocking(
     device: Option<String>,
     source: Option<CaptureSource>,
     system_source: Option<String>,
+    hints: RecordingHints,
 ) -> Result<MeetingDto, AppError> {
     let state = app.state::<AppState>();
     let mut session_slot = lock_session(&state)?;
     guard_start(session_slot.is_some(), state.import_busy())?;
 
     let effective_title = resolve_new_title(&title, OffsetDateTime::now_utc());
-    let meeting = state.store.create(&effective_title)?;
+    let created = state.store.create(&effective_title)?;
+    let meeting = created.with_capture_hints(hints.language.as_deref(), hints.speakers);
+    if meeting != created {
+        state.store.save(&meeting)?;
+    }
     let audio_paths = AudioPaths {
         playback: state.store.audio_path(meeting.id),
         mic: state.store.mic_track_path(meeting.id),

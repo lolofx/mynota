@@ -481,10 +481,22 @@ impl AppState {
     /// the evict refuses by design while an STT-side operation is live) —
     /// the call exists so eviction doesn't depend solely on the periodic
     /// ticks when the diarizer is acquired outside a guarded operation.
-    pub fn diarizer(&self, app: &AppHandle) -> Result<Arc<Diarizer>, AppError> {
+    ///
+    /// `speakers` is the number of remote speakers the user announced
+    /// before recording. When set, the clustering is pinned to that count
+    /// (and the centroid merge, which could only lower it, is skipped); the
+    /// cluster count is fixed at load, so a cached diarizer is dropped first
+    /// and the slot is reloaded with the requested configuration.
+    pub fn diarizer(
+        &self,
+        app: &AppHandle,
+        speakers: Option<u8>,
+    ) -> Result<Arc<Diarizer>, AppError> {
         self.evict_stt_if_idle();
+        self.diarizer.release_if_last();
         self.diarizer.get_or_load(|| {
             let models_root = paths::models_root(app);
+            let defaults = DiarizeConfig::default();
             Ok(Arc::new(Diarizer::load(&DiarizeConfig {
                 segmentation_model: models_root
                     .join(DIARIZE_SEG_DIR_NAME)
@@ -493,7 +505,9 @@ impl AppState {
                     .join(DIARIZE_EMB_DIR_NAME)
                     .join(DIARIZE_EMB_FILE_NAME),
                 num_threads: stt_engine_threads(),
-                ..DiarizeConfig::default()
+                num_clusters: speakers.map_or(defaults.num_clusters, i32::from),
+                enable_centroid_merge: speakers.is_none() && defaults.enable_centroid_merge,
+                ..defaults
             })?))
         })
     }

@@ -601,7 +601,7 @@ fn diarize_and_relabel(
         return Err(AppError::Cancelled);
     }
 
-    let diarizer = state.diarizer(app)?;
+    let diarizer = state.diarizer(app, meeting.expected_speakers)?;
     let diarize_result = diarizer.diarize_wav(&system_track).map_err(|err| {
         eprintln!("myna-app: diarization failed for meeting {id}: {err}");
         err

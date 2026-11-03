@@ -108,6 +108,40 @@ pub struct Meeting {
     /// older `meeting.json` files loading.
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub audio_purged: bool,
+    /// Language spoken in the meeting, as one of [`AUDIO_LANGUAGES`], or
+    /// `None` when unknown or mixed. The speech model cannot be pinned to a
+    /// language; this drives the check that flags segments decoded in the
+    /// wrong one and the exported `language` field. `#[serde(default)]` keeps
+    /// older `meeting.json` files loading.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub audio_language: Option<String>,
+    /// How many people speak on the remote side, when the user said so before
+    /// recording. Pins the cluster count of speaker detection instead of
+    /// letting it guess. `#[serde(default)]` keeps older files loading.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expected_speakers: Option<u8>,
+}
+
+/// Languages a meeting can be tagged with (ISO 639-1), all handled by the
+/// speech model.
+pub const AUDIO_LANGUAGES: &[&str] = &["fr", "en", "de", "es", "it", "nl", "pt"];
+
+/// Fewest and most remote speakers the user can announce.
+pub const EXPECTED_SPEAKERS_MIN: u8 = 1;
+pub const EXPECTED_SPEAKERS_MAX: u8 = 12;
+
+/// Keeps `language` when it is one of [`AUDIO_LANGUAGES`] (any case, trimmed);
+/// anything else, including `auto`, means "not specified".
+pub fn normalize_audio_language(language: Option<&str>) -> Option<String> {
+    let code = language?.trim().to_ascii_lowercase();
+    AUDIO_LANGUAGES.contains(&code.as_str()).then_some(code)
+}
+
+/// Keeps `speakers` when it lies in
+/// [`EXPECTED_SPEAKERS_MIN`]..=[`EXPECTED_SPEAKERS_MAX`]; anything else means
+/// "not specified".
+pub fn normalize_expected_speakers(speakers: Option<u8>) -> Option<u8> {
+    speakers.filter(|count| (EXPECTED_SPEAKERS_MIN..=EXPECTED_SPEAKERS_MAX).contains(count))
 }
 
 impl Meeting {
@@ -128,6 +162,19 @@ impl Meeting {
             speaker_names: BTreeMap::new(),
             export_path: None,
             audio_purged: false,
+            audio_language: None,
+            expected_speakers: None,
+        }
+    }
+
+    /// Returns a copy of this meeting with the language and the remote
+    /// speaker count replaced. Values outside the allowed sets are dropped
+    /// (see [`normalize_audio_language`], [`normalize_expected_speakers`]).
+    pub fn with_capture_hints(&self, language: Option<&str>, speakers: Option<u8>) -> Self {
+        Self {
+            audio_language: normalize_audio_language(language),
+            expected_speakers: normalize_expected_speakers(speakers),
+            ..self.clone()
         }
     }
 
@@ -286,5 +333,63 @@ impl Meeting {
                 .collect(),
             ..self.clone()
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_known_language_is_kept_in_lowercase() {
+        assert_eq!(normalize_audio_language(Some(" FR ")), Some("fr".into()));
+        assert_eq!(normalize_audio_language(Some("en")), Some("en".into()));
+    }
+
+    #[test]
+    fn auto_unknown_and_empty_languages_mean_not_specified() {
+        assert_eq!(normalize_audio_language(Some("auto")), None);
+        assert_eq!(normalize_audio_language(Some("klingon")), None);
+        assert_eq!(normalize_audio_language(Some("")), None);
+        assert_eq!(normalize_audio_language(None), None);
+    }
+
+    #[test]
+    fn the_speaker_count_must_lie_in_the_allowed_range() {
+        assert_eq!(normalize_expected_speakers(Some(0)), None);
+        assert_eq!(normalize_expected_speakers(Some(1)), Some(1));
+        assert_eq!(normalize_expected_speakers(Some(12)), Some(12));
+        assert_eq!(normalize_expected_speakers(Some(13)), None);
+        assert_eq!(normalize_expected_speakers(None), None);
+    }
+
+    #[test]
+    fn capture_hints_are_set_through_the_normalizers() {
+        let meeting = Meeting::new("Weekly").with_capture_hints(Some("FR"), Some(40));
+
+        assert_eq!(meeting.audio_language.as_deref(), Some("fr"));
+        assert_eq!(meeting.expected_speakers, None);
+    }
+
+    #[test]
+    fn an_older_meeting_file_without_the_hints_still_loads() {
+        let meeting = Meeting::new("Old");
+        let mut json = serde_json::to_value(&meeting).expect("serialize");
+        let object = json.as_object_mut().expect("object");
+        object.remove("audio_language");
+        object.remove("expected_speakers");
+
+        let loaded: Meeting = serde_json::from_value(json).expect("deserialize");
+
+        assert_eq!(loaded.audio_language, None);
+        assert_eq!(loaded.expected_speakers, None);
+    }
+
+    #[test]
+    fn unset_hints_are_not_written_to_the_file() {
+        let json = serde_json::to_value(Meeting::new("Plain")).expect("serialize");
+
+        assert!(json.get("audio_language").is_none());
+        assert!(json.get("expected_speakers").is_none());
     }
 }

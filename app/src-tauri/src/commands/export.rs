@@ -355,10 +355,10 @@ pub fn render_contract(
 /// summaries and notes sit between `mynota` markers so a re-export can rewrite them
 /// without touching text the user added around them (ADR 0022).
 ///
-/// The front matter only carries what the app really knows. `language` and
-/// `source` are left out on purpose: the meeting record stores neither, and
-/// guessing them would hand wrong metadata to the tooling that reads this
-/// file.
+/// The front matter only carries what the app really knows. `language` is
+/// written only when the user chose one for the meeting; `source` is left out
+/// on purpose, since the record does not store it and guessing would hand
+/// wrong metadata to the tooling that reads this file.
 fn render_markdown(
     meeting: &Meeting,
     summaries: &[Summary],
@@ -399,6 +399,9 @@ fn render_markdown(
     out.push_str(&format!("title: {}\n", yaml_scalar(&meeting.title)));
     out.push_str(&format!("date: {}\n", local_timestamp(meeting.created_at)));
     out.push_str(&format!("duration: {}\n", clock(duration_sec)));
+    if let Some(language) = &meeting.audio_language {
+        out.push_str(&format!("language: {language}\n"));
+    }
     if !speakers.is_empty() {
         let list: Vec<String> = speakers.iter().map(|name| yaml_scalar(name)).collect();
         out.push_str(&format!("speakers: [{}]\n", list.join(", ")));
@@ -607,6 +610,15 @@ fn parse_meeting_id(id: &str) -> Result<MeetingId, AppError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_front_matter_names_the_language_only_when_the_user_chose_one() {
+        let plain = Meeting::new("Weekly");
+        let tagged = plain.with_capture_hints(Some("en"), None);
+
+        assert!(!render_markdown(&plain, &[], &[], "").contains("language:"));
+        assert!(render_markdown(&tagged, &[], &[], "").contains("\nlanguage: en\n"));
+    }
 
     // --- validate_export_destination: at-rest confinement (security
     // hardening) --------------------------------------------------------

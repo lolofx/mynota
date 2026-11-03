@@ -327,6 +327,10 @@ pub struct MeetingDto {
     /// not yet transcribed, and the UI should start the transcription (the
     /// same path as "Re-transcribe"). `false` for every other meeting.
     pub transcription_pending: bool,
+    /// Language the user said the meeting is in, or `null` when unspecified.
+    pub audio_language: Option<String>,
+    /// Remote speaker count announced before recording, or `null`.
+    pub expected_speakers: Option<u8>,
 }
 
 impl MeetingDto {
@@ -366,6 +370,8 @@ impl From<Meeting> for MeetingDto {
             folder_id: meeting.folder_id.map(|id| id.to_string()),
             speaker_names: meeting.speaker_names,
             transcription_pending: false,
+            audio_language: meeting.audio_language,
+            expected_speakers: meeting.expected_speakers,
         }
     }
 }
