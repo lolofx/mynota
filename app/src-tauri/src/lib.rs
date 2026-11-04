@@ -6,6 +6,7 @@
 
 pub mod audio_purge;
 pub mod auto_export;
+pub mod combined_report;
 pub mod commands;
 pub mod diarize_judge;
 pub mod dictionary;
@@ -64,7 +65,45 @@ fn log_stranded_models(root: &Path) {
     }
 }
 
+/// One-time app setup: data root, stores, recovery, model manager and menu.
+fn setup(app: &mut tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+    let root = paths::effective_data_root_for_app(app.handle())?;
+    if let Err(err) = paths::harden_existing_data_root(&root) {
+        eprintln!("failed to harden pre-existing data root permissions: {err}");
+    }
+    // A pre-skip migration may have dragged the multi-GB weights
+    // under a custom storage location: flag it loudly (read-only —
+    // `models_status` keeps reporting the fixed path, stranded
+    // weights are never read back silently).
+    log_stranded_models(&root);
+    let store = FsMeetingStore::new(root.clone());
+    // ADR 0011: every `session.json` manifest found at this point is
+    // an orphan — no session can exist yet in this process. Fold each
+    // one back into a real meeting before anything can observe (or
+    // overwrite) it. The same scan also repairs pre-ADR-0011 legacy
+    // orphans (no manifest, 0 s meeting, placeholder-header WAV).
+    // Best-effort and never blocks boot.
+    recovery::recover_orphaned_sessions(&store);
+    let folders = FsFolderStore::new(root);
+    app.manage(AppState::new(store, folders));
+    // ADR 0022: files moved inside the vault since last time are
+    // found again by their `mynota_id`. Off the main thread: a big
+    // vault takes a moment, and it must never block boot.
+    let handle = app.handle().clone();
+    tauri::async_runtime::spawn(async move {
+        let _ = commands::export::rescan_export_folder(handle).await;
+    });
+    app.manage(Arc::new(ModelDownloadManager::new()));
+    // Replace tauri's auto-generated default menu (only installed
+    // while `app.menu.is_none()`) with ours: same items, plus
+    // "Settings…" emitting events::MENU_SETTINGS.
+    app.set_menu(menu::build(app.handle())?)?;
+    Ok(())
+}
+
 /// Build and run the Tauri application.
+// The length is the flat `generate_handler!` command list, not logic.
+#[allow(clippy::too_many_lines)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
@@ -78,40 +117,7 @@ pub fn run() {
                 .expect("\"Mynota\" is a valid header value")
                 .build(),
         )
-        .setup(|app| {
-            let root = paths::effective_data_root_for_app(app.handle())?;
-            if let Err(err) = paths::harden_existing_data_root(&root) {
-                eprintln!("failed to harden pre-existing data root permissions: {err}");
-            }
-            // A pre-skip migration may have dragged the multi-GB weights
-            // under a custom storage location: flag it loudly (read-only —
-            // `models_status` keeps reporting the fixed path, stranded
-            // weights are never read back silently).
-            log_stranded_models(&root);
-            let store = FsMeetingStore::new(root.clone());
-            // ADR 0011: every `session.json` manifest found at this point is
-            // an orphan — no session can exist yet in this process. Fold each
-            // one back into a real meeting before anything can observe (or
-            // overwrite) it. The same scan also repairs pre-ADR-0011 legacy
-            // orphans (no manifest, 0 s meeting, placeholder-header WAV).
-            // Best-effort and never blocks boot.
-            recovery::recover_orphaned_sessions(&store);
-            let folders = FsFolderStore::new(root);
-            app.manage(AppState::new(store, folders));
-            // ADR 0022: files moved inside the vault since last time are
-            // found again by their `mynota_id`. Off the main thread: a big
-            // vault takes a moment, and it must never block boot.
-            let handle = app.handle().clone();
-            tauri::async_runtime::spawn(async move {
-                let _ = commands::export::rescan_export_folder(handle).await;
-            });
-            app.manage(Arc::new(ModelDownloadManager::new()));
-            // Replace tauri's auto-generated default menu (only installed
-            // while `app.menu.is_none()`) with ours: same items, plus
-            // "Settings…" emitting events::MENU_SETTINGS.
-            app.set_menu(menu::build(app.handle())?)?;
-            Ok(())
-        })
+        .setup(setup)
         .on_menu_event(|app, event| menu::handle(app, &event))
         .invoke_handler(tauri::generate_handler![
             commands::app_info::app_version,
@@ -160,6 +166,10 @@ pub fn run() {
             commands::languages::list_summary_languages,
             commands::summary::summarize_meeting,
             commands::summary::cancel_summarization,
+            commands::summary::summarization_status,
+            commands::combined::summarize_combined,
+            commands::combined::build_external_prompt,
+            commands::combined::import_combined_report,
             commands::summary::get_summary,
             commands::summary::edit_summary,
             commands::summary::delete_summary,

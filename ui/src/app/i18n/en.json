@@ -98,6 +98,17 @@
       "summary": "Summaries",
       "storage": "Storage",
       "vocabulary": "Vocabulary"
+    },
+    "audioLanguage": {
+      "title": "Meeting language",
+      "helper": "Language spoken in your meetings. It is only a hint: it can be changed for each recording from the Audio menu, is saved in the exported file, and is used to flag passages transcribed in the wrong language.",
+      "label": "Default language of meetings",
+      "ariaLabel": "Default meeting language"
+    },
+    "skills": {
+      "title": "Skills of the summary tabs",
+      "helper": "The instructions each tab follows. Edit one here, with no meeting open: the tab and the several-summaries-at-once report both use it.",
+      "edit": "Edit…"
     }
   },
   "updateBanner": {
@@ -322,7 +333,8 @@
     "LanguageDriftHint": "Possible language drift",
     "LowSpeechEnergy": "Low speech energy",
     "TimingAnomaly": "Unusual word timing",
-    "DegenerateLength": "Unusual length"
+    "DegenerateLength": "Unusual length",
+    "WrongLanguage": "Looks like another language than the meeting's"
   },
   "layout": {
     "show": "Show {{name}}",
@@ -365,7 +377,11 @@
     "triggerMic": "Audio: Mic only",
     "triggerSource": "Audio: {{name}}",
     "triggerMicSystem": "Audio: Mic + System",
-    "triggerMicSource": "Audio: Mic + {{name}}"
+    "triggerMicSource": "Audio: Mic + {{name}}",
+    "language": "Meeting language",
+    "languageAuto": "Auto",
+    "speakers": "Remote speakers",
+    "speakersAuto": "Auto"
   },
   "live": {
     "earlier": "Show earlier transcript",
@@ -531,5 +547,30 @@
     "apply": "Apply to existing meetings…",
     "applyConfirm": "Correct the transcripts of the meetings already transcribed? Their summaries will be marked as out of date.",
     "done": "{{count}} passage(s) corrected."
+  },
+  "audioLanguages": {
+    "fr": "French",
+    "en": "English",
+    "de": "German",
+    "es": "Spanish",
+    "it": "Italian",
+    "nl": "Dutch",
+    "pt": "Portuguese"
+  },
+  "combined": {
+    "title": "Several summaries at once",
+    "hint": "Tick the tabs to fill. The model reads the transcript once and writes them all, using each tab's own skill. Or take the request to an outside assistant and import its answer.",
+    "choose": "Summaries to generate",
+    "generate": "Generate in one pass",
+    "copy": "Copy the request for an assistant",
+    "import": "Import a report…",
+    "working": "Generating the report…",
+    "copied": "Copied: the instructions and the transcript are in one text. Paste it into your assistant, then import its answer here.",
+    "importPlaceholder": "Paste the report here (sections starting with ### SECTION: name)",
+    "importSave": "Import",
+    "generatedCount": "{{count}} summaries written.",
+    "importedCount": "{{count}} summaries imported.",
+    "missing": "Left out: {{names}}.",
+    "ignored": "Not matching any tab: {{names}}."
   }
 }

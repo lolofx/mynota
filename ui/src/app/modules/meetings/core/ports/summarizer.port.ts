@@ -1,5 +1,6 @@
 import type { Observable } from 'rxjs';
 
+import type { ActiveSummarization } from '../models/active-summarization.model';
 import type { MeetingId } from '../models/meeting.model';
 import type { SummaryLanguage } from '../models/summary-language.model';
 import type { Summary } from '../models/summary.model';
@@ -38,6 +39,12 @@ export abstract class SummarizerPort {
   abstract tokens(): Observable<SummaryToken>;
   abstract done(): Observable<Summary>;
   abstract cancel(): Promise<void>;
+  /**
+   * The summary the backend is generating now, or `null`. The work outlives
+   * a webview that reloaded or crashed; asking at start-up is the only way
+   * to know it is still running.
+   */
+  abstract activeSummarization(): Promise<ActiveSummarization | null>;
   /**
    * Reads back a persisted summary's full content by (meeting, template,
    * language). `null` is a normal, non-error result meaning no summary was

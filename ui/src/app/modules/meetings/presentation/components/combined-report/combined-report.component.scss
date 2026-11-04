@@ -1,0 +1,83 @@
+:host {
+  display: block;
+  flex: none;
+}
+
+.combined-report {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  font-size: 0.85rem;
+}
+
+.toggle {
+  align-self: flex-start;
+  display: inline-flex;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hint,
+.note {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.choice {
+  display: inline-flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.import-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.text {
+  width: 100%;
+  box-sizing: border-box;
+  max-height: 40vh;
+  resize: vertical;
+  font: inherit;
+}
+
+.error {
+  margin: 0;
+  color: var(--color-danger-text);
+}

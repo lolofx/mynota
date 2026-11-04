@@ -5,6 +5,7 @@ import type { AudioSource } from '../models/audio-source.model';
 import type { CaptureSource, SystemAudioStatus } from '../models/capture-source.model';
 import type { Meeting, MeetingId } from '../models/meeting.model';
 import type { RecordingHealthEvent, StopAcknowledgement, StopPhase } from '../models/recording-lifecycle.model';
+import type { RecordingHints } from '../models/recording-hints.model';
 import type { RecordingState } from '../models/recording-state.model';
 
 /**
@@ -35,6 +36,7 @@ export abstract class RecorderPort {
     deviceName?: string,
     source?: CaptureSource,
     systemSource?: string,
+    hints?: RecordingHints,
   ): Promise<Meeting>;
   /**
    * Requests the stop. The Tauri backend resolves with the finalized meeting

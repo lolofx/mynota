@@ -165,6 +165,7 @@ export class MeetingsFacade {
   readonly recordingHealth = this.store.recordingHealth;
   readonly systemAudioStatus = this.store.systemAudioStatus;
   readonly captureSource = this.store.captureSource;
+  readonly recordingHints = this.store.recordingHints;
   readonly summaryLanguages = this.store.summaryLanguages;
   readonly selectedSummaryLanguage = this.store.selectedSummaryLanguage;
   readonly summaryGuidelines = this.store.summaryGuidelines;

@@ -15,6 +15,7 @@ mod diarize;
 mod diarize_eval;
 mod engine;
 mod error;
+mod language_check;
 mod relabel;
 mod stream;
 mod suspect;
@@ -26,7 +27,7 @@ pub use align::align_words_to_diar;
 pub use cli::{Cli, DEFAULT_VAD_MODEL};
 pub use cluster_merge::{
     apply_cluster_mapping, cluster_durations, cosine_similarity, l2_normalize, merge_and_reassign,
-    merge_centroids, reassign_short_clusters, ClusterMergeConfig,
+    merge_centroids, merge_to_count, reassign_short_clusters, ClusterMergeConfig,
 };
 pub use detokenize::{detokenize, Word};
 pub use diarize::{
@@ -39,6 +40,7 @@ pub use engine::{
     MODIFIED_BEAM_SEARCH,
 };
 pub use error::SttError;
+pub use language_check::is_wrong_language;
 pub use relabel::{
     relabel_others, relabel_others_with_config, relabel_others_word_level,
     MIN_DIARIZED_SEGMENT_SEC, MIN_SPEAKER_COVERAGE,

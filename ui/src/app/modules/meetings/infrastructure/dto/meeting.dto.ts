@@ -38,4 +38,6 @@ export interface MeetingDto {
   readonly speakerNames?: Readonly<Record<string, string>>;
   /** Mirrors the Rust `MeetingDto::transcription_pending`; typed optional so DTO literals predating it keep type-checking. */
   readonly transcriptionPending?: boolean;
+  readonly audioLanguage?: string | null;
+  readonly expectedSpeakers?: number | null;
 }

@@ -21,6 +21,7 @@ import type { TranscriptSegment } from '../../../core/models/transcript.model';
 import { transcriptSegment } from '../../../application/testing/transcript-segment.factory';
 import { MeetingSidebarComponent } from '../../components/meeting-sidebar/meeting-sidebar.component';
 import { MeetingsShellPage } from './meetings-shell.page';
+import { createRecordingHintsStub } from '../../../application/testing/recording-hints.stub';
 
 const readyModelsStatus: ModelsStatus = {
   parakeet: { present: true, expectedFiles: [] },
@@ -93,7 +94,7 @@ describe('MeetingsShellPage boot resume (ADR 0011)', () => {
     meetings, selectedMeeting, modelsStatus, devices, selectedDevice, recordingState, activeRecording, level,
     finalizedSegments, partialTextMe, partialTextOthers, error, busy, systemAudioStatus, captureSource, templates,
     summaryStream, summarizing, summarizingKey, startingRecording, summaryLanguages, selectedSummaryLanguage,
-    summaryCache, appVersion, audioSources, selectedAudioSource, effectiveSystemSource,
+    summaryCache, appVersion, audioSources, selectedAudioSource, recordingHints: createRecordingHintsStub(), effectiveSystemSource,
     splitRatio, transcriptCollapsed, sidebarWidth, sidebarCollapsed, importing, importProgress: signal(null),
     folders, expandedFolders, speakerHistory: signal([]), transcriptUndo: signal(null),
     setSidebarWidth: vi.fn(), setSidebarCollapsed: vi.fn(),

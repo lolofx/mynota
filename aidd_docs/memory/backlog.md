@@ -6,7 +6,7 @@
 | --- | --- |
 | GitHub Issues on this fork | defects and evolutions |
 | `aidd_docs/tasks/` | PRD, plans, run summaries, [resume-here.md](../tasks/2026_10/resume-here.md) |
-| `docs/adr/` | decisions (next free number: 0023) |
+| `docs/adr/` | decisions (next free number: 0025) |
 
 ## Roadmap
 
@@ -26,7 +26,7 @@ Status: **done**, **partly**, **todo**, **decide**. "Real PC" means the item nee
 | 8 | Cross-platform guard: macOS and Linux builds keep compiling and passing tests; correct local time off Windows (see ADR 0019) | todo |
 | 9 | Linux: loopback and microphone capture, packaging, CI, recipe | todo, after the Windows recipe passes |
 | 10 | Upstream's near-term items: global search, more export formats (TXT, SRT, VTT, PDF, Obsidian, Notion), model picker (7B, 14B and larger), custom vocabulary | todo; prefer upstream's implementation when it ships, build here only what is needed sooner |
-| 11 | Smaller local summary model evaluation, forced language, Whisper fallback | decide later |
+| 11 | Smaller local summary model evaluation, forced language, Whisper fallback | decide later; a first step is done: the meeting language is stored and wrong-language lines are marked ([ADR 0023](../../docs/adr/0023-meeting-language-and-expected-speakers.md)), the decoder itself is not pinned |
 | 12 | Meeting hub: stable link to the exported file and relinking, personal notes taken while listening, pasted summaries, audio purge, archive in the interface; plan in [plan-meeting-hub.md](../tasks/2026_10/plan-meeting-hub.md), [ADR 0022](../../docs/adr/0022-meeting-hub-notes-and-linked-export.md) | proposed; phases A to E todo |
 
 Scope: the fork ships on Windows, macOS (upstream's) and Linux, and adds only what is listed above. Upstream's mid-term and long-term items (calendar, RAG chat, sync, team features, and so on) are out of scope.

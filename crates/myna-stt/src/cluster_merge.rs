@@ -322,6 +322,82 @@ pub fn merge_and_reassign(
     group_of.iter().map(|&g| reassigned[g]).collect()
 }
 
+/// Brings an over-segmented clustering down to at most `target` speakers
+/// when the user has said how many people speak. Returns `mapping[k]`, the
+/// dense new id of old cluster `k`.
+///
+/// Pinning the cluster count in the clusterer itself does not work: the
+/// agglomerative cut at `k` leaves one-segment outliers as clusters of their
+/// own while two real people stay merged. This works the other way round,
+/// from a clustering with more clusters than people:
+///
+/// 1. clusters with less than `min_cluster_sec` of speech are dissolved into
+///    their nearest neighbour (the outliers go, whatever `target` is);
+/// 2. the two most similar remaining clusters merge, again and again, until
+///    at most `target` are left.
+///
+/// It never splits: when fewer than `target` clusters survive step 1, they
+/// are all kept. A `target` of `0` means "no limit", so only step 1 runs.
+/// Pure.
+pub fn merge_to_count(
+    centroids: &[Option<Vec<f32>>],
+    durations: &[f32],
+    target: usize,
+    min_cluster_sec: f32,
+) -> Vec<usize> {
+    let n = centroids.len();
+    let dissolved = merge_and_reassign(
+        centroids,
+        durations,
+        &ClusterMergeConfig {
+            merge_threshold: f32::INFINITY,
+            min_cluster_sec,
+        },
+    );
+    let duration_of = |k: usize| durations.get(k).copied().unwrap_or(0.0);
+
+    let mut survivors = dissolved.clone();
+    survivors.sort_unstable();
+    survivors.dedup();
+    let mut groups: Vec<Group> = survivors
+        .iter()
+        .map(|&survivor| {
+            let mut duration = 0.0f32;
+            let mut mean: Option<(Vec<f32>, f32)> = None;
+            for k in (0..n).filter(|&k| dissolved[k] == survivor) {
+                let weight = duration_of(k);
+                duration += weight;
+                if let Some(centroid) = &centroids[k] {
+                    let unit = l2_normalize(centroid);
+                    mean = Some(match mean {
+                        None => (unit, weight),
+                        Some((acc, acc_weight)) => (
+                            weighted_mean(&acc, acc_weight, &unit, weight),
+                            acc_weight + weight,
+                        ),
+                    });
+                }
+            }
+            Group {
+                members: vec![survivor],
+                centroid: mean.map(|(centroid, _)| centroid).unwrap_or_default(),
+                duration,
+            }
+        })
+        .collect();
+
+    let limit = if target == 0 { usize::MAX } else { target };
+    while groups.len() > limit {
+        let Some((i, j, _)) = closest_pair(&groups) else {
+            break;
+        };
+        groups = merge_pair(&groups, i, j);
+    }
+
+    let by_survivor = groups_to_mapping(&groups, n);
+    dissolved.iter().map(|&s| by_survivor[s]).collect()
+}
+
 /// Total speech duration per cluster, indexed by `speaker_index`, with
 /// length `max(num_speakers, max index + 1)` so it is safe to index by any
 /// segment's speaker. Pure.
@@ -569,5 +645,97 @@ mod tests {
         );
         assert_eq!(mapped.num_speakers, 2);
         assert_eq!(result, snapshot);
+    }
+
+    // --- merge_to_count -------------------------------------------------
+
+    /// Four real voices on the axes (A, B, C, D) plus an outlier hugging A.
+    fn voices() -> (Vec<Option<Vec<f32>>>, Vec<f32>) {
+        let centroids = vec![
+            Some(vec![1.0, 0.0, 0.0, 0.0]),
+            Some(vec![0.0, 1.0, 0.0, 0.0]),
+            Some(vec![0.0, 0.0, 1.0, 0.0]),
+            Some(vec![0.0, 0.0, 0.0, 1.0]),
+            Some(vec![0.9, 0.1, 0.0, 0.0]),
+        ];
+        (centroids, vec![300.0, 200.0, 40.0, 25.0, 0.8])
+    }
+
+    #[test]
+    fn merge_to_count_dissolves_the_outlier_without_losing_a_real_voice() {
+        let (centroids, durations) = voices();
+
+        let mapping = merge_to_count(&centroids, &durations, 4, 3.0);
+
+        assert_eq!(
+            mapping[4], mapping[0],
+            "the outlier joins its nearest voice"
+        );
+        let mut distinct = mapping.clone();
+        distinct.sort_unstable();
+        distinct.dedup();
+        assert_eq!(distinct.len(), 4, "the four real voices stay apart");
+    }
+
+    #[test]
+    fn merge_to_count_merges_the_closest_voices_down_to_the_target() {
+        let centroids = vec![
+            Some(vec![1.0, 0.0, 0.0]),
+            Some(vec![0.95, 0.2, 0.0]),
+            Some(vec![0.0, 1.0, 0.0]),
+            Some(vec![0.0, 0.0, 1.0]),
+        ];
+        let durations = vec![50.0, 30.0, 40.0, 60.0];
+
+        let mapping = merge_to_count(&centroids, &durations, 3, 3.0);
+
+        assert_eq!(mapping[0], mapping[1]);
+        let mut distinct = mapping.clone();
+        distinct.sort_unstable();
+        distinct.dedup();
+        assert_eq!(distinct.len(), 3);
+    }
+
+    #[test]
+    fn merge_to_count_never_splits_when_fewer_voices_survive_than_announced() {
+        let (centroids, durations) = voices();
+
+        let mapping = merge_to_count(&centroids, &durations, 10, 3.0);
+
+        let mut distinct = mapping.clone();
+        distinct.sort_unstable();
+        distinct.dedup();
+        assert_eq!(distinct.len(), 4, "only the outlier is dissolved");
+    }
+
+    #[test]
+    fn merge_to_count_with_no_target_only_dissolves_outliers() {
+        let (centroids, durations) = voices();
+
+        let mapping = merge_to_count(&centroids, &durations, 0, 3.0);
+
+        let mut distinct = mapping.clone();
+        distinct.sort_unstable();
+        distinct.dedup();
+        assert_eq!(distinct.len(), 4);
+    }
+
+    #[test]
+    fn merge_to_count_ids_are_dense() {
+        let (centroids, durations) = voices();
+
+        let mapping = merge_to_count(&centroids, &durations, 2, 3.0);
+
+        let max = mapping.iter().copied().max().expect("non-empty");
+        assert_eq!(max, 1);
+    }
+
+    #[test]
+    fn merge_to_count_handles_empty_input_and_clusters_without_a_centroid() {
+        assert!(merge_to_count(&[], &[], 3, 3.0).is_empty());
+
+        let centroids = vec![Some(vec![1.0, 0.0]), None, Some(vec![0.0, 1.0])];
+        let mapping = merge_to_count(&centroids, &[30.0, 20.0, 30.0], 2, 3.0);
+        assert_eq!(mapping.len(), 3);
     }
 }

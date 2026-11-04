@@ -17,6 +17,7 @@ import type { SummaryTemplate } from '../../../core/models/summary-template.mode
 import type { TranscriptSegment } from '../../../core/models/transcript.model';
 import type { ImportProgress } from '../../../core/ports/audio-import.port';
 import { MeetingsShellPage } from './meetings-shell.page';
+import { createRecordingHintsStub } from '../../../application/testing/recording-hints.stub';
 
 const readyModelsStatus: ModelsStatus = {
   parakeet: { present: true, expectedFiles: [] },
@@ -179,6 +180,7 @@ describe('MeetingsShellPage home navigation (brand button)', () => {
     appVersion,
     audioSources,
     selectedAudioSource,
+    recordingHints: createRecordingHintsStub(),
     effectiveSystemSource,
     splitRatio,
     transcriptCollapsed,

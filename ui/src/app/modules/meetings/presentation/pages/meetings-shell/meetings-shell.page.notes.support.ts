@@ -2,11 +2,15 @@ import type { Signal } from '@angular/core';
 import { computed, effect, inject, signal, untracked } from '@angular/core';
 
 import { AudioPurgeFacade } from '../../../application/facades/audio-purge.facade';
+import { CombinedReportFacade } from '../../../application/facades/combined-report.facade';
+import type { CombinedOutcome } from '../../../application/facades/combined-report.facade';
 import { ExternalSummariesFacade } from '../../../application/facades/external-summaries.facade';
 import { MeetingNotesFacade } from '../../../application/facades/meeting-notes.facade';
 import { MeetingsFacade } from '../../../application/facades/meetings.facade';
 import type { AudioUsage } from '../../../core/ports/audio-purge.port';
 import type { ExternalSummary } from '../../../core/models/external-summary.model';
+import type { CombinedTemplateOption } from '../../components/combined-report/combined-report.component';
+import { formatTemplateLabel } from '../../utils/format-display.util';
 import type { PastedSummaryDraft } from '../../components/pasted-summaries/pasted-summaries.component';
 
 /** "My notes" panel wiring (ADR 0022), grouped so `MeetingsShellPage` stays under the `max-lines` cap. */
@@ -87,6 +91,57 @@ export function createPastedSummariesControls(facade: MeetingsFacade): PastedSum
     error: computed(() => pasted?.error() ?? null),
     onAdded: (draft) => void pasted?.add(draft.label, draft.markdown),
     onRemoved: (summaryId) => void pasted?.remove(summaryId),
+  };
+}
+
+/** Combined-report panel wiring (ADR 0024). */
+export interface CombinedReportControls {
+  readonly visible: Signal<boolean>;
+  readonly options: Signal<readonly CombinedTemplateOption[]>;
+  readonly selected: Signal<readonly string[]>;
+  readonly working: Signal<boolean>;
+  readonly error: Signal<string | null>;
+  readonly outcome: Signal<CombinedOutcome | null>;
+  readonly requestCopied: Signal<boolean>;
+  readonly onToggle: (change: { name: string; checked: boolean }) => void;
+  readonly onGenerate: () => void;
+  readonly onCopy: () => void;
+  readonly onImport: (text: string) => void;
+}
+
+/** The tabs that can be ticked, the open meeting and the wiring of its actions; the facade is optional like the others. */
+export function createCombinedReportControls(facade: MeetingsFacade): CombinedReportControls {
+  const combined = inject(CombinedReportFacade, { optional: true });
+  const selection = facade as Partial<Pick<MeetingsFacade, 'selectedMeeting' | 'selectedSummaryLanguage' | 'templates'>>;
+  const meeting = (): { id: string; hasTranscript: boolean } | null => {
+    const selected = selection.selectedMeeting?.();
+    return selected ? { id: selected.id, hasTranscript: (selected.transcript?.segments.length ?? 0) > 0 } : null;
+  };
+  const language = (): string => selection.selectedSummaryLanguage?.() ?? 'en';
+  const run = (action: (id: string) => void): void => {
+    const current = meeting();
+    if (current !== null) {
+      action(current.id);
+    }
+  };
+
+  effect(() => {
+    selection.selectedMeeting?.();
+    untracked(() => combined?.reset());
+  });
+
+  return {
+    visible: computed(() => combined !== null && (meeting()?.hasTranscript ?? false)),
+    options: computed(() => (selection.templates?.() ?? []).map((template) => ({ name: template.name, label: formatTemplateLabel(template) }))),
+    selected: computed(() => combined?.selected() ?? []),
+    working: computed(() => combined?.working() ?? false),
+    error: computed(() => combined?.error() ?? null),
+    outcome: computed(() => combined?.outcome() ?? null),
+    requestCopied: computed(() => combined?.requestCopied() ?? false),
+    onToggle: (change) => combined?.toggle(change.name, change.checked),
+    onGenerate: () => run((id) => void combined?.generate(id, language())),
+    onCopy: () => run((id) => void combined?.copyRequest(id, language())),
+    onImport: (text) => run((id) => void combined?.importReport(id, language(), text)),
   };
 }
 

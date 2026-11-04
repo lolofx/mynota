@@ -105,10 +105,15 @@ Note: all figures, and which build (dev or packaged). Add them to `docs/perf-bas
 
 1. Record or import a French meeting of about 10 minutes and an English webinar.
 2. Expect: correct language per segment, readable punctuation. Mixed French and English in one recording: note how often a segment comes out in the wrong language.
+3. In Settings > General, set the meeting language to French. In a new recording, open the Audio menu and check that the language shown is the default, and that the title bar shows it (for example `· FR`). Pick another language for one recording: the next one is back on the default.
+4. After the transcript is done, the English lines carry the "possibly mis-transcribed" mark with the tooltip about another language; French lines, "okay" and short acknowledgements do not. Note false marks and missed English lines.
+5. Export the meeting: the front matter has `language: fr`. A meeting recorded with `auto` has no `language` line.
 
 ### T8. Speaker labels
 
 With diarization models installed, run **Detect speakers** on T2 or T7. Note the number of speakers found against the real number.
+
+Then record a call with several remote speakers, announcing their number in the Audio menu (Remote speakers, 1 to 12; leave it empty for the usual guess). After **Detect speakers**, the number of speakers found for the system track equals the number announced. Compare with the same call left on Auto.
 
 ### T9. Markdown export folder
 
@@ -126,6 +131,13 @@ Note: whether the `date` matches the wall clock, the file name, and anything the
 2. Generate a summary of the T7 French transcript. Repeat with 1.5B and 7B if disk allows.
 3. Note for each size: time to first output, peak memory, and a one-line quality judgement (misses, invented items, language).
 4. Restart the app: the choice must persist.
+
+## 3a. Long summaries and several tabs at once
+
+1. Record or import a meeting of about an hour. Under the meeting open **Several summaries at once**, tick Notes, Key Points, Decisions and Action Items, and press **Generate in one pass**. Expect one run, a status line with Cancel, the window to stay responsive for the whole run, and the four tabs filled afterwards. The line under the panel says how many were written and names any tab left out.
+2. While it runs, reload the window (right-click, Reload, or close and reopen from the tray). Expect it to show as generating again with Cancel available, and the four tabs to be filled when it finishes. Starting another summary meanwhile is refused with a clear message.
+3. Press **Copy the request for an assistant**, paste it into an outside assistant (Claude Code or a chat) and check that it holds the instructions of the ticked tabs, the output format and the named transcript. Paste its answer into **Import a report**: the tabs are filled and any section that matches no tab is named.
+4. In Settings > Summaries, **Edit** a skill with no meeting open (for example add a sentence to Key Points) and save. Generate again in one pass: the Key Points tab follows the new sentence.
 
 ## 3b. Linked export file
 

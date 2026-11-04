@@ -1,0 +1,70 @@
+<section class="combined-report">
+  <button type="button" class="toggle" [attr.aria-expanded]="open()" (click)="toggle()">
+    <span aria-hidden="true">{{ open() ? '▾' : '▸' }}</span>
+    {{ 'combined.title' | transloco }}
+  </button>
+  @if (open()) {
+    <p class="hint">{{ 'combined.hint' | transloco }}</p>
+    <fieldset class="choices" [disabled]="working()">
+      <legend class="visually-hidden">{{ 'combined.choose' | transloco }}</legend>
+      @for (option of templates(); track option.name) {
+        <label class="choice">
+          <input type="checkbox" [checked]="isSelected(option.name)" (change)="onCheck(option.name, $event)" />
+          {{ option.label }}
+        </label>
+      }
+    </fieldset>
+    <div class="actions">
+      @if (working()) {
+        <span class="status" role="status" aria-live="polite" aria-busy="true">
+          <span class="spinner" aria-hidden="true"></span>
+          {{ 'combined.working' | transloco }}
+        </span>
+        <button type="button" class="cancel" (click)="cancelRequested.emit()">{{ 'common.cancel' | transloco }}</button>
+      } @else {
+        <button type="button" class="generate" [disabled]="!canRun()" (click)="generateRequested.emit()">
+          {{ 'combined.generate' | transloco }}
+        </button>
+        <button type="button" class="copy" [disabled]="!canRun()" (click)="copyRequested.emit()">
+          {{ 'combined.copy' | transloco }}
+        </button>
+        <button type="button" class="import" [disabled]="importing()" (click)="startImport()">
+          {{ 'combined.import' | transloco }}
+        </button>
+      }
+    </div>
+    @if (requestCopied()) {
+      <p class="note" role="status">{{ 'combined.copied' | transloco }}</p>
+    }
+    @if (importing()) {
+      <form class="import-form" (submit)="$event.preventDefault(); submitImport()">
+        <textarea
+          class="text"
+          rows="6"
+          [value]="text()"
+          [attr.placeholder]="'combined.importPlaceholder' | transloco"
+          [attr.aria-label]="'combined.importPlaceholder' | transloco"
+          (input)="onText($event)"
+        ></textarea>
+        <div class="actions">
+          <button type="submit" class="save" [disabled]="!canImport()">{{ 'combined.importSave' | transloco }}</button>
+          <button type="button" class="cancel-import" (click)="cancelImport()">{{ 'common.cancel' | transloco }}</button>
+        </div>
+      </form>
+    }
+    @if (outcome(); as result) {
+      <p class="note" role="status">
+        {{ (result.kind === 'generated' ? 'combined.generatedCount' : 'combined.importedCount') | transloco: { count: result.saved } }}
+        @if (result.missing.length > 0) {
+          {{ 'combined.missing' | transloco: { names: result.missing.join(', ') } }}
+        }
+        @if (result.ignored.length > 0) {
+          {{ 'combined.ignored' | transloco: { names: result.ignored.join(', ') } }}
+        }
+      </p>
+    }
+    @if (error(); as message) {
+      <p class="error" role="alert">{{ message }}</p>
+    }
+  }
+</section>

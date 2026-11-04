@@ -17,6 +17,7 @@ import type { SummaryTemplate } from '../../../core/models/summary-template.mode
 import type { TranscriptSegment } from '../../../core/models/transcript.model';
 import type { ImportProgress } from '../../../core/ports/audio-import.port';
 import { MeetingsShellPage } from './meetings-shell.page';
+import { createRecordingHintsStub } from '../../../application/testing/recording-hints.stub';
 
 /**
  * Covers the shell page's wiring of the in-app model download onto the
@@ -82,7 +83,7 @@ describe('MeetingsShellPage model download', () => {
     meetings, selectedMeeting, modelsStatus, modelDownload, devices, selectedDevice, recordingState, level,
     finalizedSegments, partialTextMe, partialTextOthers, error, busy, systemAudioStatus, captureSource, templates,
     summaryStream, summarizing, summarizingKey, startingRecording, summaryLanguages, selectedSummaryLanguage,
-    summaryCache, appVersion, audioSources, selectedAudioSource, effectiveSystemSource,
+    summaryCache, appVersion, audioSources, selectedAudioSource, recordingHints: createRecordingHintsStub(), effectiveSystemSource,
     splitRatio, transcriptCollapsed, sidebarWidth, sidebarCollapsed, importing, importProgress, folders, expandedFolders,
     setSplitRatio: vi.fn(), setTranscriptCollapsed: vi.fn(), setSidebarWidth: vi.fn(), setSidebarCollapsed: vi.fn(),
     loadMeetings: vi.fn(noop), loadTemplates: vi.fn(noop), checkModels: vi.fn(noop), loadDevices: vi.fn(noop),

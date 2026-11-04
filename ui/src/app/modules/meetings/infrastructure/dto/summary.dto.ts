@@ -22,6 +22,13 @@ export interface SummaryDto {
   readonly language: string;
 }
 
+/** Mirrors the Rust `CombinedResultDto` — what a combined report did to the tabs. */
+export interface CombinedResultDto {
+  readonly saved: readonly SummaryDto[];
+  readonly missing: readonly string[];
+  readonly ignored: readonly string[];
+}
+
 /** Mirrors one entry of the Rust `list_summary_languages` result. */
 export interface SummaryLanguageDto {
   readonly code: string;

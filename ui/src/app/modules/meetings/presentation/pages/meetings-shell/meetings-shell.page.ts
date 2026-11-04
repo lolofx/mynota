@@ -1,3 +1,4 @@
+/* eslint max-lines: ["error", 412] */
 import { ChangeDetectionStrategy, Component, DestroyRef, HostListener, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -5,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { distinctUntilChanged, map } from 'rxjs';
 
 import { MeetingsFacade } from '../../../application/facades/meetings.facade';
+import { SummaryResumeFacade } from '../../../application/facades/summary-resume.facade';
 import type { CaptureSource } from '../../../core/models/capture-source.model';
 import type { FolderId } from '../../../core/models/folder.model';
 import type { MeetingId } from '../../../core/models/meeting.model';
@@ -16,6 +18,8 @@ import { MeetingDetailPaneComponent } from '../../components/meeting-detail-pane
 import type { MeetingDragMoveRequest } from '../../components/meeting-sidebar/meeting-sidebar.component';
 import { MeetingSidebarComponent } from '../../components/meeting-sidebar/meeting-sidebar.component';
 import { RecordControlComponent } from '../../components/record-control/record-control.component';
+import { TemplatePromptDialogComponent } from '../../components/template-prompt-dialog/template-prompt-dialog.component';
+import { CombinedReportComponent } from '../../components/combined-report/combined-report.component';
 import { PastedSummariesComponent } from '../../components/pasted-summaries/pasted-summaries.component';
 import { AudioPurgeStripComponent } from '../../components/audio-purge-strip/audio-purge-strip.component';
 import { NotesPanelComponent } from '../../components/notes-panel/notes-panel.component';
@@ -27,7 +31,8 @@ import { UpdateConsentDialogComponent } from '../../components/update-consent-di
 import type { SpeakerRename, TranscriptSectionDelete, TranscriptSelectionSpeakerAssignment, TranscriptSegmentEdit, TranscriptSegmentGroupSpeakerReassign, TranscriptSegmentSpeakerReassign } from '../../components/transcript-view/transcript-view.component';
 import type { LiveTranscriptSegmentEdit } from '../../components/live-transcript/live-transcript.component';
 import { formatMmSs } from '../../utils/format-display.util';
-import { createAudioPurgeControls, createNotesControls, createPastedSummariesControls } from './meetings-shell.page.notes.support';
+import { createSkillEditorControls } from './meetings-shell.page.skills.support';
+import { createAudioPurgeControls, createCombinedReportControls, createNotesControls, createPastedSummariesControls } from './meetings-shell.page.notes.support';
 import { createExportLinkControls } from './meetings-shell.page.export-link.support';
 import { buildExportFilename, CHECKING_SYSTEM_AUDIO, createLayoutControls, createSettingsControls, createSidebarNarrowControls, createSummaryInstructionControls, createUpdateHandlers, describeLatestSpeakerUndo, describeLatestTranscriptUndo, loadUpdatesOnLaunch, MeetingOpQueue, runErrorRetry, runLiveSegmentEdited, runMeetingDeleted, runMeetingMoveRequested, runSegmentEdited, runSummarize } from './meetings-shell.page.support';
 
@@ -38,13 +43,14 @@ import { buildExportFilename, CHECKING_SYSTEM_AUDIO, createLayoutControls, creat
  */
 @Component({
   selector: 'app-meetings-shell-page',
-  imports: [AudioPurgeStripComponent, PastedSummariesComponent, NotesPanelComponent, ExportLinkStripComponent, MeetingSidebarComponent, SidebarSplitterComponent, MeetingDetailPaneComponent, RecordControlComponent, AttributionComponent, SettingsComponent, UpdateConsentDialogComponent, UpdateBannerComponent, TranslocoPipe],
+  imports: [AudioPurgeStripComponent, CombinedReportComponent, TemplatePromptDialogComponent, PastedSummariesComponent, NotesPanelComponent, ExportLinkStripComponent, MeetingSidebarComponent, SidebarSplitterComponent, MeetingDetailPaneComponent, RecordControlComponent, AttributionComponent, SettingsComponent, UpdateConsentDialogComponent, UpdateBannerComponent, TranslocoPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './meetings-shell.page.html',
   styleUrl: './meetings-shell.page.scss',
 })
 export class MeetingsShellPage implements OnInit {
   protected readonly facade = inject(MeetingsFacade);
+  private readonly summaryResume = inject(SummaryResumeFacade, { optional: true });
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -79,6 +85,8 @@ export class MeetingsShellPage implements OnInit {
    */
   protected readonly recordingMeetingId = computed<MeetingId | undefined>(() => this.facade.activeRecording()?.meetingId ?? (this.facade.busy() ? this.facade.selectedMeeting()?.id : undefined));
   protected readonly pasted = createPastedSummariesControls(this.facade);
+  protected readonly combined = createCombinedReportControls(this.facade);
+  protected readonly skills = createSkillEditorControls(this.facade);
   protected readonly notes = createNotesControls(this.facade, this.elapsedSec, computed(() => this.recordingMeetingId() !== undefined && this.recordingMeetingId() === this.facade.selectedMeeting()?.id));
 
   /** Transcript-undo toolbar button label; `null` hides the button. */
@@ -117,6 +125,8 @@ export class MeetingsShellPage implements OnInit {
     // `recording_state` query, so they land after all synchronous boot work —
     // the resumed session always wins over the initial `clearSelection`.
     void this.facade.resumeActiveRecording();
+    // A summary may still be running in the backend after a reload or crash.
+    void this.summaryResume?.resume();
 
     void this.facade.loadMeetings();
     void this.facade.loadTemplates();

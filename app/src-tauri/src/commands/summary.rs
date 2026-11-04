@@ -24,12 +24,12 @@ use myna_llm::{resolve, RenderContext, SummaryInstructions, SummaryOptions, Temp
 
 use crate::commands::recording::lock_session;
 use crate::domain::{Meeting, MeetingId, Summary, SummaryRef};
-use crate::dto::{SummarizeInstructionsDto, SummaryDto};
+use crate::dto::{ActiveSummaryDto, SummarizeInstructionsDto, SummaryDto};
 use crate::error::AppError;
 use crate::events::{SummaryDonePayload, TokenPayload, SUMMARY_DONE, SUMMARY_TOKEN};
 use crate::paths;
 use crate::session::guard_not_recording;
-use crate::state::{guard_summary_vs_import, AppState};
+use crate::state::{guard_summary_vs_import, ActiveSummary, AppState};
 use crate::store::MeetingStore;
 use crate::summary_prefs;
 use crate::template_prefs;
@@ -79,6 +79,13 @@ pub async fn summarize_meeting(
     let state = app.state::<AppState>();
     guard_summary_vs_import(state.import_busy())?;
     let _guard = state.summarization_guard()?;
+    let (language_code, _) = resolve(language.as_deref());
+    let _active = state.begin_active_summary(ActiveSummary {
+        meeting_id: meeting_id.clone(),
+        template: template.clone(),
+        language: language_code.to_string(),
+        templates: Vec::new(),
+    });
 
     let app_for_worker = app.clone();
     tauri::async_runtime::spawn_blocking(move || {
@@ -178,6 +185,15 @@ pub async fn get_summary(
 #[tauri::command]
 pub fn cancel_summarization(state: State<'_, AppState>) {
     state.cancel_summary.store(true, Ordering::SeqCst);
+}
+
+/// The summary being generated right now, or `None`. A webview that reloaded
+/// or crashed mid-generation calls this at start-up: the work goes on in the
+/// backend, and without it the interface would show nothing yet refuse any
+/// new summary as busy.
+#[tauri::command]
+pub fn summarization_status(state: State<'_, AppState>) -> Option<ActiveSummaryDto> {
+    state.active_summary().map(ActiveSummaryDto::from)
 }
 
 /// Returns the persisted general guidelines applied to every summary
@@ -425,8 +441,8 @@ pub fn delete_summary_from(
 /// busy guard held by [`summarize_meeting`] guarantees no second concurrent
 /// summarization references the slot. Cross-guard `Busy` semantics are
 /// unchanged: this releases only the model slot, never the busy flag.
-struct SummarizerReleaseGuard<'a> {
-    state: &'a AppState,
+pub(crate) struct SummarizerReleaseGuard<'a> {
+    pub(crate) state: &'a AppState,
 }
 
 impl Drop for SummarizerReleaseGuard<'_> {
@@ -478,46 +494,7 @@ fn summarize_and_persist(
     let template = load_template(app, template_name)?;
     let resolved_instructions = resolve_instructions(&load_general_guidelines()?, instructions);
     let render_ctx = build_render_context(&meeting, language_label, resolved_instructions)?;
-    // A summary server the user switched on replaces the local model for
-    // every summary; nothing else changes below (ADR 0021).
-    let server = paths::data_root()
-        .ok()
-        .and_then(|root| summary_prefs::load(&root).active_server().cloned());
-    let markdown = match server {
-        Some(server) => {
-            if state.cancel_summary.load(Ordering::SeqCst) {
-                return Err(myna_llm::LlmError::Cancelled.into());
-            }
-            run_remote_inference(
-                app,
-                state,
-                &id,
-                template_name,
-                &template,
-                &render_ctx,
-                &server,
-            )?
-        }
-        None => {
-            let summarizer = state.summarizer(app)?;
-            if state.cancel_summary.load(Ordering::SeqCst) {
-                // A cancel arriving while the model was (re)loading has no
-                // in-flight job to observe it; check here so it still takes
-                // effect before the (possibly minutes-long) inference call
-                // starts, rather than only once generation begins.
-                return Err(myna_llm::LlmError::Cancelled.into());
-            }
-            run_inference(
-                app,
-                state,
-                &id,
-                template_name,
-                &template,
-                &render_ctx,
-                summarizer,
-            )?
-        }
-    };
+    let markdown = infer_markdown(app, state, &id, template_name, &template, &render_ctx)?;
 
     let created_at = OffsetDateTime::now_utc();
     let path = state
@@ -551,10 +528,53 @@ fn summarize_and_persist(
     }))
 }
 
+/// Generates the markdown of `template` over `render_ctx` with whatever the
+/// user configured: the summary server when switched on (ADR 0021), else the
+/// local model. Tokens stream to the UI under `template_name`.
+pub(crate) fn infer_markdown(
+    app: &AppHandle,
+    state: &State<'_, AppState>,
+    id: &MeetingId,
+    template_name: &str,
+    template: &Template,
+    render_ctx: &RenderContext,
+) -> Result<String, AppError> {
+    let server = paths::data_root()
+        .ok()
+        .and_then(|root| summary_prefs::load(&root).active_server().cloned());
+    match server {
+        Some(server) => {
+            if state.cancel_summary.load(Ordering::SeqCst) {
+                return Err(myna_llm::LlmError::Cancelled.into());
+            }
+            run_remote_inference(app, state, id, template_name, template, render_ctx, &server)
+        }
+        None => {
+            let summarizer = state.summarizer(app)?;
+            if state.cancel_summary.load(Ordering::SeqCst) {
+                // A cancel arriving while the model was (re)loading has no
+                // in-flight job to observe it; check here so it still takes
+                // effect before the (possibly minutes-long) inference call
+                // starts, rather than only once generation begins.
+                return Err(myna_llm::LlmError::Cancelled.into());
+            }
+            run_inference(
+                app,
+                state,
+                id,
+                template_name,
+                template,
+                render_ctx,
+                summarizer,
+            )
+        }
+    }
+}
+
 /// Reads the persisted general guidelines from the data root's preferences
 /// file. [`summary_prefs::load`] itself never fails; only resolving the
 /// data root can.
-fn load_general_guidelines() -> Result<String, AppError> {
+pub(crate) fn load_general_guidelines() -> Result<String, AppError> {
     let root = paths::data_root().map_err(|err| AppError::Path(err.to_string()))?;
     Ok(summary_prefs::load(&root).guidelines)
 }
@@ -708,7 +728,7 @@ fn run_remote_inference(
 
 /// Loads `template_name` from the templates root by discovering every valid
 /// template rather than trusting the name as a path segment.
-fn load_template(app: &AppHandle, template_name: &str) -> Result<Template, AppError> {
+pub(crate) fn load_template(app: &AppHandle, template_name: &str) -> Result<Template, AppError> {
     let builtin = myna_llm::list_templates(&paths::templates_root(app))?
         .into_iter()
         .find(|candidate| candidate.name == template_name)
@@ -792,7 +812,13 @@ fn emit_token(app: &AppHandle, meeting_id: &str, template: &str, token: &str) {
     let _ = app.emit(SUMMARY_TOKEN, payload);
 }
 
-fn emit_done(app: &AppHandle, meeting_id: &str, template: &str, language: &str, markdown: &str) {
+pub(crate) fn emit_done(
+    app: &AppHandle,
+    meeting_id: &str,
+    template: &str,
+    language: &str,
+    markdown: &str,
+) {
     let payload = SummaryDonePayload {
         meeting_id: meeting_id.to_string(),
         template: template.to_string(),
@@ -804,7 +830,7 @@ fn emit_done(app: &AppHandle, meeting_id: &str, template: &str, language: &str, 
 
 /// Parses a meeting id from its string form, surfacing an invalid id as
 /// [`AppError::NotFound`] rather than a parse error.
-fn parse_meeting_id(id: &str) -> Result<MeetingId, AppError> {
+pub(crate) fn parse_meeting_id(id: &str) -> Result<MeetingId, AppError> {
     id.parse().map_err(|_| AppError::NotFound(id.to_string()))
 }
 

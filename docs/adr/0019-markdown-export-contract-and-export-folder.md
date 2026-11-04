@@ -17,7 +17,7 @@ The Markdown export follows PRD requirement R5.
   - `status` is `to-summarize` until at least one summary exists, then `summarized`.
   - Values that YAML could misread (a colon, a quote, `true`, a number) are double-quoted.
 - **Lines**: `[hh:mm:ss] Speaker: text`, sorted by start time with a stable sort so simultaneous segments of the two tracks keep their stored order. Whitespace and line breaks inside a segment collapse to single spaces. A segment with no known speaker has no `Speaker:` prefix.
-- **`language` and `source` are omitted.** The meeting record stores neither (Parakeet detects the language per segment and exposes no meeting-level value), and guessing them would give the downstream tool wrong metadata. They can be added once the app really knows them.
+- **`source` is omitted, and `language` only appears when the user chose one.** The meeting record does not store the source, and guessing would give the downstream tool wrong metadata. `language` was added by [ADR 0023](0023-meeting-language-and-expected-speakers.md), from the language announced before recording.
 - **Export folder**: an absolute folder stored under the `export` key of `preferences.json`. Choosing one turns exporting on; clearing it turns it off. There is no separate switch.
 - **Automatic**: the file is (re)written right after a save that changes its content: end of recording, import, re-transcription, diarization, speaker rename or reassignment, segment edits, and summary generation. Renaming the title does not trigger it; archiving does, since the file says `status: archived` (ADR 0022).
 - **File name**: `YYYY-MM-DD_hh-mm_<title-slug>.md` in local time. It is deterministic, so a later export overwrites the same file instead of piling up copies. The date prefix also rules out reserved Windows device names. Renaming a meeting's title later therefore leaves the old file next to a new one.
@@ -48,7 +48,7 @@ Diarization and speaker renames change the file the reader sees, and a summary c
 
 ## Open Risks
 
-- No `language` or `source` field yet.
+- No `source` field yet; `language` is written only when the user announced one (ADR 0023).
 - **The local time is only right on Windows today.** The `time` crate reports no local offset on macOS and Linux once the process has several threads, so the front matter `date` and the file name fall back to UTC there. This must be fixed before the macOS and Linux builds ship, for example with a time-zone-aware crate, or by reading the offset once in `main` before any thread starts; the second option is wrong across daylight-saving changes for older meetings.
 - A title change leaves the previous file behind.
 - Mixed-language meetings carry no per-line language marker.

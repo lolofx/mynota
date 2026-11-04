@@ -5,6 +5,13 @@ import { I18n } from '../../../../../i18n/i18n.service';
 import type { AudioDevice } from '../../../core/models/audio-device.model';
 import type { AudioSource } from '../../../core/models/audio-source.model';
 import type { CaptureSource, SystemAudioStatus } from '../../../core/models/capture-source.model';
+import {
+  AUDIO_LANGUAGE_CODES,
+  AUTO_AUDIO_LANGUAGE,
+  EXPECTED_SPEAKERS_MAX,
+  EXPECTED_SPEAKERS_MIN,
+  toExpectedSpeakers,
+} from '../../../core/models/recording-hints.model';
 import { CaptureSourcePickerComponent } from '../capture-source-picker/capture-source-picker.component';
 import { SearchableSelectComponent } from '../searchable-select/searchable-select.component';
 
@@ -41,12 +48,23 @@ export class CaptureSettingsComponent {
   readonly systemAudioStatus = input.required<SystemAudioStatus>();
   readonly audioSources = input<readonly AudioSource[]>([]);
   readonly selectedAudioSource = input<string>('');
+  /** Language of the next recording: a code from the list, or 'auto'. */
+  readonly audioLanguage = input<string>(AUTO_AUDIO_LANGUAGE);
+  /** Remote speakers announced for the next recording; `null` = let detection guess. */
+  readonly expectedSpeakers = input<number | null>(null);
   readonly disabled = input(false);
 
   readonly deviceChanged = output<string>();
   readonly sourceSelected = output<CaptureSource>();
   readonly audioSourceSelected = output<string>();
   readonly permissionRequested = output<void>();
+  readonly audioLanguageSelected = output<string>();
+  readonly expectedSpeakersChanged = output<number | null>();
+
+  protected readonly autoLanguage = AUTO_AUDIO_LANGUAGE;
+  protected readonly audioLanguageCodes = AUDIO_LANGUAGE_CODES;
+  protected readonly speakersMin = EXPECTED_SPEAKERS_MIN;
+  protected readonly speakersMax = EXPECTED_SPEAKERS_MAX;
 
   protected readonly expanded = signal(false);
 
@@ -61,6 +79,12 @@ export class CaptureSettingsComponent {
   );
 
   protected readonly triggerLabel = computed(() => {
+    const language = this.audioLanguage();
+    const base = this.sourceLabel();
+    return language === AUTO_AUDIO_LANGUAGE ? base : `${base} · ${language.toUpperCase()}`;
+  });
+
+  private readonly sourceLabel = computed(() => {
     const source = this.captureSource();
     const sourceName = this.selectedAudioSourceName() ?? ALL_SYSTEM_AUDIO_LABEL;
     if (source === 'microphone') {
@@ -87,6 +111,14 @@ export class CaptureSettingsComponent {
   protected onSourceSelected(source: CaptureSource): void {
     this.sourceSelected.emit(source);
     this.close();
+  }
+
+  protected onLanguageChange(event: Event): void {
+    this.audioLanguageSelected.emit((event.target as HTMLSelectElement).value);
+  }
+
+  protected onSpeakersChange(event: Event): void {
+    this.expectedSpeakersChanged.emit(toExpectedSpeakers((event.target as HTMLInputElement).value));
   }
 
   protected onAudioSourceChange(id: string): void {

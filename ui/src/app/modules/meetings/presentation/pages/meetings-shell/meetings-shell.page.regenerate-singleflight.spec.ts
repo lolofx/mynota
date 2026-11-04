@@ -21,6 +21,7 @@ import type { ImportProgress } from '../../../core/ports/audio-import.port';
 import { MeetingDetailPaneComponent } from '../../components/meeting-detail-pane/meeting-detail-pane.component';
 import { MeetingsShellPage } from './meetings-shell.page';
 import { closeSidebarOnEscape } from './meetings-shell.page.sidebar-narrow.support';
+import { createRecordingHintsStub } from '../../../application/testing/recording-hints.stub';
 
 const readyModelsStatus: ModelsStatus = {
   parakeet: { present: true, expectedFiles: [] },
@@ -140,7 +141,7 @@ describe('MeetingsShellPage regenerate single-flight', () => {
     finalizedSegments, partialTextMe, partialTextOthers, error, busy, systemAudioStatus, captureSource, templates,
     clearError: vi.fn(),
     summaryStream, summarizing, summarizingKey, startingRecording, summaryLanguages, selectedSummaryLanguage,
-    summaryCache, appVersion, audioSources, selectedAudioSource, effectiveSystemSource,
+    summaryCache, appVersion, audioSources, selectedAudioSource, recordingHints: createRecordingHintsStub(), effectiveSystemSource,
     splitRatio, transcriptCollapsed, sidebarWidth, sidebarCollapsed, importing, importProgress, setSplitRatio, setTranscriptCollapsed, setSidebarWidth, setSidebarCollapsed,
     loadMeetings, loadTemplates, checkModels, loadDevices, checkSystemAudio, loadSummaryLanguages,
     loadSummaryGuidelines, setSummaryGuidelines, summaryGuidelines, summaryInstructionDraft, setSummaryInstructionDraft,

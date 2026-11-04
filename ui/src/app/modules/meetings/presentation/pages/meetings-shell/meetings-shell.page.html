@@ -17,6 +17,8 @@
         [systemAudioStatus]="systemAudioStatus()"
         [audioSources]="facade.audioSources()"
         [selectedAudioSource]="facade.selectedAudioSource()"
+        [audioLanguage]="facade.recordingHints.language()"
+        [expectedSpeakers]="facade.recordingHints.speakers()"
         [effectiveSystemSource]="facade.effectiveSystemSource()"
         [level]="facade.level()"
         [elapsedLabel]="elapsedLabel()"
@@ -27,6 +29,8 @@
         (deviceChanged)="onDeviceChanged($event)"
         (sourceSelected)="onSourceSelected($event)"
         (audioSourceSelected)="onAudioSourceSelected($event)"
+        (audioLanguageSelected)="facade.recordingHints.setLanguage($event)"
+        (expectedSpeakersChanged)="facade.recordingHints.setSpeakers($event)"
         (permissionRequested)="onPermissionRequested()"
         (recordClicked)="onRecord()"
         (stopClicked)="onStop()"
@@ -169,6 +173,21 @@
           (diarizeRequested)="onDiarizeRequested()"
           (summaryInstructionDraftChanged)="summaryInstructions.onDraftChanged($event)"
         />
+        @if (combined.visible()) {
+          <app-combined-report
+            [templates]="combined.options()"
+            [selected]="combined.selected()"
+            [working]="combined.working()"
+            [error]="combined.error()"
+            [outcome]="combined.outcome()"
+            [requestCopied]="combined.requestCopied()"
+            (toggled)="combined.onToggle($event)"
+            (generateRequested)="combined.onGenerate()"
+            (cancelRequested)="cancelSummary()"
+            (copyRequested)="combined.onCopy()"
+            (importRequested)="combined.onImport($event)"
+          />
+        }
         @if (pasted.visible()) {
           <app-pasted-summaries
             [items]="pasted.items()"
@@ -234,6 +253,8 @@
         [recording]="facade.busy()"
         [summaryLanguages]="facade.summaryLanguages()"
         [selectedSummaryLanguage]="facade.selectedSummaryLanguage()"
+        [audioLanguage]="facade.recordingHints.defaultLanguage()"
+        [skills]="skills.options()"
         [summaryModels]="facade.modelsStatus()?.summaryModels ?? []"
         [modelDownload]="facade.modelDownload()"
         [guidelines]="settings.guidelines()"
@@ -249,6 +270,8 @@
         (updateConsentChanged)="updateHandlers.onConsentChanged($event)"
         (checkNowRequested)="updateHandlers.onCheckNow()"
         (summaryLanguageSelected)="onSummaryLanguageSelected($event)"
+        (audioLanguageSelected)="facade.recordingHints.setDefaultLanguage($event)"
+        (skillEditRequested)="skills.onOpen($event)"
         (summaryModelSelected)="settings.onSummaryModelSelected($event)"
         (summaryModelDownloadRequested)="settings.onSummaryModelDownloadRequested($event)"
         (guidelinesChanged)="settings.onGuidelinesChanged($event)"
@@ -267,5 +290,20 @@
     (granted)="updateHandlers.onGranted()"
     (declined)="updateHandlers.onDeclined()"
     (postponed)="updateHandlers.onPostponed()"
+  />
+}
+
+@if (skills.open(); as skillName) {
+  <app-template-prompt-dialog
+    [templateName]="skillName"
+    [templateLabel]="skills.label()"
+    [templateDescription]="skills.description()"
+    [builtinPrompt]="skills.builtin()"
+    [effectivePrompt]="skills.effective()"
+    [confirmDisabled]="skills.loading()"
+    [error]="skills.error()"
+    (saved)="skills.onSaved($event)"
+    (resetRequested)="skills.onReset()"
+    (cancelled)="skills.onClose()"
   />
 }

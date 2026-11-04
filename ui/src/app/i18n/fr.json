@@ -98,6 +98,17 @@
       "summary": "Résumés",
       "storage": "Stockage",
       "vocabulary": "Vocabulaire"
+    },
+    "audioLanguage": {
+      "title": "Langue des réunions",
+      "helper": "Langue parlée dans vos réunions. C'est une indication : elle se change à chaque enregistrement depuis le menu Audio, elle est écrite dans le fichier exporté et sert à repérer les passages transcrits dans la mauvaise langue.",
+      "label": "Langue par défaut des réunions",
+      "ariaLabel": "Langue par défaut des réunions"
+    },
+    "skills": {
+      "title": "Skills des onglets de résumé",
+      "helper": "Les instructions que suit chaque onglet. Modifiez-en une ici, sans réunion ouverte : l'onglet et le rapport « plusieurs résumés d'un coup » l'utilisent tous les deux.",
+      "edit": "Modifier…"
     }
   },
   "updateBanner": {
@@ -322,7 +333,8 @@
     "LanguageDriftHint": "Dérive de langue possible",
     "LowSpeechEnergy": "Parole peu audible",
     "TimingAnomaly": "Durée des mots inhabituelle",
-    "DegenerateLength": "Longueur inhabituelle"
+    "DegenerateLength": "Longueur inhabituelle",
+    "WrongLanguage": "Semble être dans une autre langue que celle de la réunion"
   },
   "layout": {
     "show": "Afficher {{name}}",
@@ -365,7 +377,11 @@
     "triggerMic": "Audio : micro seul",
     "triggerSource": "Audio : {{name}}",
     "triggerMicSystem": "Audio : micro + système",
-    "triggerMicSource": "Audio : micro + {{name}}"
+    "triggerMicSource": "Audio : micro + {{name}}",
+    "language": "Langue de la réunion",
+    "languageAuto": "Auto",
+    "speakers": "Interlocuteurs distants",
+    "speakersAuto": "Auto"
   },
   "live": {
     "earlier": "Afficher la transcription précédente",
@@ -531,5 +547,30 @@
     "apply": "Appliquer aux réunions existantes…",
     "applyConfirm": "Corriger les transcriptions des réunions déjà transcrites ? Leurs résumés seront marqués comme périmés.",
     "done": "{{count}} passage(s) corrigé(s)."
+  },
+  "audioLanguages": {
+    "fr": "Français",
+    "en": "Anglais",
+    "de": "Allemand",
+    "es": "Espagnol",
+    "it": "Italien",
+    "nl": "Néerlandais",
+    "pt": "Portugais"
+  },
+  "combined": {
+    "title": "Plusieurs résumés d'un coup",
+    "hint": "Cochez les onglets à remplir. Le modèle lit la transcription une seule fois et les écrit tous, avec le skill propre à chaque onglet. Ou emportez la demande dans un assistant externe et importez sa réponse.",
+    "choose": "Résumés à générer",
+    "generate": "Générer en une passe",
+    "copy": "Copier la demande pour un assistant",
+    "import": "Importer un rapport…",
+    "working": "Génération du rapport…",
+    "copied": "Copié : les instructions et la transcription sont dans un seul texte. Collez-le dans votre assistant, puis importez sa réponse ici.",
+    "importPlaceholder": "Collez le rapport ici (sections commençant par ### SECTION: nom)",
+    "importSave": "Importer",
+    "generatedCount": "{{count}} résumés écrits.",
+    "importedCount": "{{count}} résumés importés.",
+    "missing": "Non fournis : {{names}}.",
+    "ignored": "Sans onglet correspondant : {{names}}."
   }
 }

@@ -94,7 +94,6 @@ export interface MeetingsStoreConfig {
   TEMPLATE_PROMPT_LOADING: ReadonlySet<string>;
   MODELS_STATUS: ModelsStatus;
   MODEL_DOWNLOAD: ModelDownloadState;
-  SUMMARY_STREAM: string;
   ERROR: MeetingsErrorInfo;
   DEVICES: readonly AudioDevice[];
   SELECTED_DEVICE: AudioDevice | null;

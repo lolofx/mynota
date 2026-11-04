@@ -17,7 +17,8 @@ use sherpa_onnx::{
 };
 
 use crate::cluster_merge::{
-    apply_cluster_mapping, cluster_durations, l2_normalize, merge_and_reassign, ClusterMergeConfig,
+    apply_cluster_mapping, cluster_durations, l2_normalize, merge_and_reassign, merge_to_count,
+    ClusterMergeConfig,
 };
 use crate::error::SttError;
 use crate::wav::WavBlockReader;
@@ -66,6 +67,12 @@ pub struct DiarizeConfig {
     /// and makes `threshold` irrelevant. Exposed for the eval sweep — the
     /// production default is unchanged.
     pub num_clusters: i32,
+    /// How many speakers the user said there are. When set, the clusterer
+    /// is run with more clusters than that and [`merge_to_count`] brings
+    /// them down, instead of pinning `num_clusters` (which keeps one-segment
+    /// outliers as speakers). Takes over from `num_clusters` and from the
+    /// centroid merge.
+    pub target_speakers: Option<u32>,
     pub threshold: f32,
     pub min_duration_on: f32,
     pub min_duration_off: f32,
@@ -112,6 +119,7 @@ impl Default for DiarizeConfig {
             embedding_model: PathBuf::new(),
             num_threads: 2,
             num_clusters: -1,
+            target_speakers: None,
             threshold: 0.5,
             min_duration_on: MIN_DURATION_ON,
             min_duration_off: MIN_DURATION_OFF,
@@ -165,7 +173,19 @@ pub struct Diarizer {
     /// Present only when [`DiarizeConfig::enable_centroid_merge`] was set at
     /// load time; `None` keeps [`Self::diarize_wav`] on the legacy path.
     merge: Option<(ClusterEmbedder, ClusterMergeConfig)>,
+    /// Speaker count announced by the user, see [`DiarizeConfig::target_speakers`].
+    target: Option<usize>,
 }
+
+/// Clusters asked of the clusterer, per announced speaker, before they are
+/// merged down: enough that no real voice is missing, few enough to stay
+/// cheap.
+const OVERSEGMENT_FACTOR: usize = 2;
+/// Upper bound on the clusters asked of the clusterer.
+const OVERSEGMENT_MAX: usize = 32;
+/// Speech under which a cluster counts as an outlier when merging down to
+/// an announced speaker count.
+const TARGET_MIN_CLUSTER_SEC: f32 = 3.0;
 
 impl Diarizer {
     /// Loads the segmentation and embedding model artifacts named in `cfg`.
@@ -174,7 +194,8 @@ impl Diarizer {
     pub fn load(cfg: &DiarizeConfig) -> Result<Self, SttError> {
         require_artifact(&cfg.segmentation_model)?;
         require_artifact(&cfg.embedding_model)?;
-        let merge = if cfg.enable_centroid_merge {
+        let target = cfg.target_speakers.map(|count| count.max(1) as usize);
+        let merge = if cfg.enable_centroid_merge || target.is_some() {
             Some((
                 ClusterEmbedder::load(&cfg.embedding_model, cfg.num_threads, cfg.min_embed_sec)?,
                 ClusterMergeConfig {
@@ -201,7 +222,9 @@ impl Diarizer {
                 ..Default::default()
             },
             clustering: FastClusteringConfig {
-                num_clusters: cfg.num_clusters,
+                num_clusters: target.map_or(cfg.num_clusters, |count| {
+                    (count * OVERSEGMENT_FACTOR).min(OVERSEGMENT_MAX) as i32
+                }),
                 threshold: cfg.threshold,
             },
             min_duration_on: cfg.min_duration_on,
@@ -209,7 +232,11 @@ impl Diarizer {
         };
 
         let inner = OfflineSpeakerDiarization::create(&config).ok_or(SttError::DiarizeInit)?;
-        Ok(Self { inner, merge })
+        Ok(Self {
+            inner,
+            merge,
+            target,
+        })
     }
 
     /// Diarizes a WAV file on disk, returning segments sorted by start time.
@@ -244,6 +271,17 @@ impl Diarizer {
         // merge near-duplicate centroids, absorb short clusters, then
         // restore the dense-index invariant.
         let centroids = embedder.centroids(&clustered, &samples, sample_rate);
+        if let Some(target) = self.target {
+            let mapping = merge_to_count(
+                &centroids,
+                &cluster_durations(&clustered),
+                target,
+                TARGET_MIN_CLUSTER_SEC,
+            );
+            return Ok(compact_speaker_indices(&apply_cluster_mapping(
+                &clustered, &mapping,
+            )));
+        }
         Ok(merge_clusters(&clustered, &centroids, merge_cfg))
     }
 

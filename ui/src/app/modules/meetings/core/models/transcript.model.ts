@@ -97,7 +97,7 @@ export interface TranscriptSegment {
  * e.g. a reason minted by a newer backend — fall back to the raw value so
  * the UI never drops an audit hint it doesn't recognize yet.
  */
-const SUSPECT_REASONS: readonly string[] = ['RepetitionLoop', 'LanguageDriftHint', 'LowSpeechEnergy', 'TimingAnomaly', 'DegenerateLength'];
+const SUSPECT_REASONS: readonly string[] = ['RepetitionLoop', 'LanguageDriftHint', 'LowSpeechEnergy', 'TimingAnomaly', 'DegenerateLength', 'WrongLanguage'];
 
 /** Whether a segment carries any suspect flag worth review. */
 export function isSuspect(segment: TranscriptSegment): boolean {

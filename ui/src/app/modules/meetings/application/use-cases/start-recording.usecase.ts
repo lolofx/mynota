@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 
 import type { CaptureSource } from '../../core/models/capture-source.model';
 import type { Meeting } from '../../core/models/meeting.model';
+import type { RecordingHints } from '../../core/models/recording-hints.model';
 import { MeetingsError } from '../../core/models/recording-state.model';
 import { RecorderPort } from '../../core/ports/recorder.port';
 
@@ -14,11 +15,12 @@ export class StartRecordingUseCase {
     deviceName?: string,
     source?: CaptureSource,
     systemSource?: string,
+    hints?: RecordingHints,
   ): Promise<Meeting> {
     const snapshot = await this.recorder.state();
     if (snapshot.state !== 'idle') {
       throw new MeetingsError('BUSY', 'A recording is already in progress.');
     }
-    return this.recorder.start(title, deviceName, source, systemSource);
+    return this.recorder.start(title, deviceName, source, systemSource, hints);
   }
 }

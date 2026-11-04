@@ -1,4 +1,4 @@
-import { speakerAccentIndex, speakerDisplayName, speakerRole, speakerSubId, withSegmentText } from './transcript.model';
+import { speakerAccentIndex, speakerDisplayName, speakerRole, speakerSubId, suspectLabel, withSegmentText } from './transcript.model';
 import type { Transcript, TranscriptSegment } from './transcript.model';
 
 describe('withSegmentText', () => {
@@ -105,5 +105,16 @@ describe('speakerAccentIndex', () => {
       expect(index).toBeGreaterThanOrEqual(0);
       expect(index).toBeLessThan(6);
     }
+  });
+});
+
+describe('suspectLabel', () => {
+  it('words the wrong-language mark instead of showing the raw value', () => {
+    expect(suspectLabel('WrongLanguage')).not.toBe('WrongLanguage');
+    expect(suspectLabel('WrongLanguage').length).toBeGreaterThan(0);
+  });
+
+  it('shows an unknown reason as it is', () => {
+    expect(suspectLabel('SomethingNew')).toBe('SomethingNew');
   });
 });

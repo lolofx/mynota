@@ -19,6 +19,7 @@ import type { UpdateCheck, UpdateConsent, UpdateInstallState } from '../../../co
 import type { ImportProgress } from '../../../core/ports/audio-import.port';
 import { flushMicrotasks } from '../../../infrastructure/tauri/testing/tauri-internals.stub';
 import { MeetingsShellPage } from './meetings-shell.page';
+import { createRecordingHintsStub } from '../../../application/testing/recording-hints.stub';
 
 /**
  * Covers the shell page's launch-time update-check wiring: consent-dialog
@@ -119,7 +120,7 @@ describe('MeetingsShellPage update checks', () => {
     meetings, selectedMeeting, modelsStatus, modelDownload, devices, selectedDevice, recordingState, level,
     finalizedSegments, partialTextMe, partialTextOthers, error, busy, systemAudioStatus, captureSource, templates,
     summaryStream, summarizing, summarizingKey, startingRecording, summaryLanguages, selectedSummaryLanguage,
-    summaryCache, appVersion, audioSources, selectedAudioSource, effectiveSystemSource,
+    summaryCache, appVersion, audioSources, selectedAudioSource, recordingHints: createRecordingHintsStub(), effectiveSystemSource,
     splitRatio, transcriptCollapsed, sidebarWidth, sidebarCollapsed, importing, importProgress, folders, expandedFolders,
     setSplitRatio: vi.fn(), setTranscriptCollapsed: vi.fn(), setSidebarWidth: vi.fn(), setSidebarCollapsed: vi.fn(),
     loadMeetings: vi.fn(noop), loadTemplates: vi.fn(noop), checkModels: vi.fn(noop), loadDevices: vi.fn(noop),
