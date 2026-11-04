@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0-beta.2] - 2026-11-04
+
+### Added
+
+- **Meeting language and remote speakers** - pick the language and the number of remote speakers before recording; segments transcribed in another language are flagged.
+- **Several summaries in one pass** - tick several summary tabs and fill them from one read of the transcript, or import a report written by an outside assistant (copyable prompt provided).
+- **Skills in Settings** - edit the skills behind the summary tabs.
+- **Reattach to a running summary** - a summary still running is picked up again after the window reloads.
+
+### Changed
+
+- The single-template full report and its prompt button are replaced by the several-summaries pass.
+- Over-segmented speaker clustering is merged down to the announced remote speaker count.
+
+### Fixed
+
+- The summary stream no longer makes the webview run out of memory.
+
 ## [0.8.0-beta.1] - 2026-11-02
 
 ### Added
