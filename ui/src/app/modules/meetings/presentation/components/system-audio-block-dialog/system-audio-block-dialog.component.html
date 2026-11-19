@@ -1,0 +1,43 @@
+@if (block()) {
+  <div class="system-audio-block-backdrop">
+    <div
+      class="system-audio-block-dialog"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="system-audio-block-title"
+      aria-describedby="system-audio-block-body"
+    >
+      @if (isStartRefused()) {
+        <button type="button" class="close" [attr.aria-label]="'systemAudioBlock.close' | transloco" (click)="dismissRequested.emit()">&times;</button>
+      }
+
+      <h2 id="system-audio-block-title">
+        {{ (isStartRefused() ? 'systemAudioBlock.startTitle' : 'systemAudioBlock.lostTitle') | transloco }}
+      </h2>
+      <p id="system-audio-block-body">
+        {{ (isStartRefused() ? 'systemAudioBlock.startBody' : 'systemAudioBlock.lostBody') | transloco }}
+      </p>
+
+      @if (permissionDenied()) {
+        <p class="detail">{{ 'systemAudioBlock.permissionDenied' | transloco }}</p>
+      }
+      @if (restartRequired()) {
+        <p class="detail">{{ 'systemAudioBlock.restartRequired' | transloco }}</p>
+      }
+      @if (unavailableReason(); as detail) {
+        <p class="detail">{{ 'systemAudioBlock.unavailable' | transloco }} <code>{{ detail }}</code></p>
+      }
+
+      <div class="actions">
+        @if (isStartRefused()) {
+          @if (permissionDenied()) {
+            <button type="button" class="grant" (click)="permissionRequested.emit()">{{ 'systemAudioBlock.grant' | transloco }}</button>
+          }
+          <button type="button" class="retry" (click)="retryRequested.emit()">{{ 'systemAudioBlock.retry' | transloco }}</button>
+        } @else {
+          <button type="button" class="stop" (click)="stopRequested.emit()">{{ 'systemAudioBlock.stop' | transloco }}</button>
+        }
+      </div>
+    </div>
+  </div>
+}
