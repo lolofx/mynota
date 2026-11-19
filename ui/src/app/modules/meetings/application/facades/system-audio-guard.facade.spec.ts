@@ -138,6 +138,18 @@ describe('SystemAudioGuardFacade', () => {
     expect(guard.block()).toBeNull();
   });
 
+  it('lifts the lost-capture block when the system source shows up late', () => {
+    const guard = TestBed.inject(SystemAudioGuardFacade);
+    recordingState.set('recording');
+    flush();
+    vi.advanceTimersByTime(SYSTEM_AUDIO_GRACE_MS);
+    expect(guard.block()).toBe('lost-during-recording');
+
+    effectiveSystemSource.set({ id: 'all', name: 'Tous' });
+    flush();
+    expect(guard.block()).toBeNull();
+  });
+
   it('never blocks a microphone-only recording', () => {
     captureSource.set('microphone');
     const guard = TestBed.inject(SystemAudioGuardFacade);
