@@ -45,6 +45,7 @@ export class SystemAudioGuardFacade {
         return;
       }
       if (!systemAudioRequired(this.store.captureSource()) || this.store.effectiveSystemSource() !== null) {
+        this.blockState.update((current) => (current === 'lost-during-recording' ? null : current));
         return;
       }
       const timer = setTimeout(() => this.blockState.set('lost-during-recording'), SYSTEM_AUDIO_GRACE_MS);
