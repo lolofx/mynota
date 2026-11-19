@@ -182,6 +182,7 @@
     "effectiveSource": "Source audio système effective",
     "micOnly": "Micro seul",
     "micOnlyTitle": "L’autorisation d’audio système n’a pas été accordée — enregistrement du microphone uniquement.",
+    "noMic": "Pas de micro : votre voix ne sera pas enregistrée.",
     "confirmDiscard": "Arrêter et abandonner cet enregistrement ? L’audio et la transcription seront supprimés.",
     "stopPhase": {
       "stopping-capture": "Arrêt de la capture",
@@ -192,6 +193,19 @@
       "completed": "Terminé",
       "failed": "Échec"
     }
+  },
+  "systemAudioBlock": {
+    "startTitle": "Enregistrement impossible sans audio système",
+    "startBody": "Mynota ne lance pas l’enregistrement sans l’audio système : sans lui, les participants distants ne sont pas captés et la réunion serait incomplète.",
+    "lostTitle": "L’audio système n’est plus capturé",
+    "lostBody": "Seul votre micro est enregistré : les participants distants ne sont pas captés, la transcription sera incomplète. Arrêtez l’enregistrement, corrigez l’accès à l’audio système, puis relancez la réunion.",
+    "permissionDenied": "L’autorisation d’audio système est refusée pour Mynota.",
+    "restartRequired": "Redémarrez Mynota après avoir accordé l’autorisation.",
+    "unavailable": "L’audio système n’est pas disponible sur cet appareil.",
+    "grant": "Accorder l’autorisation",
+    "retry": "Réessayer",
+    "stop": "Arrêter l’enregistrement",
+    "close": "Fermer"
   },
   "welcome": {
     "title": "Bienvenue dans Mynota",

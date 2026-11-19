@@ -182,6 +182,7 @@
     "effectiveSource": "Effective system audio source",
     "micOnly": "Mic only",
     "micOnlyTitle": "System audio permission was not granted — recording microphone only.",
+    "noMic": "No microphone: your voice will not be recorded.",
     "confirmDiscard": "Stop and discard this recording? The audio and transcript will be deleted.",
     "stopPhase": {
       "stopping-capture": "Stopping capture",
@@ -192,6 +193,19 @@
       "completed": "Completed",
       "failed": "Failed"
     }
+  },
+  "systemAudioBlock": {
+    "startTitle": "Can't record without system audio",
+    "startBody": "Mynota won't start recording without system audio: without it, remote participants are not captured and the meeting would be incomplete.",
+    "lostTitle": "System audio is no longer being captured",
+    "lostBody": "Only your microphone is being recorded: remote participants are not captured and the transcript will be incomplete. Stop the recording, fix system audio access, then start the meeting again.",
+    "permissionDenied": "System audio permission is denied for Mynota.",
+    "restartRequired": "Restart Mynota after granting the permission.",
+    "unavailable": "System audio is not available on this device.",
+    "grant": "Grant permission",
+    "retry": "Try again",
+    "stop": "Stop recording",
+    "close": "Close"
   },
   "welcome": {
     "title": "Welcome to Mynota",
