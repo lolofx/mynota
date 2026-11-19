@@ -108,6 +108,17 @@
 }
 
 /* Latest `recording://health` event; severity tints the chip. */
+/* Shown whenever the capture is system-only: the user's own voice is not recorded. */
+.no-mic {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-sm);
+  color: var(--color-warning, #b45309);
+}
+
 .recording-health {
   display: inline-flex;
   align-items: center;
