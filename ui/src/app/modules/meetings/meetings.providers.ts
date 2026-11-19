@@ -97,6 +97,7 @@ import { CombinedReportFacade } from './application/facades/combined-report.faca
 import { SummaryResumeFacade } from './application/facades/summary-resume.facade';
 import { MeetingNotesFacade } from './application/facades/meeting-notes.facade';
 import { MeetingsFacade } from './application/facades/meetings.facade';
+import { SystemAudioGuardFacade } from './application/facades/system-audio-guard.facade';
 import { ModelsFacade } from './application/facades/models.facade';
 import { SpeakerFacade } from './application/facades/speaker.facade';
 import { TranscriptEditingFacade } from './application/facades/transcript-editing.facade';
@@ -202,6 +203,7 @@ export function provideMeetings(): EnvironmentProviders {
     DevicesFacade,
     UpdatesFacade,
     MeetingsFacade,
+    SystemAudioGuardFacade,
     ExportFolderFacade,
     MeetingNotesFacade,
     ExternalSummariesFacade,

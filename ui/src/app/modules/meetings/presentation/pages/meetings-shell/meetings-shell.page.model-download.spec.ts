@@ -4,6 +4,8 @@ import { ActivatedRoute, convertToParamMap, provideRouter, type ParamMap } from 
 import { BehaviorSubject, EMPTY } from 'rxjs';
 import { vi } from 'vitest';
 
+import { SystemAudioGuardFacade } from '../../../application/facades/system-audio-guard.facade';
+import { systemAudioGuardFake } from '../../../application/testing/system-audio-guard.fake';
 import { MeetingsFacade } from '../../../application/facades/meetings.facade';
 import { NOOP_UPDATES_FACADE_STUB } from '../../../application/testing/noop-updates-facade.stub';
 import type { MeetingsErrorInfo, ModelDownloadState } from '../../../application/stores/meetings.store';
@@ -112,6 +114,7 @@ describe('MeetingsShellPage model download', () => {
       providers: [
         provideRouter([]),
         { provide: MeetingsFacade, useValue: facadeStub },
+        { provide: SystemAudioGuardFacade, useValue: systemAudioGuardFake },
         {
           provide: ActivatedRoute,
           useValue: { paramMap: new BehaviorSubject<ParamMap>(convertToParamMap({})) },

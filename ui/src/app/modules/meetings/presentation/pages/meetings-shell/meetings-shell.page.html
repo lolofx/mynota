@@ -285,6 +285,15 @@
   </div>
 }
 
+<app-system-audio-block-dialog
+  [block]="systemAudioGuard.block()"
+  [status]="systemAudioGuard.status()"
+  (permissionRequested)="facade.requestSystemAudioPermission()"
+  (retryRequested)="onRecord()"
+  (stopRequested)="onStop()"
+  (dismissRequested)="systemAudioGuard.dismiss()"
+/>
+
 @if (updateHandlers.visible()) {
   <app-update-consent-dialog
     (granted)="updateHandlers.onGranted()"
