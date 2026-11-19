@@ -47,6 +47,10 @@
     <app-level-meter [level]="level()" />
   }
 
+  @if (captureSource() === 'system') {
+    <span class="no-mic" role="status">{{ 'record.noMic' | transloco }}</span>
+  }
+
   @if (recordingHealth(); as health) {
     <span
       class="recording-health"
