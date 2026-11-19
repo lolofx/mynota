@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **No recording without system audio** - a meeting that needs system audio no longer starts when that audio cannot be captured: a blocking dialog explains why and offers the permission. If system audio drops during a recording, a blocking dialog asks to stop it. A system-only capture shows a "no microphone" warning.
+
 ## [0.8.0-beta.2] - 2026-11-04
 
 ### Added
