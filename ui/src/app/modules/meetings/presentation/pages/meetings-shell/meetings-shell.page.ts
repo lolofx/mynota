@@ -1,4 +1,4 @@
-/* eslint max-lines: ["error", 412] */
+/* eslint max-lines: ["error", 413] */
 import { ChangeDetectionStrategy, Component, DestroyRef, HostListener, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { distinctUntilChanged, map } from 'rxjs';
 
 import { MeetingsFacade } from '../../../application/facades/meetings.facade';
+import { SystemAudioGuardFacade } from '../../../application/facades/system-audio-guard.facade';
 import { SummaryResumeFacade } from '../../../application/facades/summary-resume.facade';
 import type { CaptureSource } from '../../../core/models/capture-source.model';
 import type { FolderId } from '../../../core/models/folder.model';
@@ -27,6 +28,7 @@ import { ExportLinkStripComponent } from '../../components/export-link-strip/exp
 import { SettingsComponent } from '../../components/settings/settings.component';
 import { SidebarSplitterComponent } from '../../components/sidebar-splitter/sidebar-splitter.component';
 import { UpdateBannerComponent } from '../../components/update-banner/update-banner.component';
+import { SystemAudioBlockDialogComponent } from '../../components/system-audio-block-dialog/system-audio-block-dialog.component';
 import { UpdateConsentDialogComponent } from '../../components/update-consent-dialog/update-consent-dialog.component';
 import type { SpeakerRename, TranscriptSectionDelete, TranscriptSelectionSpeakerAssignment, TranscriptSegmentEdit, TranscriptSegmentGroupSpeakerReassign, TranscriptSegmentSpeakerReassign } from '../../components/transcript-view/transcript-view.component';
 import type { LiveTranscriptSegmentEdit } from '../../components/live-transcript/live-transcript.component';
@@ -43,13 +45,14 @@ import { buildExportFilename, CHECKING_SYSTEM_AUDIO, createLayoutControls, creat
  */
 @Component({
   selector: 'app-meetings-shell-page',
-  imports: [AudioPurgeStripComponent, CombinedReportComponent, TemplatePromptDialogComponent, PastedSummariesComponent, NotesPanelComponent, ExportLinkStripComponent, MeetingSidebarComponent, SidebarSplitterComponent, MeetingDetailPaneComponent, RecordControlComponent, AttributionComponent, SettingsComponent, UpdateConsentDialogComponent, UpdateBannerComponent, TranslocoPipe],
+  imports: [AudioPurgeStripComponent, CombinedReportComponent, TemplatePromptDialogComponent, PastedSummariesComponent, NotesPanelComponent, ExportLinkStripComponent, MeetingSidebarComponent, SidebarSplitterComponent, MeetingDetailPaneComponent, RecordControlComponent, AttributionComponent, SettingsComponent, UpdateConsentDialogComponent, SystemAudioBlockDialogComponent, UpdateBannerComponent, TranslocoPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './meetings-shell.page.html',
   styleUrl: './meetings-shell.page.scss',
 })
 export class MeetingsShellPage implements OnInit {
   protected readonly facade = inject(MeetingsFacade);
+  protected readonly systemAudioGuard = inject(SystemAudioGuardFacade);
   private readonly summaryResume = inject(SummaryResumeFacade, { optional: true });
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -196,7 +199,7 @@ export class MeetingsShellPage implements OnInit {
   }
 
   onRecord(): void {
-    void this.facade.startRecording('', this.facade.selectedDevice()?.name);
+    void this.systemAudioGuard.startGuarded(() => this.facade.startRecording('', this.facade.selectedDevice()?.name));
   }
 
   /** Stop; speaker detection is manual-only (ADR 0009) — use the "Detect speakers" button. */

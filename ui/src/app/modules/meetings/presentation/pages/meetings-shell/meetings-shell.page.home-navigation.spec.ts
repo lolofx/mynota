@@ -4,6 +4,8 @@ import { ActivatedRoute, Router, convertToParamMap, provideRouter, type ParamMap
 import { BehaviorSubject, EMPTY } from 'rxjs';
 import { vi } from 'vitest';
 
+import { SystemAudioGuardFacade } from '../../../application/facades/system-audio-guard.facade';
+import { systemAudioGuardFake } from '../../../application/testing/system-audio-guard.fake';
 import { MeetingsFacade } from '../../../application/facades/meetings.facade';
 import { NOOP_UPDATES_FACADE_STUB } from '../../../application/testing/noop-updates-facade.stub';
 import type { MeetingsErrorInfo } from '../../../application/stores/meetings.store';
@@ -270,6 +272,7 @@ describe('MeetingsShellPage home navigation (brand button)', () => {
       providers: [
         provideRouter([]),
         { provide: MeetingsFacade, useValue: facadeStub },
+        { provide: SystemAudioGuardFacade, useValue: systemAudioGuardFake },
         {
           provide: ActivatedRoute,
           useValue: { paramMap: routeParamMap },
