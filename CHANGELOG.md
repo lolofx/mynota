@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0-beta.3] - 2026-11-24
+
 ### Changed
 
 - **No recording without system audio** - a meeting that needs system audio no longer starts when that audio cannot be captured: a blocking dialog explains why and offers the permission. If system audio drops during a recording, a blocking dialog asks to stop it. A system-only capture shows a "no microphone" warning.
